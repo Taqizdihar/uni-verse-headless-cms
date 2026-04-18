@@ -1,0 +1,413 @@
+// File: src/pages/Settings.tsx
+import React, { useState, useEffect } from 'react';
+import { useCMS } from '../context/CMSContext';
+import { Save, Globe, Palette, Mail, CheckCircle2, Monitor, Sparkles, Eye } from 'lucide-react';
+
+interface BrandingPalette {
+  name: string;
+  primary: string;
+  secondary: string;
+  surface: string;
+  text: string;
+}
+
+const PRESET_PALETTES: BrandingPalette[] = [
+  {
+    name: "Uni-Inside's Color",
+    primary: '#FBBF24',
+    secondary: '#18181B',
+    surface: '#FFFFFF',
+    text: '#27272A',
+  },
+  {
+    name: 'Ocean Breeze',
+    primary: '#06B6D4',
+    secondary: '#0F172A',
+    surface: '#F8FAFC',
+    text: '#1E293B',
+  },
+  {
+    name: 'Forest Emerald',
+    primary: '#10B981',
+    secondary: '#1C1917',
+    surface: '#FAFAF9',
+    text: '#292524',
+  },
+  {
+    name: 'Royal Violet',
+    primary: '#8B5CF6',
+    secondary: '#1E1B4B',
+    surface: '#FAF5FF',
+    text: '#2E1065',
+  },
+  {
+    name: 'Sunset Coral',
+    primary: '#F97316',
+    secondary: '#1C1917',
+    surface: '#FFFBEB',
+    text: '#292524',
+  },
+];
+
+export function Settings() {
+  const { settings, updateSettings, fetchAllData } = useCMS();
+  const [formData, setFormData] = useState({
+    site_name: '',
+    tagline: '',
+    support_email: '',
+    active_template: 'minimalist',
+    theme_color: '#fbbf24'
+  });
+  const [activePalette, setActivePalette] = useState<BrandingPalette>(PRESET_PALETTES[0]);
+  const [paletteMode, setPaletteMode] = useState<'preset' | 'custom'>('preset');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Pre-fill form when data arrives from context
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        site_name: settings.site_name || '',
+        tagline: settings.tagline || '',
+        support_email: settings.global_options?.support_email || '',
+        active_template: settings.active_template || 'minimalist',
+        theme_color: settings.global_options?.theme_color || '#fbbf24'
+      });
+      // Restore palette from saved settings
+      const savedPalette = settings.global_options?.branding_palette;
+      if (savedPalette) {
+        setActivePalette(savedPalette);
+        // Check if it matches a preset
+        const matchedPreset = PRESET_PALETTES.find(p => p.primary === savedPalette.primary && p.secondary === savedPalette.secondary);
+        setPaletteMode(matchedPreset ? 'preset' : 'custom');
+      }
+    }
+  }, [settings]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePaletteSelect = (palette: BrandingPalette) => {
+    setActivePalette(palette);
+    setPaletteMode('preset');
+    // Also update theme_color to match primary for backward compatibility
+    setFormData(prev => ({ ...prev, theme_color: palette.primary }));
+  };
+
+  const handleCustomColorChange = (key: keyof BrandingPalette, value: string) => {
+    setActivePalette(prev => ({ ...prev, [key]: value }));
+    setPaletteMode('custom');
+    if (key === 'primary') {
+      setFormData(prev => ({ ...prev, theme_color: value }));
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('saving');
+    
+    try {
+        await updateSettings({
+          ...formData,
+          branding_palette: activePalette,
+        } as any);
+        // Refresh global state so Sidebar/Navbar reflect changes immediately
+        await fetchAllData();
+        setStatus('saved');
+        setTimeout(() => setStatus('idle'), 3000);
+    } catch (err) {
+        setStatus('error');
+    }
+  };
+
+  return (
+    <div className="animate-in fade-in duration-500 space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight">System Configuration</h2>
+          <p className="text-zinc-500 mt-1 font-medium">Manage your root branding, layout deployments, and contact registry.</p>
+        </div>
+        
+        {status === 'saved' && (
+            <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-xl border border-green-100 animate-in slide-in-from-right-4 font-bold text-xs uppercase tracking-widest">
+                <CheckCircle2 className="w-4 h-4" />
+                Registry Synchronized
+            </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* General Section */}
+            <div className="lg:col-span-2 space-y-6">
+                <Card className="p-8">
+                    <h3 className="text-lg font-bold text-zinc-900 mb-6 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-amber-500" />
+                        Identity & Branding
+                    </h3>
+                    
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Site Title</label>
+                                <input 
+                                    type="text" 
+                                    required 
+                                    value={formData.site_name} 
+                                    onChange={e => handleInputChange('site_name', e.target.value)}
+                                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-zinc-900" 
+                                    placeholder="Uni-Inside CMS" 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Support Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
+                                    <input 
+                                        type="email" 
+                                        value={formData.support_email} 
+                                        onChange={e => handleInputChange('support_email', e.target.value)}
+                                        className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600" 
+                                        placeholder="support@example.com" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tagline</label>
+                            <input 
+                                type="text" 
+                                value={formData.tagline} 
+                                onChange={e => handleInputChange('tagline', e.target.value)}
+                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 italic" 
+                                placeholder="The Next-Gen Headless Engine" 
+                            />
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Deployment Template */}
+                <Card className="p-8">
+                    <h3 className="text-lg font-bold text-zinc-900 mb-6 flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-amber-500" />
+                        Deployment Template
+                    </h3>
+                    <div className="relative">
+                        <Monitor className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
+                        <select 
+                            value={formData.active_template} 
+                            onChange={e => handleInputChange('active_template', e.target.value)}
+                            className="w-full pl-11 pr-10 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all appearance-none font-bold text-zinc-900 text-sm cursor-pointer"
+                        >
+                            <option value="minimalist">Minimalist Concept (System Default)</option>
+                            <option value="corporate">Corporate Identity Pack</option>
+                            <option value="creative">Creative Canvas Engine</option>
+                        </select>
+                    </div>
+                </Card>
+
+                {/* Branding Palettes */}
+                <Card className="p-8">
+                    <h3 className="text-lg font-bold text-zinc-900 mb-2 flex items-center gap-2">
+                        <Palette className="w-5 h-5 text-amber-500" />
+                        Branding Palettes
+                    </h3>
+                    <p className="text-zinc-400 text-xs font-medium mb-6">Select a preset brand palette or create a custom one. Colors will be injected as CSS variables across all templates.</p>
+
+                    {/* Preset Palette Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+                        {PRESET_PALETTES.map((palette) => {
+                            const isSelected = paletteMode === 'preset' && activePalette.name === palette.name;
+                            return (
+                                <button
+                                    key={palette.name}
+                                    type="button"
+                                    onClick={() => handlePaletteSelect(palette)}
+                                    className="group relative text-left rounded-2xl border-2 p-4 transition-all duration-200 hover:shadow-lg"
+                                    style={{
+                                        borderColor: isSelected ? palette.primary : '#e4e4e7',
+                                        background: isSelected ? `${palette.primary}08` : '#fafafa',
+                                    }}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute top-2 right-2">
+                                            <CheckCircle2 className="w-5 h-5" style={{ color: palette.primary }} />
+                                        </div>
+                                    )}
+                                    <div className="flex gap-1.5 mb-3">
+                                        <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: palette.primary }} title="Primary" />
+                                        <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: palette.secondary }} title="Secondary" />
+                                        <div className="w-8 h-8 rounded-lg shadow-sm border border-zinc-200" style={{ background: palette.surface }} title="Surface" />
+                                        <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: palette.text }} title="Text" />
+                                    </div>
+                                    <p className="font-bold text-sm text-zinc-800">{palette.name}</p>
+                                    {palette.name === "Uni-Inside's Color" && (
+                                        <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-widest text-amber-600">
+                                            <Sparkles className="w-3 h-3" /> Recommended
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Custom Color Editor */}
+                    <div className="border-t border-zinc-100 pt-6">
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1">Fine-Tune Active Palette</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {([
+                                { key: 'primary', label: 'Primary' },
+                                { key: 'secondary', label: 'Secondary' },
+                                { key: 'surface', label: 'Surface / BG' },
+                                { key: 'text', label: 'Text Color' },
+                            ] as const).map(({ key, label }) => (
+                                <div key={key}>
+                                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{label}</label>
+                                    <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2 focus-within:border-amber-400 transition-all">
+                                        <input
+                                            type="color"
+                                            value={activePalette[key]}
+                                            onChange={(e) => handleCustomColorChange(key, e.target.value)}
+                                            className="w-8 h-8 rounded-lg border-0 cursor-pointer p-0 bg-transparent"
+                                            style={{ WebkitAppearance: 'none' }}
+                                        />
+                                        <input
+                                            type="text"
+                                            value={activePalette[key]}
+                                            onChange={(e) => handleCustomColorChange(key, e.target.value)}
+                                            className="flex-1 bg-transparent outline-none font-mono text-xs uppercase text-zinc-700 font-bold"
+                                            maxLength={7}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Live Preview */}
+                    <div className="mt-8 border-t border-zinc-100 pt-6">
+                        <p className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1"><Eye className="w-3.5 h-3.5" /> Live Preview</p>
+                        <div 
+                            className="rounded-2xl overflow-hidden shadow-lg border border-zinc-200"
+                            style={{ background: activePalette.surface }}
+                        >
+                            {/* Preview Navbar */}
+                            <div 
+                                className="px-6 py-3 flex items-center justify-between"
+                                style={{ 
+                                    background: `${activePalette.secondary}ee`,
+                                    backdropFilter: 'blur(12px)',
+                                }}
+                            >
+                                <span style={{ color: activePalette.primary, fontWeight: 800, fontSize: '0.9rem', letterSpacing: '-0.02em' }}>{formData.site_name || 'Site Name'}</span>
+                                <div className="flex gap-4">
+                                    <span style={{ color: `${activePalette.surface}99`, fontSize: '0.75rem', fontWeight: 500 }}>Home</span>
+                                    <span style={{ color: activePalette.primary, fontSize: '0.75rem', fontWeight: 600, borderBottom: `2px solid ${activePalette.primary}` }}>About</span>
+                                    <span style={{ color: `${activePalette.surface}99`, fontSize: '0.75rem', fontWeight: 500 }}>Contact</span>
+                                </div>
+                            </div>
+                            {/* Preview Hero */}
+                            <div className="px-6 py-10 text-center" style={{ background: activePalette.surface }}>
+                                <h4 style={{ color: activePalette.text, fontWeight: 800, fontSize: '1.5rem', letterSpacing: '-0.03em', marginBottom: '0.5rem' }}>Welcome to {formData.site_name || 'Your Site'}</h4>
+                                <p style={{ color: `${activePalette.text}88`, fontSize: '0.8rem', marginBottom: '1.25rem' }}>{formData.tagline || 'Your tagline goes here'}</p>
+                                <span 
+                                    style={{ 
+                                        display: 'inline-block',
+                                        padding: '0.5rem 1.5rem', 
+                                        background: activePalette.primary, 
+                                        color: activePalette.secondary, 
+                                        borderRadius: '999px', 
+                                        fontWeight: 700, 
+                                        fontSize: '0.75rem',
+                                        letterSpacing: '0.02em',
+                                    }}
+                                >Get Started →</span>
+                            </div>
+                            {/* Preview Footer */}
+                            <div 
+                                className="px-6 py-2 text-center"
+                                style={{ background: activePalette.secondary, color: `${activePalette.surface}66`, fontSize: '0.65rem' }}
+                            >
+                                © 2026 {formData.site_name || 'Your Site'}
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            {/* Sidebar Stats / Info */}
+            <div className="space-y-6">
+                <Card className="p-6 bg-zinc-900 border-zinc-800">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-amber-400/10 flex items-center justify-center rounded-xl">
+                            <Save className="w-5 h-5 text-amber-400" />
+                        </div>
+                        <div>
+                            <p className="text-white font-bold text-sm">Persist Changes</p>
+                            <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Commit to Registry</p>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        type="submit"
+                        disabled={status === 'saving'}
+                        className="w-full py-4 bg-amber-400 text-zinc-950 rounded-2xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
+                    >
+                        {status === 'saving' ? 'Processing...' : 'Synchronize Database'}
+                    </button>
+
+                    <div className="mt-8 pt-6 border-t border-zinc-800 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Server Status</span>
+                            <span className="text-green-500 text-[10px] font-bold uppercase">Online</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Active Palette</span>
+                            <span className="text-zinc-300 text-[10px] font-bold">{activePalette.name || 'Custom'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Last Synced</span>
+                            <span className="text-zinc-300 text-[10px] font-bold tabular-nums">Just Now</span>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Active Palette Summary */}
+                <Card className="p-6">
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Active Palette Tokens</p>
+                    <div className="space-y-3">
+                        {[
+                            { label: '--primary', color: activePalette.primary },
+                            { label: '--secondary', color: activePalette.secondary },
+                            { label: '--bg-color', color: activePalette.surface },
+                            { label: '--text-main', color: activePalette.text },
+                        ].map(({ label, color }) => (
+                            <div key={label} className="flex items-center gap-3">
+                                <div className="w-6 h-6 rounded-md border border-zinc-200 shadow-sm flex-shrink-0" style={{ background: color }} />
+                                <div className="flex-1 min-w-0">
+                                    <span className="text-[10px] font-mono font-bold text-zinc-500 block">{label}</span>
+                                    <span className="text-xs font-mono text-zinc-800 uppercase">{color}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
+
+                <div className="px-4 text-center">
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
+                        Modifying global settings will propagate updates across all headless consumption endpoints immediately.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode, className?: string }) {
+    return <div className={`bg-white rounded-[2rem] border border-zinc-200 shadow-sm ${className}`}>{children}</div>;
+}
