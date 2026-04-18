@@ -973,8 +973,8 @@ app.put('/api/plugins/:id', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('CORS enabled for: http://localhost:3000 and http://localhost:5173');
+    console.log('CORS enabled for dynamically configured origins');
 });
