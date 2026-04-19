@@ -24,28 +24,14 @@ cloudinary.config({
 
 const app = express();
 
-// Use a function to log incoming origins for debugging in Back4App logs
-app.use((req, res, next) => {
-  console.log('Incoming Request from Origin:', req.headers.origin);
-  next();
-});
-
+// Allow all origins for debugging, credentials enabled
 app.use(cors({
-  origin: true, // This allows all origins temporarily to verify it fixes the issue
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Explicitly handle OPTIONS (Preflight) requests
-app.options('*', cors());
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
 app.use(express.json());
 
 // Verbose Request Logging
