@@ -96,6 +96,7 @@ interface CMSContextType {
   plugins: PluginItem[];
   settings: Settings;
   activities: ActivityItem[];
+  totalUsers: number;
   user: any;
   token: string | null;
   isAuthenticated: boolean;
@@ -144,6 +145,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [plugins, setPlugins] = useState<PluginItem[]>([]);
   const [settings, setSettings] = useState<Settings>({});
   const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -168,10 +170,11 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         fetch(`${import.meta.env.VITE_API_URL}/api/posts`, options),
         fetch(`${import.meta.env.VITE_API_URL}/api/media`, options),
         fetch(`${import.meta.env.VITE_API_URL}/api/users`, options),
-        fetch(`${import.meta.env.VITE_API_URL}/api/plugins`, options)
+        fetch(`${import.meta.env.VITE_API_URL}/api/plugins`, options),
+        fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats`, options)
       ]);
 
-      const [settingsRes, pagesRes, layoutRes, postsRes, mediaRes, usersRes, pluginsRes] = await Promise.all(
+      const [settingsRes, pagesRes, layoutRes, postsRes, mediaRes, usersRes, pluginsRes, dashboardRes] = await Promise.all(
         responses.map(res => res.ok ? res.json() : null)
       );
       
@@ -192,6 +195,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       if (Array.isArray(mediaRes)) setMedia(mediaRes);
       if (Array.isArray(usersRes)) setUsers(usersRes);
       if (Array.isArray(pluginsRes)) setPlugins(pluginsRes);
+      if (dashboardRes && dashboardRes.totalUsers !== undefined) setTotalUsers(dashboardRes.totalUsers);
       
     } catch (err) {
       console.error('Error fetching CMS data from backend:', err);
@@ -465,7 +469,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
 
   return (
     <CMSContext.Provider value={{ 
-      pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, 
+      pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers,
       user, token, isAuthenticated, setUser, setToken, 
       setPages, setPosts, setMedia,
       fetchAllData,

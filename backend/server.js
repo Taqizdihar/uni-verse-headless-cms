@@ -662,8 +662,9 @@ app.patch('/api/posts/:id/status', async (req, res) => {
 
     try {
         console.log(`[REQUEST] Incoming Status Toggle for Post ID: ${id} -> ${finalStatus} (tenant: ${tid})`);
-        // ✅ SECURITY FIX: Scope update to the authenticated tenant
-        const [result] = await db.execute('UPDATE posts SET status = ? WHERE id = ? AND tenant_id = ?', [finalStatus, id, tid]);
+        
+        // Ensure the SQL query uses single quotes for string values as requested
+        const [result] = await db.execute(`UPDATE posts SET status = '${finalStatus}' WHERE id = ? AND tenant_id = ?`, [id, tid]);
         
         if (result.affectedRows === 0) {
             console.warn(`[WARN] No post found with ID: ${id} for tenant: ${tid}`);
@@ -738,6 +739,17 @@ app.delete('/api/media/:id', async (req, res) => {
     } catch (error) {
         console.error('Purge Error:', error);
         res.status(500).json({ error: 'Internal system purge failure' });
+    }
+});
+
+// --- Dashboard ---
+app.get('/api/dashboard/stats', async (req, res) => {
+    try {
+        const [rows] = await db.execute('SELECT COUNT(*) as total FROM users');
+        res.json({ totalUsers: rows[0].total });
+    } catch (error) {
+        console.error('[API ERROR] Get Dashboard Stats:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

@@ -5,7 +5,7 @@ import { Users, FileText, CheckCircle, TrendingUp, Loader2, Image as ImageIcon, 
 import { useCMS } from '@/context/CMSContext';
 
 export function Dashboard() {
-  const { activities, pages, posts, media, comments } = useCMS();
+  const { activities, pages, posts, media, comments, totalUsers } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
 
   const pendingCommentsCount = comments ? comments.filter(c => c.status === 'Pending').length : 0;
@@ -25,12 +25,11 @@ export function Dashboard() {
   }
 
   const stats = [
-    { title: "Total Tenant", value: "1,248", change: "+12.5%", icon: Users, trend: "up" },
-    { title: "Halaman Diterbitkan", value: pages?.length.toString() || "0", change: "+4.2%", icon: FileText, trend: "up" },
-    { title: "Post Aktif", value: posts?.length.toString() || "0", change: "-2.1%", icon: CheckCircle, trend: "down" },
-    { title: "Aset Media", value: media?.length.toString() || "0", change: "+8.4%", icon: ImageIcon, trend: "up" },
-    { title: "Komentar Tertunda", value: pendingCommentsCount.toString(), change: "+12", icon: MessageSquare, trend: "up" },
-    { title: "Waktu Aktif Sistem", value: "99.99%", change: "+0.01%", icon: TrendingUp, trend: "up" }
+    { title: "Total User", value: totalUsers.toString(), icon: Users },
+    { title: "Halaman Diterbitkan", value: pages?.length.toString() || "0", icon: FileText },
+    { title: "Post Aktif", value: posts?.length.toString() || "0", icon: CheckCircle },
+    { title: "Aset Media", value: media?.length.toString() || "0", icon: ImageIcon },
+    { title: "Komentar Tertunda", value: pendingCommentsCount.toString(), icon: MessageSquare }
   ];
 
   return (
@@ -46,7 +45,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
@@ -61,12 +60,6 @@ export function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-zinc-900">{stat.value}</div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  {stat.trend === 'up' ? <Up className="w-3.5 h-3.5 text-green-600" /> : <Down className="w-3.5 h-3.5 text-red-600" />}
-                  <p className={`text-xs font-bold ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change}
-                  </p>
-                </div>
               </CardContent>
             </Card>
           );
