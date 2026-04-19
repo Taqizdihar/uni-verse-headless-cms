@@ -130,8 +130,7 @@ export function Settings() {
   const [homePreviewData, setHomePreviewData] = useState<{pageData: any, navPages: any[]}>({ pageData: null, navPages: [] });
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [exportStatus, setExportStatus] = useState<'idle' | 'exporting'>('idle');
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
 
   useEffect(() => {
     // Fetch home page to show in preview
@@ -176,22 +175,26 @@ export function Settings() {
       if (savedPalette) {
         // Full comparison: match all 4 color values to find the correct preset
         const matchedPreset = PRESET_PALETTES.find(p =>
-          p.primary.toLowerCase() === savedPalette.primary.toLowerCase() &&
-          p.secondary.toLowerCase() === savedPalette.secondary.toLowerCase() &&
-          p.surface.toLowerCase() === savedPalette.surface.toLowerCase() &&
-          p.text.toLowerCase() === savedPalette.text.toLowerCase()
+          p.primary === savedPalette.primary &&
+          p.secondary === savedPalette.secondary &&
+          p.surface === savedPalette.surface &&
+          p.text === savedPalette.text
         );
+        
+        // CRITICAL: Always populate customPalette with these colors so they aren't lost
+        // if user switches to custom, even if they match a preset initially.
+        setCustomPalette({ ...savedPalette, name: 'Custom' });
+
         if (matchedPreset) {
+            // Use the preset object directly so .name matches for card highlighting
             setActivePalette(matchedPreset);
             setPaletteMode('preset');
         } else {
-            const custom = { ...savedPalette, name: 'Custom' };
-            setActivePalette(custom);
-            setCustomPalette(custom);
+            setActivePalette(savedPalette);
             setPaletteMode('custom');
         }
       }
-      setIsDataLoaded(true);
+      setIsSettingsLoaded(true);
     }
   }, [settings]);
 
@@ -337,6 +340,14 @@ export function Settings() {
     }
   };
 
+  if (!isSettingsLoaded) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 animate-in fade-in duration-500">
+            <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Menyinkronkan Pengaturan...</p>
+        </div>
+    );
+  }
 
   return (
     <div className="animate-in fade-in duration-500 space-y-8 pb-10">
@@ -480,13 +491,6 @@ export function Settings() {
                     </h3>
                     <p className="text-zinc-400 text-xs font-medium mb-6">Pilih palet merek bawaan atau buat palet kustom. Warna akan diterapkan secara otomatis di seluruh template.</p>
 
-                    {!isDataLoaded ? (
-                        <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                            <div className="w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Sinkronisasi Palet...</p>
-                        </div>
-                    ) : (
-                    <>
                     {/* Preset Palette Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
                         {PRESET_PALETTES.map((palette) => {
@@ -565,14 +569,14 @@ export function Settings() {
                                         <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-zinc-200 shadow-inner flex-shrink-0">
                                             <input
                                                 type="color"
-                                                value={paletteMode === 'custom' ? customPalette[key] : activePalette[key]}
+                                                value={customPalette[key]}
                                                 onChange={(e) => handleCustomColorChange(key, e.target.value)}
                                                 className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer outline-none border-0 p-0"
                                             />
                                         </div>
                                         <input
                                             type="text"
-                                            value={paletteMode === 'custom' ? customPalette[key] : activePalette[key]}
+                                            value={customPalette[key]}
                                             onChange={(e) => handleCustomColorChange(key, e.target.value)}
                                             className="w-full bg-transparent outline-none font-mono text-xs uppercase text-zinc-700 font-bold tracking-wider"
                                             maxLength={7}
@@ -582,8 +586,6 @@ export function Settings() {
                             ))}
                         </div>
                     </div>
-                    )}
-                    </>
                     )}
 
                     {/* Live Preview */}
