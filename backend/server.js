@@ -95,7 +95,7 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
         if (pages.length > 0) {
             const row = pages[0];
             const [navPages] = await db.execute(
-                'SELECT title, slug FROM pages WHERE tenant_id = ? AND status = "published" ORDER BY id ASC',
+                "SELECT title, slug FROM pages WHERE tenant_id = ? AND status = 'published' ORDER BY id ASC",
                 [tenantId]
             );
 
@@ -128,7 +128,7 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
         if (posts.length > 0) {
             const row = posts[0];
             const [navPages] = await db.execute(
-                'SELECT title, slug FROM pages WHERE tenant_id = ? AND status = "published" ORDER BY id ASC',
+                "SELECT title, slug FROM pages WHERE tenant_id = ? AND status = 'published' ORDER BY id ASC",
                 [tenantId]
             );
 
@@ -160,7 +160,7 @@ app.get('/api/public/posts', async (req, res) => {
         // ✅ SECURITY FIX: Scope posts to a specific tenant via ?tenant_id query param
         // Also supports fetching all published posts for single-tenant use (no param)
         const tenantId = req.query.tenant_id ? parseInt(req.query.tenant_id) : null;
-        let query = 'SELECT id, title, slug, category, excerpt, created_at, content FROM posts WHERE status = "published"';
+        let query = "SELECT id, title, slug, category, excerpt, created_at, content FROM posts WHERE status = 'published'";
         const params = [];
         if (tenantId) {
             query += ' AND tenant_id = ?';
@@ -183,7 +183,7 @@ app.get('/api/public/posts', async (req, res) => {
 app.get('/api/public/posts/:slug', async (req, res) => {
     try {
         const cleanSlug = (req.params.slug || '').replace(/^\/+/, '');
-        const [posts] = await db.execute('SELECT * FROM posts WHERE slug = ? AND status = "published" LIMIT 1', [cleanSlug]);
+        const [posts] = await db.execute("SELECT * FROM posts WHERE slug = ? AND status = 'published' LIMIT 1", [cleanSlug]);
         if (posts.length === 0) return res.status(404).json({ error: 'Post not found' });
         const post = posts[0];
         if (post.content && typeof post.content === 'string') {
@@ -792,8 +792,8 @@ app.get('/api/export/zip', async (req, res) => {
 
         // 1. Fetch data
         const [settingsRows] = await db.execute('SELECT * FROM settings WHERE tenant_id = ?', [tid]);
-        const [postsRows] = await db.execute('SELECT * FROM posts WHERE tenant_id = ? AND status = "published"', [tid]);
-        const [pagesRows] = await db.execute('SELECT * FROM pages WHERE tenant_id = ? AND status = "published"', [tid]);
+        const [postsRows] = await db.execute("SELECT * FROM posts WHERE tenant_id = ? AND status = 'published'", [tid]);
+        const [pagesRows] = await db.execute("SELECT * FROM pages WHERE tenant_id = ? AND status = 'published'", [tid]);
 
         if (settingsRows.length === 0) return res.status(404).json({ error: 'Settings not found.' });
         
