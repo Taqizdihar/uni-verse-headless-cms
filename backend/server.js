@@ -221,17 +221,36 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
         
+        console.log(`[AUTH] Generating placeholder tenant`);
+        const subdomain = 'tenant-' + Date.now();
+        const [tenant] = await db.execute('INSERT INTO tenants (name, subdomain) VALUES (?, ?)', ['My Site', subdomain]);
+        const tenantId = tenant.insertId;
+
         console.log(`[AUTH] Hashing password for: ${email}`);
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(`[AUTH] Inserting user into database: ${email}`);
         const [result] = await db.execute(
-            'INSERT INTO users (name, username, password, email) VALUES (?, ?, ?, ?)',
-            [name, email, hashedPassword, email]
+            'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
+            [name, email, hashedPassword]
         );
-        console.log(`[AUTH] Success. New User ID: ${result.insertId}`);
+        const userId = result.insertId;
+
+        console.log(`[AUTH] Linking user and tenant`);
+        await db.execute('INSERT INTO tenant_users (tenant_id, user_id, role) VALUES (?, ?, ?)', [tenantId, userId, 'admin']);
+
+        // Create default settings registry
+        await db.execute(
+            'INSERT INTO settings (tenant_id, site_name, tagline, site_description, footer_description, active_template) VALUES (?, ?, ?, ?, ?, ?)',
+            [tenantId, 'My Site', '', '', '', 'minimalist']
+        );
+
+        const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+
         res.status(201).json({ 
-            message: 'User created', 
-            user: { id: result.insertId, name, email, tenant_id: null, role: null } 
+            message: 'Success', 
+            token,
+            tenant_id: tenantId,
+            user: { id: userId, name, email, tenant_id: tenantId, role: 'admin' } 
         });
     } catch (error) {
         console.error('DATABASE ERROR:', error);
@@ -243,14 +262,14 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         console.log(`[AUTH] Login attempt: ${email}`);
-        const [users] = await db.execute('SELECT id, name, email, password FROM users WHERE email = ?', [email]);
+        const [users] = await db.execute('SELECT id, name, email, password_hash FROM users WHERE email = ?', [email]);
         if (users.length === 0) {
             console.log(`[AUTH] Login failed: User ${email} not found`);
             return res.status(400).json({ error: 'User not found' });
         }
         
         const user = users[0];
-        const validPassword = await bcrypt.compare(password, user.password);
+        const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             console.log(`[AUTH] Login failed: Invalid password for ${email}`);
             return res.status(400).json({ error: 'Invalid password' });
@@ -273,33 +292,32 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/setup', authenticateToken, async (req, res) => {
     const { site_name, tagline, subdomain } = req.body;
     const userId = req.user.userId;
+    const tenantId = req.user.tenant_id;
     try {
         console.log(`[AUTH] Setting up tenant for User ID: ${userId}, Subdomain: ${subdomain}`);
-        // Validation
-        const [existing] = await db.execute('SELECT * FROM tenants WHERE subdomain = ?', [subdomain]);
+        if (!tenantId) return res.status(400).json({ error: 'Tenant context is missing.' });
+
+        // Validation for uniqueness (excluding self)
+        const [existing] = await db.execute('SELECT * FROM tenants WHERE subdomain = ? AND id != ?', [subdomain, tenantId]);
         if (existing.length > 0) {
             console.log(`[AUTH] Setup failed: Subdomain ${subdomain} already exists`);
             return res.status(400).json({ error: 'Subdomain already exists' });
         }
 
-        // a. Create tenant
-        const [tenant] = await db.execute('INSERT INTO tenants (name, subdomain) VALUES (?, ?)', [site_name, subdomain]);
-        const tenantId = tenant.insertId;
+        // a. Update tenant
+        await db.execute('UPDATE tenants SET name = ?, subdomain = ? WHERE id = ?', [site_name, subdomain, tenantId]);
 
-        // b. Create tenant_users
-        await db.execute('INSERT INTO tenant_users (tenant_id, user_id, role) VALUES (?, ?, ?)', [tenantId, userId, 'admin']);
-
-        // c. Create default settings
+        // b. Update settings
         await db.execute(
-            'INSERT INTO settings (tenant_id, site_name, tagline, site_description, footer_description, active_template) VALUES (?, ?, ?, ?, ?, ?)',
-            [tenantId, site_name, tagline, '', '', 'minimalist']
+            'UPDATE settings SET site_name = ?, tagline = ? WHERE tenant_id = ?',
+            [site_name, tagline, tenantId]
         );
 
-        // Sign new token with tenant_id included
+        // Sign fresh token
         const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
         
-        console.log(`[AUTH] Setup completed. New Tenant ID: ${tenantId}`);
-        res.status(201).json({ message: 'Setup completed', token, user: { id: userId, email: req.user.email, tenant_id: tenantId, role: 'admin'} });
+        console.log(`[AUTH] Setup finalized. Tenant ID: ${tenantId}`);
+        res.status(200).json({ message: 'Setup completed', token, user: { id: userId, email: req.user.email, tenant_id: tenantId, role: 'admin'} });
     } catch (error) {
         console.error('[AUTH ERROR] Setup Transaction Failure:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
@@ -343,13 +361,14 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
-app.put('/api/settings', async (req, res) => {
+app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     const { 
         site_name, tagline, site_description, footer_description, 
         active_template, support_email, theme_color, branding_palette, 
         logo_url, footer_config 
     } = req.body;
-    const tid = getTenantId(req);
+    // Prefer explicitly passed param, otherwise fallback to jwt
+    const tid = req.params.tenantId ? parseInt(req.params.tenantId) : getTenantId(req);
     try {
         const globalOptions = JSON.stringify({
             support_email: support_email || '',

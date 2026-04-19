@@ -28,13 +28,11 @@ export function Register() {
       
       console.log('Registration success:', regRes.data);
 
-      // 2. Immediate Login following registration
-      const loginRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
-      
-      const { token, user } = loginRes.data;
+      const { token, user, tenant_id } = regRes.data;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('tenant_id', tenant_id.toString());
       
       setToken(token);
       setUser(user);

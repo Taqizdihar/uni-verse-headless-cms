@@ -15,8 +15,13 @@ export function Setup() {
 
   // Protect route
   useEffect(() => {
-     if (!localStorage.getItem('token')) {
+     const token = localStorage.getItem('token');
+     const tenantId = localStorage.getItem('tenant_id');
+     
+     if (!token) {
          navigate('/login');
+     } else if (!tenantId) {
+         navigate('/register');
      }
   }, [navigate]);
 
