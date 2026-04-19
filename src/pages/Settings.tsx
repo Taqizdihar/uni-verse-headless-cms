@@ -103,8 +103,6 @@ export function Settings() {
   const [formData, setFormData] = useState({
     site_name: '',
     tagline: '',
-    site_description: '',
-    footer_description: '',
     support_email: '',
     active_template: 'minimalist',
     theme_color: '#fbbf24',
@@ -154,8 +152,6 @@ export function Settings() {
       setFormData({
         site_name: settings.site_name || '',
         tagline: settings.tagline || '',
-        site_description: settings.site_description || '',
-        footer_description: settings.footer_description || '',
         support_email: settings.global_options?.support_email || '',
         active_template: settings.active_template || 'minimalist',
         theme_color: settings.global_options?.theme_color || '#fbbf24',
@@ -407,15 +403,6 @@ export function Settings() {
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Deskripsi Website</label>
-                            <textarea 
-                                value={formData.site_description} 
-                                onChange={e => handleInputChange('site_description', e.target.value)}
-                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 h-24 resize-none" 
-                                placeholder="Deskripsi lengkap tentang universitas/instansi Anda..." 
-                            />
-                        </div>
                     </div>
                 </Card>
 
@@ -604,16 +591,6 @@ export function Settings() {
                             Konfigurasi Footer
                         </h3>
                         
-                        {/* Footer Description */}
-                        <div className="mb-6">
-                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Deskripsi Footer</label>
-                            <textarea 
-                                value={formData.footer_description}
-                                onChange={(e) => handleInputChange('footer_description', e.target.value)}
-                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 resize-none h-24"
-                                placeholder="Deskripsi singkat yang muncul di footer..."
-                            />
-                        </div>
 
                         {/* Quick Links */}
                         <div className="mb-6 border-t border-zinc-100 pt-6">
@@ -694,7 +671,7 @@ export function Settings() {
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                                 <div>
                                     <h4 className="font-bold mb-4 text-sm" style={{ color: activePalette.primary }}>{formData.site_name || 'Logo / Judul'}</h4>
-                                    <p className="opacity-70 leading-relaxed mb-6 text-[11px]">{formData.footer_description || 'Deskripsi singkat tertera di sini...'}</p>
+                                    <p className="opacity-70 leading-relaxed mb-6 text-[11px]">{formData.tagline || 'Tagline tertera di sini...'}</p>
                                     <div className="flex gap-3 items-center">
                                         {formData.footer_config.social_links.map((s, i) => (
                                            <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 transition-transform hover:scale-110" style={{ background: activePalette.surface, color: activePalette.secondary }}>

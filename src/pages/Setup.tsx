@@ -16,13 +16,17 @@ export function Setup() {
   // Protect route
   useEffect(() => {
      const token = localStorage.getItem('token');
-     const tenantId = localStorage.getItem('tenant_id');
+     const userStr = localStorage.getItem('user');
+     const user = userStr ? JSON.parse(userStr) : null;
      
      if (!token) {
          navigate('/login');
-     } else if (!tenantId) {
-         navigate('/register');
+     } else if (user && user.tenant_id) {
+         // If already has a tenant, go to dashboard
+         navigate('/dashboard');
      }
+     // If has token but NO tenant_id, stay here to complete setup.
+     // Never redirect back to /register from here if authenticated.
   }, [navigate]);
 
   const handleSetup = async (e: React.FormEvent) => {

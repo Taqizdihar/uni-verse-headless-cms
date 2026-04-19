@@ -242,8 +242,8 @@ app.post('/api/auth/register', async (req, res) => {
 
         // Create default settings registry
         await db.execute(
-            'INSERT INTO settings (tenant_id, site_name, tagline, site_description, footer_description, active_template) VALUES (?, ?, ?, ?, ?, ?)',
-            [tenantId, 'My Site', '', '', '', 'minimalist']
+            'INSERT INTO settings (tenant_id, site_name, tagline, active_template) VALUES (?, ?, ?, ?)',
+            [tenantId, 'My Site', '', 'minimalist']
         );
 
         const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
@@ -365,7 +365,7 @@ app.get('/api/settings', async (req, res) => {
 
 app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     const { 
-        site_name, tagline, site_description, footer_description, 
+        site_name, tagline, 
         active_template, support_email, theme_color, branding_palette, 
         logo_url, footer_config 
     } = req.body;
@@ -380,8 +380,8 @@ app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
         });
 
         await db.execute(
-            'UPDATE settings SET site_name = ?, tagline = ?, site_description = ?, footer_description = ?, active_template = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
-            [site_name, tagline, site_description || '', footer_description || '', active_template, logo_url || null, globalOptions, tid]
+            'UPDATE settings SET site_name = ?, tagline = ?, active_template = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
+            [site_name, tagline, active_template, logo_url || null, globalOptions, tid]
         );
         res.json({ message: 'Configuration synchronized successfully' });
     } catch (error) {
