@@ -4,7 +4,7 @@ import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
-import universeLogo from '../assets/logo/UNI-VERSE Logo.png';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V2.png';
 
 export function Header() {
   const { searchQuery, setSearchQuery } = useSearch();

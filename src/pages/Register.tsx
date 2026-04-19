@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Layout as LayoutIcon, Mail, Lock, User, ShieldPlus, ArrowRight, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-import universeLogo from '../assets/logo/UNI-VERSE Logo.png';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 import { useCMS } from '../context/CMSContext';
 
 export function Register() {
