@@ -16,6 +16,8 @@ import { PagesEditor } from './pages/PagesEditor';
 import { HeadlessPosts } from './pages/HeadlessPosts';
 import { LandingPagePreview } from './pages/LandingPagePreview';
 import { Profile } from './pages/Profile';
+import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
+import { SuperAdminRoute } from './components/SuperAdminRoute';
 import { SearchProvider } from './context/SearchContext';
 import { CMSProvider } from './context/CMSContext';
 import { HeadlessCmsProvider } from './context/HeadlessCmsContext';
@@ -63,6 +65,13 @@ export default function App() {
                   <Route path="/headless-posts" element={<HeadlessPosts />} />
                   <Route path="/headless-preview" element={<LandingPagePreview />} />
                   <Route path="/profile" element={<Profile />} />
+                </Route>
+              </Route>
+
+              {/* Super Admin Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<SuperAdminRoute />}>
+                   <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
                 </Route>
               </Route>
 

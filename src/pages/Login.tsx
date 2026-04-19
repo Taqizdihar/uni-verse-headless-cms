@@ -17,6 +17,12 @@ export function Login() {
   useEffect(() => {
     if (localStorage.getItem('token')) {
        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        // Super Admin Check
+        if (user.email === 'm.taqizdihar@gmail.com' && user.id === 1) {
+          navigate('/super-admin/dashboard');
+          return;
+        }
+
         if (user.site_name && user.site_name !== 'My Site') {
           navigate('/dashboard');
         } else {
@@ -41,9 +47,12 @@ export function Login() {
       setToken(token);
       setUser(user);
       
-      console.log(`[FRONTEND] Login success. Tenant ID: ${user.tenant_id || 'NONE'}`);
+      console.log(`[FRONTEND] Login success. User ID: ${user.id}`);
 
-      if (user.site_name && user.site_name !== 'My Site') {
+      // Super Admin Check
+      if (user.email === 'm.taqizdihar@gmail.com' && user.id === 1) {
+        navigate('/super-admin/dashboard');
+      } else if (user.site_name && user.site_name !== 'My Site') {
          navigate('/dashboard');
       } else {
          navigate('/setup');

@@ -209,6 +209,67 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Super Admin Middleware (Strict check for user_id === 1)
+const verifySuperAdmin = (req, res, next) => {
+    if (req.user && req.user.userId === 1) {
+        return next();
+    }
+    return res.status(403).json({ error: 'Access Denied: Super Admin privileges required.' });
+};
+
+// =============================================================
+// ★ SUPER ADMIN PRIVILEGED ROUTES ★
+// =============================================================
+app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const [userCount] = await db.execute('SELECT COUNT(*) as total FROM users');
+        const [tenantCount] = await db.execute('SELECT COUNT(*) as total FROM tenants');
+        res.json({
+            totalUsers: userCount[0].total,
+            totalTenants: tenantCount[0].total
+        });
+    } catch (error) {
+        console.error('[SUPER ADMIN ERROR] Stats fetch failed:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
+    const { title, description, version, images } = req.body;
+    
+    if (!title || !description || !version) {
+        return res.status(400).json({ error: 'Title, description, and version are required.' });
+    }
+
+    try {
+        // 1. Insert into update_history
+        const [result] = await db.execute(
+            'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, NOW())',
+            [title, description, version]
+        );
+        const updateId = result.insertId;
+
+        // 2. Insert multiple images if provided
+        if (images && Array.isArray(images) && images.length > 0) {
+            const imageValues = images.map(url => [updateId, url]);
+            // Constructing manual bulk insert for better speed
+            const placeholders = images.map(() => '(?, ?)').join(', ');
+            const flattened = [];
+            images.forEach(url => flattened.push(updateId, url));
+            
+            await db.execute(
+                `INSERT INTO update_images (update_id, image_url) VALUES ${placeholders}`,
+                flattened
+            );
+        }
+
+        res.status(201).json({ message: 'Update history recorded successfully', updateId });
+    } catch (error) {
+        console.error('[SUPER ADMIN ERROR] History write failed:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    }
+});
+
 
 app.post('/api/auth/register', async (req, res) => {
     console.log('[AUTH] Register request received:', req.body);
