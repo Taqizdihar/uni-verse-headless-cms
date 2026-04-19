@@ -49,15 +49,27 @@ export function Header() {
         </button>
         
         <div className="flex items-center gap-4 pl-6 border-l border-zinc-200">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-zinc-900 leading-none">{user?.name || 'Admin User'}</p>
+          <div 
+            className="text-right hidden sm:block cursor-pointer"
+            onClick={() => navigate('/profile')}
+          >
+            <p className="text-sm font-bold text-zinc-900 leading-none hover:text-amber-500 transition-colors">{user?.name || 'Admin User'}</p>
             <p className="text-[11px] text-zinc-500 font-medium mt-1 uppercase tracking-wider">{user?.role || 'Superadmin'}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="text-zinc-400 hover:text-zinc-900 transition-colors">
-                <UserCircle className="w-10 h-10" />
-            </button>
-            <button onClick={() => setIsLogoutConfirmOpen(true)} className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="Keluar">
+          <div 
+            className="flex items-center gap-2 cursor-pointer group"
+            onClick={() => navigate('/profile')}
+          >
+            <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm">
+                {user?.profile_picture_url ? (
+                    <img src={user.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+                        <UserCircle className="w-8 h-8" />
+                    </div>
+                )}
+            </div>
+            <button onClick={(e) => { e.stopPropagation(); setIsLogoutConfirmOpen(true); }} className="p-2 text-zinc-400 hover:text-red-500 transition-colors" title="Keluar">
                 <LogOut className="w-5 h-5" />
             </button>
           </div>

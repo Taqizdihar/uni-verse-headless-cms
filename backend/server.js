@@ -794,6 +794,63 @@ app.delete('/api/users/:user_id', async (req, res) => {
     }
 });
 
+// --- Profile ---
+app.get('/api/user/profile', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const [rows] = await db.execute('SELECT name, email, profile_picture_url FROM users WHERE id = ?', [userId]);
+        if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('[PROFILE ERROR] Get profile:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.put('/api/user/profile', async (req, res) => {
+    const { name, email } = req.body;
+    const userId = req.user.userId;
+    try {
+        await db.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, userId]);
+        res.json({ message: 'Profil diperbarui' });
+    } catch (error) {
+        console.error('[PROFILE ERROR] Update profile:', error);
+        res.status(500).json({ error: 'Gagal memperbarui profil' });
+    }
+});
+
+app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diunggah' });
+        const avatarUrl = req.file.path; // Cloudinary secure_url
+        const userId = req.user.userId;
+        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
+        res.json({ url: avatarUrl });
+    } catch (error) {
+        console.error('[PROFILE ERROR] Upload avatar:', error);
+        res.status(500).json({ error: 'Gagal mengunggah foto profil' });
+    }
+});
+
+app.put('/api/user/change-password', async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId;
+    try {
+        const [users] = await db.execute('SELECT password_hash FROM users WHERE id = ?', [userId]);
+        if (users.length === 0) return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+        
+        const validPassword = await bcrypt.compare(currentPassword, users[0].password_hash);
+        if (!validPassword) return res.status(400).json({ error: 'Kata sandi saat ini salah' });
+        
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await db.execute('UPDATE users SET password_hash = ? WHERE id = ?', [hashedNewPassword, userId]);
+        res.json({ message: 'Kata sandi berhasil diubah' });
+    } catch (error) {
+        console.error('[PROFILE ERROR] Change password:', error);
+        res.status(500).json({ error: 'Gagal mengubah kata sandi' });
+    }
+});
+
 // --- Export ---
 app.get('/api/export/zip', async (req, res) => {
     try {
@@ -1075,7 +1132,17 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('CORS enabled for dynamically configured origins');
+    
+    // Auto-migration for user profile field
+    try {
+        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture_url"');
+        if (columns.length === 0) {
+            console.log('[MIGRATION] Adding profile_picture_url to users table...');
+            await db.execute('ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR(255) DEFAULT NULL');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not verify/add profile_picture_url column:', e.message);
+    }
 });

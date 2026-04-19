@@ -15,6 +15,7 @@ import { LayoutManager } from './pages/LayoutManager';
 import { PagesEditor } from './pages/PagesEditor';
 import { HeadlessPosts } from './pages/HeadlessPosts';
 import { LandingPagePreview } from './pages/LandingPagePreview';
+import { Profile } from './pages/Profile';
 import { SearchProvider } from './context/SearchContext';
 import { CMSProvider } from './context/CMSContext';
 import { HeadlessCmsProvider } from './context/HeadlessCmsContext';
@@ -61,6 +62,7 @@ export default function App() {
                   <Route path="/headless-pages" element={<PagesEditor />} />
                   <Route path="/headless-posts" element={<HeadlessPosts />} />
                   <Route path="/headless-preview" element={<LandingPagePreview />} />
+                  <Route path="/profile" element={<Profile />} />
                 </Route>
               </Route>
 
