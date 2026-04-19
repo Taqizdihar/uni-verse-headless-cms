@@ -3,6 +3,10 @@ const archiver = require('archiver');
 
 const cors = require('cors');
 require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET || 'uni-inside-secret-key-2026';
+if (!process.env.JWT_SECRET) {
+    console.warn('[WARNING] JWT_SECRET is not defined in environment variables. Using fallback key for development.');
+}
 const db = require('./db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -195,7 +199,7 @@ const authenticateToken = (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: 'Forbidden' });
         req.user = user;
         next();
@@ -225,7 +229,10 @@ app.post('/api/auth/register', async (req, res) => {
             [name, email, hashedPassword, email]
         );
         console.log(`[AUTH] Success. New User ID: ${result.insertId}`);
-        res.status(201).json({ message: 'User created', userId: result.insertId });
+        res.status(201).json({ 
+            message: 'User created', 
+            user: { id: result.insertId, name, email, tenant_id: null, role: null } 
+        });
     } catch (error) {
         console.error('DATABASE ERROR:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
@@ -254,7 +261,7 @@ app.post('/api/auth/login', async (req, res) => {
         const tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
         const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1d' });
         console.log(`[AUTH] Login successful for ${email}. Tenant ID: ${tenant_id || 'NONE'}`);
         res.json({ token, user: { id: user.id, name: user.name, email: user.email, tenant_id, role } });
     } catch (error) {
@@ -289,7 +296,7 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
         );
 
         // Sign new token with tenant_id included
-        const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
         
         console.log(`[AUTH] Setup completed. New Tenant ID: ${tenantId}`);
         res.status(201).json({ message: 'Setup completed', token, user: { id: userId, email: req.user.email, tenant_id: tenantId, role: 'admin'} });
