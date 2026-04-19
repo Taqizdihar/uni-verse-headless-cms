@@ -4,6 +4,7 @@ import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import universeLogo from '../assets/logo/UNI-VERSE Logo.png';
 
 export function Header() {
   const { searchQuery, setSearchQuery } = useSearch();
@@ -22,9 +23,12 @@ export function Header() {
   return (
     <header className="h-20 bg-white border-b border-zinc-200 flex items-center justify-between px-8 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-6">
-        <h2 className="text-xl font-bold text-zinc-900 hidden md:block tracking-tight text-center">
-          Uni-Inside <span className="text-amber-400 font-extrabold uppercase italic">CMS</span>
-        </h2>
+        <div className="flex flex-col items-start leading-tight">
+          <img src={universeLogo} alt="UNI-VERSE" className="h-4 w-auto mb-0.5" />
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
+            Uni-Inside <span className="text-amber-500">CMS</span>
+          </span>
+        </div>
         {/* Search bar */}
         <div className="relative hidden lg:block">
           <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
