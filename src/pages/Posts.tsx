@@ -128,24 +128,22 @@ export function Posts() {
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Gambar Utama</label>
             <div className="flex gap-2 items-center mb-3">
                 <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih gambar header..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
             
             {formData.featured_image && (
-              <div className="relative group w-full max-w-[320px] aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-sm transition-all hover:shadow-md">
-                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-2">
-                  <button 
-                    type="button" 
-                    onClick={() => handleInputChange('featured_image', null)}
-                    className="p-2 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all"
-                    title="Hapus Gambar"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="relative group w-48 aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
+                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => handleInputChange('featured_image', null)}
+                  className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-md hover:bg-red-50 transition-all shadow-sm"
+                  title="Hapus Gambar"
+                >
+                  <Trash2 className="w-3.5 h-3.5 font-bold" />
+                </button>
               </div>
             )}
           </div>
@@ -168,24 +166,22 @@ export function Posts() {
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Sampul Event</label>
             <div className="flex gap-2 items-center mb-3">
                 <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih banner event..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
 
             {formData.featured_image && (
-              <div className="relative group w-full max-w-[320px] aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-sm transition-all hover:shadow-md">
-                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-2">
-                  <button 
-                    type="button" 
-                    onClick={() => handleInputChange('featured_image', null)}
-                    className="p-2 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all"
-                    title="Hapus Gambar"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="relative group w-48 aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
+                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  onClick={() => handleInputChange('featured_image', null)}
+                  className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-md hover:bg-red-50 transition-all shadow-sm"
+                  title="Hapus Gambar"
+                >
+                  <Trash2 className="w-3.5 h-3.5 font-bold" />
+                </button>
               </div>
             )}
           </div>
@@ -419,9 +415,16 @@ export function Posts() {
                     {renderDynamicInputs()}
                 </div>
 
-                <div className="pt-10 flex justify-end sticky bottom-0 bg-gradient-to-t from-white via-white/90 to-transparent -mx-10 px-10 pb-2">
-                  <button type="submit" className="flex items-center gap-3 bg-zinc-950 text-white px-10 py-4 rounded-2xl font-bold hover:shadow-2xl hover:shadow-zinc-900/20 transition-all active:scale-95 group">
-                    <Send className="w-5 h-5 text-amber-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                <div className="pt-6 flex justify-end gap-3 sticky bottom-0 bg-white border-t border-zinc-100 -mx-10 px-10 py-6 mt-10 rounded-b-[2.5rem]">
+                  <button 
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-8 py-3.5 rounded-2xl font-bold border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-all active:scale-95"
+                  >
+                    Batal
+                  </button>
+                  <button type="submit" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
+                    <Send className="w-5 h-5" />
                     Simpan Perubahan
                   </button>
                 </div>
