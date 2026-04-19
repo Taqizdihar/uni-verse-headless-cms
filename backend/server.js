@@ -859,7 +859,63 @@ app.get('/api/export/zip', async (req, res) => {
 
         console.log(`[EXPORT] Initiating full project ZIP export for tenant: ${tid}`);
 
+        const https = require('https');
+        const http = require('http');
+        const path = require('path');
+        const fs = require('fs');
+
+        const fetchImage = (url) => {
+            return new Promise((resolve) => {
+                if (!url) return resolve(null);
+                const client = url.startsWith('https') ? https : http;
+                client.get(url, (response) => {
+                    if (response.statusCode === 200) {
+                        const data = [];
+                        response.on('data', (chunk) => data.push(chunk));
+                        response.on('end', () => resolve(Buffer.concat(data)));
+                    } else {
+                        resolve(null);
+                    }
+                }).on('error', () => resolve(null));
+            });
+        };
+
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        const downloadAndProcessImage = async (url) => {
+            if (!url) return null;
+            try {
+                let filename = `image_${Date.now()}.png`;
+                if (url.startsWith('http')) {
+                    filename = path.basename(new URL(url).pathname);
+                } else if (url.startsWith('/uploads') || url.startsWith('uploads/')) {
+                    filename = path.basename(url);
+                }
+                if (!filename || filename === '') filename = `image_${Date.now()}.png`;
+
+                let buffer = null;
+                if (url.startsWith('http')) {
+                    buffer = await fetchImage(url);
+                } else {
+                    const localPath = path.join(__dirname, 'uploads', filename);
+                    if (fs.existsSync(localPath)) {
+                        buffer = fs.readFileSync(localPath);
+                    }
+                }
+                if (buffer) {
+                    archive.append(buffer, { name: `public/assets/${filename}` });
+                    return `./assets/${filename}`;
+                }
+            } catch (e) {
+                console.error(`[EXPORT] Error processing image: ${url}`, e);
+            }
+            return url;
+        };
+
         // 1. Fetch data
+        const [tenantRows] = await db.execute('SELECT name FROM tenants WHERE id = ?', [tid]);
+        const tenantName = tenantRows[0]?.name || 'Site';
+
         const [settingsRows] = await db.execute('SELECT * FROM settings WHERE tenant_id = ?', [tid]);
         const [postsRows] = await db.execute("SELECT * FROM posts WHERE tenant_id = ? AND status = 'published'", [tid]);
         const [pagesRows] = await db.execute("SELECT * FROM pages WHERE tenant_id = ? AND status = 'published'", [tid]);
@@ -867,30 +923,51 @@ app.get('/api/export/zip', async (req, res) => {
         if (settingsRows.length === 0) return res.status(404).json({ error: 'Settings not found.' });
         
         const settings = settingsRows[0];
-        // Parse global_options if it's a string
         if (settings.global_options && typeof settings.global_options === 'string') {
             try { settings.global_options = JSON.parse(settings.global_options); } catch(e) {}
         }
 
+        // Process Settings Logo
+        if (settings.logo_url) {
+            settings.logo_url = await downloadAndProcessImage(settings.logo_url) || settings.logo_url;
+        }
+
         // Process pages and posts content
-        const pages = pagesRows.map(p => {
+        const pages = [];
+        for (const p of pagesRows) {
             if (p.content && typeof p.content === 'string') {
                 try { p.content = JSON.parse(p.content); } catch(e) {}
             }
-            return p;
-        });
-        const posts = postsRows.map(p => {
+            if (p.content?.hero_image) {
+                p.content.hero_image = await downloadAndProcessImage(p.content.hero_image) || p.content.hero_image;
+            }
+            if (p.content?.featured_image) {
+                p.content.featured_image = await downloadAndProcessImage(p.content.featured_image) || p.content.featured_image;
+            }
+            if (p.content?.main_image) {
+                p.content.main_image = await downloadAndProcessImage(p.content.main_image) || p.content.main_image;
+            }
+            pages.push(p);
+        }
+
+        const posts = [];
+        for (const p of postsRows) {
             if (p.content && typeof p.content === 'string') {
                 try { p.content = JSON.parse(p.content); } catch(e) {}
             }
-            return p;
-        });
+            if (p.content?.featured_image) {
+                p.content.featured_image = await downloadAndProcessImage(p.content.featured_image) || p.content.featured_image;
+            }
+            if (p.content?.main_image) {
+                p.content.main_image = await downloadAndProcessImage(p.content.main_image) || p.content.main_image;
+            }
+            posts.push(p);
+        }
 
         // 2. Prepare Headers
-        res.attachment(`${settings.site_name.replace(/\s+/g, '_').toLowerCase()}-source.zip`);
+        res.attachment(`${tenantName.replace(/\s+/g, '_')}.zip`);
 
         // 3. Initialize Archiver
-        const archive = archiver('zip', { zlib: { level: 9 } });
         archive.pipe(res);
 
         // --- Task 1: Generate data.json ---
@@ -918,6 +995,7 @@ app.get('/api/export/zip', async (req, res) => {
                 "react-dom": "^18.2.0",
                 "react-router-dom": "^6.22.3",
                 "lucide-react": "^0.344.0",
+                "framer-motion": "^11.0.8",
                 "clsx": "^2.1.0",
                 "tailwind-merge": "^2.2.1"
             },
@@ -941,6 +1019,18 @@ export default defineConfig({
   plugins: [react()],
 })`;
         archive.append(viteConfig, { name: 'vite.config.ts' });
+
+        const readmeMd = `# ${settings.site_name}
+        
+## Local Development
+1. \`npm install\`
+2. \`npm run dev\`
+
+## Hosting / Production
+1. \`npm run build\`
+2. Deploy the \`dist\` folder.
+`;
+        archive.append(readmeMd, { name: 'README.md' });
 
         const indexHtml = `<!doctype html>
 <html lang="en">
@@ -982,6 +1072,10 @@ body {
   place-content: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+.rich-text-content {
+  font-family: inherit;
 }`;
         archive.append(indexCss, { name: 'src/index.css' });
 
@@ -1062,7 +1156,7 @@ export default function App() {
             let templateContent = fs.readFileSync(templatePath, 'utf8');
             // Fix imports if depth changed
             if (templatePath.includes(`${path.sep}${activeTemplate}${path.sep}`)) {
-                templateContent = templateContent.replace(/\.\.\/\.\.\/components\//g, '../components/');
+                templateContent = templateContent.replace(/\\.\\.\\/\\.\\.\\/components\\//g, '../components/');
             }
             archive.append(templateContent, { name: 'src/templates/Template.tsx' });
         } else {
@@ -1074,15 +1168,6 @@ export default function App() {
         if (fs.existsSync(componentPath)) {
             const componentContent = fs.readFileSync(componentPath, 'utf8');
             archive.append(componentContent, { name: 'src/components/UnifiedPostLayout.tsx' });
-        }
-
-        // --- Task 4: Public Assets ---
-        if (settings.logo_url) {
-            const logoFilename = path.basename(settings.logo_url);
-            const logoFilePath = path.join(__dirname, 'uploads', logoFilename);
-            if (fs.existsSync(logoFilePath)) {
-                archive.file(logoFilePath, { name: `public/uploads/${logoFilename}` });
-            }
         }
 
         // Finalize

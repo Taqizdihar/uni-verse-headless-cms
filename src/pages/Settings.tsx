@@ -99,7 +99,7 @@ const PRESET_PALETTES: BrandingPalette[] = [
 ];
 
 export function Settings() {
-  const { settings, updateSettings, fetchAllData, media } = useCMS();
+  const { settings, updateSettings, fetchAllData, media, pages } = useCMS();
   const [formData, setFormData] = useState({
     site_name: '',
     tagline: '',
@@ -304,6 +304,10 @@ export function Settings() {
   };
 
   const handleDownloadZip = async () => {
+    if (!pages || pages.length === 0) {
+        alert("Buat minimal 1 Page");
+        return;
+    }
     setExportStatus('exporting');
     try {
       const token = localStorage.getItem('token');
