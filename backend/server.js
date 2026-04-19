@@ -221,8 +221,8 @@ app.post('/api/auth/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(`[AUTH] Inserting user into database: ${email}`);
         const [result] = await db.execute(
-            'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
-            [name, email, hashedPassword]
+            'INSERT INTO users (name, username, password, email) VALUES (?, ?, ?, ?)',
+            [name, email, hashedPassword, email]
         );
         console.log(`[AUTH] Success. New User ID: ${result.insertId}`);
         res.status(201).json({ message: 'User created', userId: result.insertId });
@@ -236,14 +236,14 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     try {
         console.log(`[AUTH] Login attempt: ${email}`);
-        const [users] = await db.execute('SELECT id, name, email, password_hash FROM users WHERE email = ?', [email]);
+        const [users] = await db.execute('SELECT id, name, email, password FROM users WHERE email = ?', [email]);
         if (users.length === 0) {
             console.log(`[AUTH] Login failed: User ${email} not found`);
             return res.status(400).json({ error: 'User not found' });
         }
         
         const user = users[0];
-        const validPassword = await bcrypt.compare(password, user.password_hash);
+        const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
             console.log(`[AUTH] Login failed: Invalid password for ${email}`);
             return res.status(400).json({ error: 'Invalid password' });
