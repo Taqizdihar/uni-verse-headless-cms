@@ -25,21 +25,25 @@ cloudinary.config({
 const app = express();
 
 // Middleware — CORS must come FIRST, before all routes
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://uni-verse-cms.netlify.app'
+];
+
 app.use(cors({
-    origin: function (origin, callback) {
-        const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
-        if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
-        
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app')) {
-            callback(null, true);
-        } else {
-            console.error(`[CORS REJECTED] Origin: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app')) {
+      callback(null, true);
+    } else {
+      console.error(`[CORS REJECTED] Origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 app.use(express.json());
 
