@@ -13,7 +13,8 @@ import {
   Mail, 
   Clock, 
   MessageCircle,
-  ArrowRight
+  ArrowRight,
+  Image
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
 
@@ -88,38 +89,46 @@ export default function MinimalistTemplate({
     switch (pageType) {
       case 'home':
         return (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {content.hero_image && (
-              <div style={{ width: '100%', height: '70vh', overflow: 'hidden' }}>
-                <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000" style={{ maxWidth: '1200px', margin: '0 auto', padding: '6rem 2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+              <div>
+                {(content.headline || content.hero_title) && (
+                  <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.05em', marginBottom: '1.5rem' }}>
+                    {content.headline || content.hero_title}
+                  </h1>
+                )}
+                {(content.sub_headline || content.hero_subtitle) && (
+                  <p style={{ fontSize: '1.25rem', lineHeight: 1.6, opacity: 0.7, maxWidth: '500px' }}>
+                    {content.sub_headline || content.hero_subtitle}
+                  </p>
+                )}
               </div>
-            )}
-            <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '6rem 2rem' }}>
-              {content.headline && (
-                <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 5rem)', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.05em', marginBottom: '2rem' }}>
-                  {content.headline}
-                </h1>
-              )}
-              {content.sub_headline && (
-                <p style={{ fontSize: '1.25rem', lineHeight: 1.6, opacity: 0.7, maxWidth: '600px' }}>
-                  {content.sub_headline}
-                </p>
-              )}
+              <div style={{ aspectRatio: '1/1', borderRadius: '3rem', overflow: 'hidden', background: 'var(--text-color)05', boxShadow: '0 30px 100px rgba(0,0,0,0.05)' }}>
+                {content.hero_image ? (
+                  <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
+                    <Image size={48} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
 
       case 'profile':
         return (
-          <div style={{ maxWidth: '800px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
-            <h2 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>About Us</h2>
-            <div 
-              style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.9, whiteSpace: 'pre-wrap' }}
-              className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
-            />
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
+            <div style={{ maxWidth: '800px' }}>
+              <h2 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>About Us</h2>
+              <div 
+                style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.9, whiteSpace: 'pre-wrap' }}
+                className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+              />
+            </div>
           </div>
         );
-
+// ... existing gallery and news cases ...
       case 'gallery':
         const galleryImages = Array.isArray(content.images) ? content.images : [];
         return (
@@ -269,52 +278,49 @@ function MinimalistNavbar({ settings, siteName, navPages, currentSlug, subdomain
 
 function MinimalistFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
+  const hasSocial = footerCfg.social_links && footerCfg.social_links.length > 0;
+  const mapsSrc = footerCfg.location_embed_link?.includes('<iframe') ? footerCfg.location_embed_link.match(/src="([^"]+)"/)?.[1] : footerCfg.location_embed_link;
+
   return (
-    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-color)0a', padding: '8rem 4rem 4rem' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '4rem' }}>
+    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-color)0a', padding: '6rem 4rem 4rem' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '4rem' }}>
+        {/* Column 1: Identity & Social */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
             {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '40px', width: 'auto' }} />}
             <span style={{ fontWeight: 900, fontSize: '1.5rem', letterSpacing: '-0.04em' }}>{siteName}</span>
           </div>
-          <p style={{ opacity: 0.5, lineHeight: 1.8, fontSize: '0.95rem', marginBottom: '2.5rem', maxWidth: '300px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
-        </div>
-
-        <div>
-           <h4 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '2rem', opacity: 0.4 }}>Quick Links</h4>
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {(footerCfg.quick_links || []).slice(0, 5).map((link: any, i: number) => (
-                <a key={i} href={link.url} style={{ textDecoration: 'none', color: 'inherit', fontSize: '0.95rem', opacity: 0.7 }}>{link.label}</a>
-              ))}
-           </div>
-        </div>
-
-        <div>
-           <h4 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '2rem', opacity: 0.4 }}>Social Media</h4>
-           <div style={{ display: 'flex', gap: '1.5rem' }}>
-              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.6 }} onMouseOver={e => e.currentTarget.style.color = 'var(--primary-color)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
-                  <SocialIcon type={social.icon} size={24} />
+          {hasSocial && (
+            <div style={{ display: 'flex', gap: '1.25rem', marginTop: '1rem' }}>
+              {footerCfg.social_links.map((social: any, i: number) => (
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.6, transition: 'all 0.3s' }} onMouseOver={e => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.opacity = '1'; }} onMouseOut={e => { e.currentTarget.style.color = 'inherit'; e.currentTarget.style.opacity = '0.6'; }}>
+                  <SocialIcon type={social.icon} size={22} />
                 </a>
               ))}
-           </div>
+            </div>
+          )}
         </div>
 
+        {/* Column 2: Contact Us */}
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '2rem', opacity: 0.4 }}>Hubungi Kami</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {contact.phone && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Phone size={18} style={{ opacity: 0.4 }} /> <b>{contact.phone}</b></div>}
-              {contact.whatsapp && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><MessageCircle size={18} style={{ opacity: 0.4 }} /> <b>{contact.whatsapp}</b></div>}
-              {contact.email && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Mail size={18} style={{ opacity: 0.4 }} /> <b>{contact.email}</b></div>}
-              {contact.service_hours && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Clock size={18} style={{ opacity: 0.4 }} /> <span>{contact.service_hours}</span></div>}
-              
-              {footerCfg.location_embed_link && (
-                <div style={{ width: '100%', height: '120px', borderRadius: '1rem', overflow: 'hidden', marginTop: '1rem' }}>
-                   <iframe src={footerCfg.location_embed_link.includes('<iframe') ? footerCfg.location_embed_link.match(/src="([^"]+)"/)?.[1] : footerCfg.location_embed_link} width="100%" height="100%" style={{ border: 0 }} loading="lazy"></iframe>
-                </div>
-              )}
+              {contact.phone && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Phone size={16} style={{ opacity: 0.4 }} /> <span style={{ fontSize: '0.95rem' }}>{contact.phone}</span></div>}
+              {contact.whatsapp && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><MessageCircle size={16} style={{ opacity: 0.4 }} /> <span style={{ fontSize: '0.95rem' }}>{contact.whatsapp}</span></div>}
+              {contact.email && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Mail size={16} style={{ opacity: 0.4 }} /> <span style={{ fontSize: '0.95rem' }}>{contact.email}</span></div>}
+              {contact.service_hours && <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Clock size={16} style={{ opacity: 0.4 }} /> <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>{contact.service_hours}</span></div>}
            </div>
         </div>
+
+        {/* Column 3: Location (Maps) */}
+        {mapsSrc && (
+          <div>
+            <h4 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '2rem', opacity: 0.4 }}>Lokasi</h4>
+            <div style={{ width: '100%', height: '180px', borderRadius: '1.5rem', overflow: 'hidden', background: 'var(--text-color)05' }}>
+               <iframe src={mapsSrc} width="100%" height="100%" style={{ border: 0 }} loading="lazy"></iframe>
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ maxWidth: '1400px', margin: '6rem auto 0', paddingTop: '3rem', borderTop: '1px solid var(--text-color)0a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', opacity: 0.4 }}>
