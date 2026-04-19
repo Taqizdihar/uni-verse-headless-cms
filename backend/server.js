@@ -29,6 +29,7 @@ app.use(cors({
         if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app')) {
             callback(null, true);
         } else {
+            console.error(`[CORS REJECTED] Origin: ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -971,6 +972,12 @@ app.put('/api/plugins/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+// Catch-All for 404
+app.use((req, res) => {
+    console.log('404 Route Not Found:', req.url);
+    res.status(404).send('Route not found');
 });
 
 const PORT = process.env.PORT || 8080;
