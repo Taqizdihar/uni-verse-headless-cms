@@ -242,8 +242,8 @@ app.post('/api/auth/register', async (req, res) => {
 
         // Create default settings registry
         await db.execute(
-            'INSERT INTO settings (tenant_id, site_name, tagline, active_template) VALUES (?, ?, ?, ?)',
-            [tenantId, 'My Site', '', 'minimalist']
+            'INSERT INTO settings (tenant_id, site_name, tagline, active_template, logo_url, global_options) VALUES (?, ?, ?, ?, ?, ?)',
+            [tenantId, 'My Site', '', 'minimalist', null, '{}']
         );
 
         const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
