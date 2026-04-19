@@ -291,8 +291,8 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
 
         // c. Create default settings
         await db.execute(
-            'INSERT INTO settings (tenant_id, site_name, tagline, active_template) VALUES (?, ?, ?, ?)',
-            [tenantId, site_name, tagline, 'minimalist']
+            'INSERT INTO settings (tenant_id, site_name, tagline, site_description, footer_description, active_template) VALUES (?, ?, ?, ?, ?, ?)',
+            [tenantId, site_name, tagline, '', '', 'minimalist']
         );
 
         // Sign new token with tenant_id included
@@ -344,7 +344,11 @@ app.get('/api/settings', async (req, res) => {
 });
 
 app.put('/api/settings', async (req, res) => {
-    const { site_name, tagline, active_template, support_email, theme_color, branding_palette, logo_url, footer_config } = req.body;
+    const { 
+        site_name, tagline, site_description, footer_description, 
+        active_template, support_email, theme_color, branding_palette, 
+        logo_url, footer_config 
+    } = req.body;
     const tid = getTenantId(req);
     try {
         const globalOptions = JSON.stringify({
@@ -355,8 +359,8 @@ app.put('/api/settings', async (req, res) => {
         });
 
         await db.execute(
-            'UPDATE settings SET site_name = ?, tagline = ?, active_template = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
-            [site_name, tagline, active_template, logo_url || null, globalOptions, tid]
+            'UPDATE settings SET site_name = ?, tagline = ?, site_description = ?, footer_description = ?, active_template = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
+            [site_name, tagline, site_description || '', footer_description || '', active_template, logo_url || null, globalOptions, tid]
         );
         res.json({ message: 'Configuration synchronized successfully' });
     } catch (error) {
