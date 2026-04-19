@@ -271,7 +271,7 @@ app.post('/api/auth/login', async (req, res) => {
         console.log(`[AUTH] Login attempt for email: ${email}`);
 
         // 1. Search for user by email
-        const [users] = await db.execute('SELECT id, name, email, profile_picture, password_hash FROM users WHERE email = ?', [email]);
+        const [users] = await db.execute('SELECT id, name, email, profile_picture_url, password_hash FROM users WHERE email = ?', [email]);
         
         if (!users || users.length === 0) {
             console.log(`[AUTH] Login failed: User ${email} not found`);
@@ -312,7 +312,7 @@ app.post('/api/auth/login', async (req, res) => {
                 id: user.id, 
                 name: user.name, 
                 email: user.email, 
-                profile_picture: user.profile_picture,
+                profile_picture_url: user.profile_picture_url,
                 tenant_id, 
                 role, 
                 site_name 
@@ -799,7 +799,7 @@ app.delete('/api/users/:user_id', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [rows] = await db.execute('SELECT name, email, profile_picture FROM users WHERE id = ?', [userId]);
+        const [rows] = await db.execute('SELECT name, email, profile_picture_url FROM users WHERE id = ?', [userId]);
         if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
         res.json(rows[0]);
     } catch (error) {
@@ -825,7 +825,7 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
         if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diunggah' });
         const avatarUrl = req.file.path; // Cloudinary secure_url
         const userId = req.user.userId;
-        await db.execute('UPDATE users SET profile_picture = ? WHERE id = ?', [avatarUrl, userId]);
+        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
         res.json({ url: avatarUrl });
     } catch (error) {
         console.error('[PROFILE ERROR] Upload avatar:', error);
@@ -957,7 +957,7 @@ app.get('/api/export/zip', async (req, res) => {
                 try { p.content = JSON.parse(p.content); } catch(e) {}
             }
             if (p.content?.featured_image) {
-                p.content.featured_image = await downloadAndProcessImage(p.content.featured_image) || p.content.featured_image;
+            p.content.featured_image = await downloadAndProcessImage(p.content.featured_image) || p.content.featured_image;
             }
             if (p.content?.main_image) {
                 p.content.main_image = await downloadAndProcessImage(p.content.main_image) || p.content.main_image;
@@ -966,23 +966,46 @@ app.get('/api/export/zip', async (req, res) => {
         }
 
         // 2. Prepare Headers
-        res.attachment(`${tenantName.replace(/\s+/g, '_')}.zip`);
+        const safeName = tenantName.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+        res.attachment(`${safeName}-Web.zip`);
 
         // 3. Initialize Archiver
         archive.pipe(res);
 
-        // --- Task 1: Generate data.json ---
-        const exportData = {
+        // --- Task 1: Generate Modular data/ ---
+        const navPages = pages.map(p => ({ title: p.title, slug: p.slug }));
+        const settingsData = {
             settings,
-            pages,
-            posts,
+            navPages,
             exported_at: new Date().toISOString()
         };
-        archive.append(JSON.stringify(exportData, null, 2), { name: 'src/data.json' });
+        
+        archive.append(JSON.stringify(settingsData, null, 2), { name: 'src/data/settings.json' });
+
+        // Export each page
+        pages.forEach(page => {
+            archive.append(JSON.stringify(page, null, 2), { name: `src/data/pages/${page.slug}.json` });
+        });
+
+        // Export each post
+        posts.forEach(post => {
+            archive.append(JSON.stringify(post, null, 2), { name: `src/data/posts/${post.slug}.json` });
+        });
+
+        // Add a helper for posts metadata (for the blog list)
+        const postsMetadata = posts.map(p => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            category: p.category,
+            excerpt: p.excerpt,
+            created_at: p.created_at
+        }));
+        archive.append(JSON.stringify(postsMetadata, null, 2), { name: 'src/data/posts.json' });
 
         // --- Task 2: Scaffolding Files ---
         const packageJson = {
-            name: "exported-cms-site",
+            name: safeName.toLowerCase(),
             private: true,
             version: "1.0.0",
             type: "module",
@@ -1080,55 +1103,91 @@ body {
 }`;
         archive.append(indexCss, { name: 'src/index.css' });
 
-        const appTsx = `import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import data from './data.json';
+        const appTsx = `import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import settingsData from './data/settings.json';
+import postsList from './data/posts.json';
 import Template from './templates/Template';
 
-export default function App() {
-  const { settings, pages, posts } = data;
+function PageLoader() {
+  const { slug = 'home' } = useParams();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setData(null);
+    setError(false);
+    
+    import(\`./data/pages/\${slug}.json\`)
+      .then(m => setData(m.default))
+      .catch((err) => {
+        console.error('Failed to load page:', err);
+        setError(true);
+      });
+  }, [slug]);
+
+  if (error) return <Navigate to="/" replace />;
+  if (!data) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+
+  const { settings, navPages } = settingsData;
   const themeColor = settings.global_options?.theme_color || '#fbbf24';
   const palette = settings.global_options?.branding_palette;
-  const navPages = pages.filter(p => p.status === 'published');
 
+  return (
+    <Template 
+      pageData={data} 
+      settings={settings} 
+      posts={postsList} 
+      themeColor={themeColor} 
+      palette={palette} 
+      navPages={navPages}
+      currentSlug={slug}
+    />
+  );
+}
+
+function PostLoader() {
+  const { slug } = useParams();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setData(null);
+    setError(false);
+    
+    import(\`./data/posts/\${slug}.json\`)
+      .then(m => setData(m.default))
+      .catch(() => setError(true));
+  }, [slug]);
+
+  if (error) return <Navigate to="/" replace />;
+  if (!data) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+
+  const { settings, navPages } = settingsData;
+  const themeColor = settings.global_options?.theme_color || '#fbbf24';
+  const palette = settings.global_options?.branding_palette;
+
+  return (
+    <Template 
+      pageData={{}} 
+      postData={data}
+      settings={settings} 
+      posts={postsList} 
+      themeColor={themeColor} 
+      palette={palette} 
+      navPages={navPages}
+      currentSlug={slug}
+    />
+  );
+}
+
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {pages.map(page => (
-          <Route 
-            key={page.id} 
-            path={page.slug === 'home' ? '/' : \`/\${page.slug}\`} 
-            element={
-              <Template 
-                pageData={page} 
-                settings={settings} 
-                posts={posts} 
-                themeColor={themeColor} 
-                palette={palette} 
-                navPages={navPages}
-                currentSlug={page.slug}
-              />
-            } 
-          />
-        ))}
-        {posts.map(post => (
-          <Route 
-            key={post.id} 
-            path={\`/post/\${post.slug}\`} 
-            element={
-              <Template 
-                pageData={{}} 
-                postData={post}
-                settings={settings} 
-                posts={posts} 
-                themeColor={themeColor} 
-                palette={palette} 
-                navPages={navPages}
-                currentSlug={post.slug}
-              />
-            } 
-          />
-        ))}
+        <Route path="/" element={<PageLoader />} />
+        <Route path="/:slug" element={<PageLoader />} />
+        <Route path="/post/:slug" element={<PostLoader />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
@@ -1223,12 +1282,12 @@ app.listen(PORT, '0.0.0.0', async () => {
     
     // Auto-migration for user profile field
     try {
-        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture"');
+        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture_url"');
         if (columns.length === 0) {
-            console.log('[MIGRATION] Adding profile_picture to users table...');
-            await db.execute('ALTER TABLE users ADD COLUMN profile_picture VARCHAR(255) DEFAULT NULL');
+            console.log('[MIGRATION] Adding profile_picture_url to users table...');
+            await db.execute('ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR(255) DEFAULT NULL');
         }
     } catch (e) {
-        console.warn('[MIGRATION ERROR] Could not verify/add profile_picture column:', e.message);
+        console.warn('[MIGRATION ERROR] Could not verify/add profile_picture_url column:', e.message);
     }
 });
