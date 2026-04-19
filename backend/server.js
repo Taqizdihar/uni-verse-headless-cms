@@ -261,43 +261,73 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
     try {
-        console.log(`[AUTH] Login attempt: ${email}`);
+        const { email, password } = req.body || {};
+        
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        console.log(`[AUTH] Login attempt for email: ${email}`);
+
+        // 1. Search for user by email
         const [users] = await db.execute('SELECT id, name, email, password_hash FROM users WHERE email = ?', [email]);
-        if (users.length === 0) {
+        
+        if (!users || users.length === 0) {
             console.log(`[AUTH] Login failed: User ${email} not found`);
-            return res.status(400).json({ error: 'User not found' });
+            return res.status(401).json({ error: 'Kredensial tidak valid' });
         }
         
         const user = users[0];
+
+        // 2. Compare password with hashed version from DB
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             console.log(`[AUTH] Login failed: Invalid password for ${email}`);
-            return res.status(400).json({ error: 'Invalid password' });
+            return res.status(401).json({ error: 'Kredensial tidak valid' });
         }
         
-        // Find if user has a tenant
+        // 3. Retrieve tenant_id and role from tenant_users
         const [tenantUsers] = await db.execute('SELECT tenant_id, role FROM tenant_users WHERE user_id = ?', [user.id]);
         const tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
         const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1d' });
-        
-        // Fetch site_name for redirect logic
+        // 4. Fetch site_name for frontend redirection logic
         let site_name = 'My Site';
         if (tenant_id) {
             const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
-            if (settings.length > 0) site_name = settings[0].site_name;
+            if (settings && settings.length > 0) {
+                site_name = settings[0].site_name;
+            }
         }
 
-        console.log(`[AUTH] Login successful for ${email}. Tenant ID: ${tenant_id || 'NONE'}`);
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, tenant_id, role, site_name } });
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1d' });
+        
+        console.log(`[AUTH] Login successful for ${email}. Tenant: ${tenant_id || 'NONE'}`);
+
+        // 5. Response Payload: return token, user object, and top-level tenant_id
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                tenant_id, 
+                role, 
+                site_name 
+            },
+            tenant_id 
+        });
+
     } catch (error) {
-        console.error('[AUTH ERROR] Login Registry Failure:', error);
-        res.status(500).json({ error: error.message || 'Internal Server Error' });
+        console.error('[AUTH CRITICAL ERROR] Login logic failure:', error);
+        // Ensure we send a proper JSON response to prevent CORS issues on client browser
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        }
     }
 });
+
 
 app.post('/api/auth/setup', authenticateToken, async (req, res) => {
     const { site_name, tagline, subdomain } = req.body;
