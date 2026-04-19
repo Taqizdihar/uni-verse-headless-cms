@@ -31,6 +31,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   console.log('CORS Bypass active for:', req.method, req.url);
@@ -967,7 +968,7 @@ app.get('/api/export/zip', async (req, res) => {
 
         // 2. Prepare Headers
         const safeName = tenantName.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
-        res.setHeader('Content-Disposition', 'attachment; filename="' + safeName + '-Web.zip"');
+        res.setHeader('Content-Disposition', 'attachment; filename="' + safeName + '.zip"');
 
         // 3. Initialize Archiver
         archive.pipe(res);
@@ -1001,7 +1002,7 @@ app.get('/api/export/zip', async (req, res) => {
             excerpt: p.excerpt,
             created_at: p.created_at
         }));
-        archive.append(JSON.stringify(postsMetadata, null, 2), { name: 'src/data/config/posts-metadata.json' });
+        archive.append(JSON.stringify(postsMetadata, null, 2), { name: 'src/data/config/posts.json' });
 
         // --- Task 2: Scaffolding Files ---
         const packageJson = {
@@ -1021,14 +1022,15 @@ app.get('/api/export/zip', async (req, res) => {
                 "lucide-react": "^0.344.0",
                 "framer-motion": "^11.0.8",
                 "clsx": "^2.1.0",
-                "tailwind-merge": "^2.2.1",
-                "tailwindcss": "^4.0.0",
-                "@tailwindcss/vite": "^4.0.0"
+                "tailwind-merge": "^2.2.1"
             },
             devDependencies: {
                 "@types/react": "^18.2.66",
                 "@types/react-dom": "^18.2.22",
                 "@vitejs/plugin-react": "^4.2.1",
+                "autoprefixer": "^10.4.18",
+                "postcss": "^8.4.35",
+                "tailwindcss": "^3.4.1",
                 "typescript": "^5.2.2",
                 "vite": "^5.2.2"
             }
@@ -1037,13 +1039,9 @@ app.get('/api/export/zip', async (req, res) => {
 
         const viteConfig = `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react()],
 })`;
         archive.append(viteConfig, { name: 'vite.config.ts' });
 
@@ -1085,7 +1083,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 )`;
         archive.append(mainTsx, { name: 'src/main.tsx' });
 
-        const indexCss = `@import "tailwindcss";
+        const indexCss = `@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -1107,7 +1107,7 @@ body {
         const appTsx = `import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import settingsData from './data/config/settings.json';
-import postsList from './data/config/posts-metadata.json';
+import postsList from './data/config/posts.json';
 import Template from './templates/Template';
 
 function PageLoader() {
@@ -1215,22 +1215,10 @@ export default function App() {
 
         if (templatePath) {
             let templateContent = fs.readFileSync(templatePath, 'utf8');
-            
-            // --- Polish Template for Export (Zero Config) ---
-            // 1. Remove API-specific logic and fix image paths
-            templateContent = templateContent.replace(/const BASE_URL = [^;]+;/g, 'const BASE_URL = "";');
-            templateContent = templateContent.replace(/url\.startsWith\(["']\/uploads["']\)/g, 'url.startsWith("./assets/media/")');
-            templateContent = templateContent.replace(/`\$\{BASE_URL\}\$\{url\}`/g, 'url');
-            
-            // 2. Cleanup Preview Links (Remove /preview/${subdomain})
-            templateContent = templateContent.replace(/\/preview\/\$\{subdomain\}\//g, '/');
-            templateContent = templateContent.replace(/\/preview\/\$\{subdomain\}/g, '/');
-            
-            // 3. Fix component imports if depth changed
-            if (templatePath.includes(`${activeTemplate}${path.sep}`)) {
+            // Fix imports if depth changed
+            if (templatePath.includes(`${path.sep}${activeTemplate}${path.sep}`)) {
                 templateContent = templateContent.split('../../../components/').join('../components/');
             }
-            
             archive.append(templateContent, { name: 'src/templates/Template.tsx' });
         } else {
             console.error(`[EXPORT] Template not found for: ${activeTemplate}`);
@@ -1239,13 +1227,7 @@ export default function App() {
 
         const componentPath = path.join(__dirname, '..', 'src', 'components', 'UnifiedPostLayout.tsx');
         if (fs.existsSync(componentPath)) {
-            let componentContent = fs.readFileSync(componentPath, 'utf8');
-            
-            // Polish Component for Export
-            componentContent = componentContent.replace(/const BASE_URL = [^;]+;/g, 'const BASE_URL = "";');
-            componentContent = componentContent.replace(/url\.startsWith\(["']\/uploads["']\)/g, 'url.startsWith("./assets/media/")');
-            componentContent = componentContent.replace(/`\$\{BASE_URL\}\$\{url\}`/g, 'url');
-
+            const componentContent = fs.readFileSync(componentPath, 'utf8');
             archive.append(componentContent, { name: 'src/components/UnifiedPostLayout.tsx' });
         }
 
