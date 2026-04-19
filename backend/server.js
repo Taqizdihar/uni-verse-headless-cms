@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
   // Allow any origin for testing purposes
   res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
@@ -150,8 +150,8 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
         res.status(404).json({ error: `Not found: ${cleanSlug} for site ${subdomain}` });
     } catch (error) {
-        console.error('[PREVIEW] Critical error:', error);
-        res.status(500).json({ error: 'Data resolution failure' });
+        console.error('[PREVIEW ERROR] Database failure during site resolution:', error);
+        res.status(500).json({ error: 'Data resolution failure', details: error.message });
     }
 });
 
