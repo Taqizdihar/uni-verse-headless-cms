@@ -79,22 +79,19 @@ export function PublicView() {
     text: '#27272A',
   });
 
-  // Inject CSS variables for the full branding palette (both naming conventions)
+  // Inject CSS variables for the full branding palette
   useEffect(() => {
     const root = document.documentElement;
-    // Primary aliases
     root.style.setProperty('--primary', palette.primary);
-    root.style.setProperty('--primary-color', palette.primary);
-    root.style.setProperty('--primary-accent', palette.primary);
-    // Secondary aliases
     root.style.setProperty('--secondary', palette.secondary);
-    root.style.setProperty('--secondary-color', palette.secondary);
-    // Surface / background aliases
     root.style.setProperty('--bg-color', palette.surface);
-    root.style.setProperty('--surface-color', palette.surface);
-    // Text aliases
     root.style.setProperty('--text-main', palette.text);
+    // Template-standard aliases (all 26 templates reference these)
+    root.style.setProperty('--primary-color', palette.primary);
+    root.style.setProperty('--secondary-color', palette.secondary);
     root.style.setProperty('--text-color', palette.text);
+    // Legacy fallback
+    root.style.setProperty('--primary-accent', palette.primary);
   }, [palette]);
 
   useEffect(() => {
@@ -299,14 +296,13 @@ export function PublicView() {
           className="content-root"
           style={{
             '--primary': palette.primary,
-            '--primary-color': palette.primary,
-            '--primary-accent': palette.primary,
             '--secondary': palette.secondary,
-            '--secondary-color': palette.secondary,
             '--bg-color': palette.surface,
-            '--surface-color': palette.surface,
             '--text-main': palette.text,
+            '--primary-color': palette.primary,
+            '--secondary-color': palette.secondary,
             '--text-color': palette.text,
+            '--primary-accent': palette.primary,
             minHeight: '100vh'
           } as React.CSSProperties}
         >
