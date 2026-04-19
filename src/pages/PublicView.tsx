@@ -79,12 +79,21 @@ export function PublicView() {
     text: '#27272A',
   });
 
-  // Inject CSS variables for the full branding palette
+  // Inject CSS variables for the full branding palette (both naming conventions)
   useEffect(() => {
     const root = document.documentElement;
+    // Primary aliases
+    root.style.setProperty('--primary', palette.primary);
     root.style.setProperty('--primary-color', palette.primary);
+    root.style.setProperty('--primary-accent', palette.primary);
+    // Secondary aliases
+    root.style.setProperty('--secondary', palette.secondary);
     root.style.setProperty('--secondary-color', palette.secondary);
+    // Surface / background aliases
     root.style.setProperty('--bg-color', palette.surface);
+    root.style.setProperty('--surface-color', palette.surface);
+    // Text aliases
+    root.style.setProperty('--text-main', palette.text);
     root.style.setProperty('--text-color', palette.text);
   }, [palette]);
 
@@ -289,13 +298,16 @@ export function PublicView() {
         <div 
           className="content-root"
           style={{
+            '--primary': palette.primary,
             '--primary-color': palette.primary,
+            '--primary-accent': palette.primary,
+            '--secondary': palette.secondary,
             '--secondary-color': palette.secondary,
             '--bg-color': palette.surface,
+            '--surface-color': palette.surface,
+            '--text-main': palette.text,
             '--text-color': palette.text,
-            minHeight: '100vh',
-            background: 'var(--bg-color)',
-            color: 'var(--text-color)'
+            minHeight: '100vh'
           } as React.CSSProperties}
         >
           <SelectedTemplate {...sharedProps} />

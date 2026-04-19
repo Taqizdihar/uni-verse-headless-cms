@@ -122,7 +122,9 @@ export function Settings() {
     surface: '#ffffff',
     text: '#09090b',
   });
-  const [paletteMode, setPaletteMode] = useState<'preset' | 'custom'>('preset');
+  // null means "not yet loaded from server" — prevents wrong card from highlighting on mount
+  const [paletteMode, setPaletteMode] = useState<'preset' | 'custom' | null>(null);
+  const [paletteSettingsLoaded, setPaletteSettingsLoaded] = useState(false);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'general' | 'footer'>('general');
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -170,30 +172,25 @@ export function Settings() {
           location_embed_link: ''
         }
       });
-      // Restore palette from saved settings
+      // Restore palette from saved settings — always run so state reflects server truth
       const savedPalette = settings.global_options?.branding_palette;
-      const legacyColor = settings.global_options?.theme_color;
-      let pToMatch = savedPalette;
-      
-      if (!pToMatch && legacyColor) {
-        pToMatch = { primary: legacyColor, secondary: '#18181B', surface: '#FFFFFF', text: '#27272A', name: 'Custom' };
-      }
-
-      if (pToMatch) {
-        setActivePalette(pToMatch);
-        // Check if it matches a preset case-insensitively
-        const matchedPreset = PRESET_PALETTES.find(p => 
-            p.primary.toLowerCase() === pToMatch.primary.toLowerCase() && 
-            p.secondary.toLowerCase() === pToMatch.secondary.toLowerCase()
+      if (savedPalette && savedPalette.primary) {
+        setActivePalette(savedPalette);
+        const matchedPreset = PRESET_PALETTES.find(
+          p => p.primary === savedPalette.primary && p.secondary === savedPalette.secondary
         );
         if (matchedPreset) {
-            setPaletteMode('preset');
-            setActivePalette(matchedPreset);
+          setPaletteMode('preset');
         } else {
-            setPaletteMode('custom');
-            setCustomPalette({ ...pToMatch, name: 'Custom' });
+          setPaletteMode('custom');
+          setCustomPalette({ ...savedPalette, name: 'Custom' });
         }
+      } else {
+        // No saved palette — fall back to first preset
+        setActivePalette(PRESET_PALETTES[0]);
+        setPaletteMode('preset');
       }
+      setPaletteSettingsLoaded(true);
     }
   }, [settings]);
 
@@ -482,7 +479,14 @@ export function Settings() {
                     </h3>
                     <p className="text-zinc-400 text-xs font-medium mb-6">Pilih palet merek bawaan atau buat palet kustom. Warna akan diterapkan secara otomatis di seluruh template.</p>
 
-                    {/* Preset Palette Grid */}
+                    {/* Preset Palette Grid — only render after server data is confirmed */}
+                    {!paletteSettingsLoaded ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="rounded-2xl border-2 border-zinc-100 p-4 h-24 animate-pulse bg-zinc-50" />
+                            ))}
+                        </div>
+                    ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
                         {PRESET_PALETTES.map((palette) => {
                             const isSelected = paletteMode === 'preset' && activePalette.name === palette.name;
@@ -542,6 +546,7 @@ export function Settings() {
                             <p className="font-bold text-sm text-zinc-800">Custom</p>
                         </button>
                     </div>
+                    )}{/* end paletteSettingsLoaded */}
 
                     {/* Custom Color Editor */}
                     {paletteMode === 'custom' && (
@@ -589,13 +594,18 @@ export function Settings() {
                         >
                             <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%' }}>
                                 <div style={{
+                                    '--primary': activePalette.primary,
                                     '--primary-color': activePalette.primary,
+                                    '--primary-accent': activePalette.primary,
+                                    '--secondary': activePalette.secondary,
                                     '--secondary-color': activePalette.secondary,
                                     '--bg-color': activePalette.surface,
+                                    '--surface-color': activePalette.surface,
+                                    '--text-main': activePalette.text,
                                     '--text-color': activePalette.text,
                                     minHeight: '100%',
-                            background: 'var(--bg-color)', 
-                            color: 'var(--text-color)',
+                                    background: activePalette.surface,
+                                    color: activePalette.text,
                                 } as React.CSSProperties}>
                                     <ErrorBoundary fallback={
                                         <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px] bg-red-50 text-red-500 rounded-lg">
