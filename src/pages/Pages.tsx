@@ -42,7 +42,7 @@ export function Pages() {
 
   const addGalleryImage = () => {
     const currentImages = formData.images || [];
-    handleInputChange('images', [...currentImages, '']);
+    openMediaPicker('images', currentImages.length);
   };
 
   const removeGalleryImage = (index: number) => {
@@ -159,6 +159,11 @@ export function Pages() {
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Hero</label>
               <div className="flex gap-2 items-center">
                   <input type="text" value={formData.hero_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
+                  {formData.hero_image && (
+                      <button type="button" onClick={() => handleInputChange('hero_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
+                          <Trash2 className="w-5 h-5" />
+                      </button>
+                  )}
                   <button type="button" onClick={() => openMediaPicker('hero_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
                       <ImageIcon className="w-5 h-5" />
                   </button>
@@ -253,10 +258,20 @@ export function Pages() {
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Utama</label>
               <div className="flex gap-2 items-center">
                   <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih aset header..." />
+                  {formData.featured_image && (
+                      <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors shadow-lg shadow-red-500/20">
+                          <Trash2 className="w-5 h-5" />
+                      </button>
+                  )}
                   <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-lg shadow-amber-400/20">
                       <ImageIcon className="w-5 h-5" />
                   </button>
               </div>
+              {formData.featured_image && (
+                  <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
+                      <img src={formData.featured_image} alt="Main Preview" className="w-full h-full object-cover" />
+                  </div>
+              )}
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Ringkasan</label>
@@ -394,15 +409,20 @@ export function Pages() {
 
       {/* Pages Editor Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="p-10">
-              <div className="flex items-center justify-between mb-8">
+        <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onMouseDown={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false); }}
+        >
+          <div className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-8 border-b border-zinc-100 flex items-center justify-between shrink-0">
                 <h2 className="text-2xl font-bold text-zinc-900">{editingId ? 'Edit Halaman' : 'Buat Halaman Baru'}</h2>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
-              </div>
-
-              <form onSubmit={handleSave} className="space-y-6">
+            </div>
+            
+            {/* Modal Body (Scrollable Container) */}
+            <div className="p-8 overflow-y-auto flex-1">
+              <form id="page-edit-form" onSubmit={handleSave} className="space-y-6 p-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Judul Halaman</label>
@@ -433,14 +453,15 @@ export function Pages() {
                     <h3 className="text-sm font-bold text-zinc-900 mb-4 uppercase tracking-wider">Properti Tata Letak</h3>
                     {renderDynamicInputs()}
                 </div>
-
-                <div className="flex justify-end pt-8">
-                  <button type="submit" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
-                    <Send className="w-5 h-5" />
-                    Simpan Halaman
-                  </button>
-                </div>
               </form>
+            </div>
+            
+            {/* Modal Footer (Sticky) */}
+            <div className="p-8 border-t border-zinc-100 shrink-0 flex justify-end bg-zinc-50/50 rounded-b-[2rem]">
+                <button type="submit" form="page-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
+                  <Send className="w-5 h-5" />
+                  Simpan Halaman
+                </button>
             </div>
           </div>
         </div>
