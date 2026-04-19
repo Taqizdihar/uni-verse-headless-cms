@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
+import logoUniverse from '../assets/logo/UNI-VERSE Logo.png';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -32,11 +33,11 @@ export function Sidebar() {
   
   return (
     <aside className="w-64 bg-zinc-900 text-white h-screen flex flex-col fixed left-0 top-0 overflow-y-auto z-50 shadow-xl">
-      <div className="p-8">
-        <h1 className="text-2xl font-black text-amber-400 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
-            {settings?.site_name || 'Uni-Inside'}
-        </h1>
-        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em] mt-1 ml-0.5 opacity-60">Konsol Admin</p>
+      <div className="p-8 flex flex-col items-start">
+        <img src={logoUniverse} alt="UNI-VERSE" className="h-10 w-auto mb-2" />
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] ml-0.5">
+          Uni-Inside CMS
+        </p>
       </div>
 
       <nav className="flex-1 px-4 pb-8 space-y-1">
