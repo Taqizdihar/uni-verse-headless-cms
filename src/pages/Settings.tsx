@@ -116,6 +116,7 @@ export function Settings() {
   });
   const [activePalette, setActivePalette] = useState<BrandingPalette>(PRESET_PALETTES[0]);
   const [paletteMode, setPaletteMode] = useState<'preset' | 'custom'>('preset');
+  const [showCustomEditor, setShowCustomEditor] = useState(false);
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'general' | 'footer'>('general');
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -169,7 +170,9 @@ export function Settings() {
         setActivePalette(savedPalette);
         // Check if it matches a preset
         const matchedPreset = PRESET_PALETTES.find(p => p.primary === savedPalette.primary && p.secondary === savedPalette.secondary);
-        setPaletteMode(matchedPreset ? 'preset' : 'custom');
+        const mode = matchedPreset ? 'preset' : 'custom';
+        setPaletteMode(mode);
+        setShowCustomEditor(mode === 'custom');
       }
     }
   }, [settings]);
@@ -229,8 +232,14 @@ export function Settings() {
   const handlePaletteSelect = (palette: BrandingPalette) => {
     setActivePalette(palette);
     setPaletteMode('preset');
+    setShowCustomEditor(false);
     // Also update theme_color to match primary for backward compatibility
     setFormData(prev => ({ ...prev, theme_color: palette.primary }));
+  };
+
+  const handleCustomModeSelect = () => {
+    setPaletteMode('custom');
+    setShowCustomEditor(true);
   };
 
   const handleCustomColorChange = (key: keyof BrandingPalette, value: string) => {
@@ -324,6 +333,26 @@ export function Settings() {
           <p className="text-zinc-500 mt-1 font-medium">Kelola branding dasar, penempatan desain, dan informasi kontak.</p>
         </div>
         
+        <div className="flex items-center gap-4">
+            <button 
+                onClick={() => setIsConfirmOpen(true)}
+                disabled={status === 'saving'}
+                className="flex items-center gap-2 px-6 py-3 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            >
+                {status === 'saving' ? <span className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" /> : <Save className="w-5 h-5 text-amber-400" />}
+                Simpan Perubahan
+            </button>
+            <button 
+                type="button"
+                onClick={handleDownloadZip}
+                disabled={exportStatus === 'exporting'}
+                className="flex items-center gap-2 px-6 py-3 bg-white border border-zinc-200 text-zinc-700 rounded-xl font-bold text-sm hover:bg-zinc-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            >
+                {exportStatus === 'exporting' ? <span className="animate-spin w-4 h-4 border-2 border-zinc-400 border-t-zinc-700 rounded-full" /> : <Download className="w-5 h-5 text-zinc-400" />}
+                Export ZIP
+            </button>
+        </div>
+
         {status === 'saved' && (
             <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-xl border border-green-100 animate-in slide-in-from-right-4 font-bold text-xs uppercase tracking-widest">
                 <CheckCircle2 className="w-4 h-4" />
@@ -492,40 +521,66 @@ export function Settings() {
                                 </button>
                             );
                         })}
+                        
+                        {/* Custom Palette Card */}
+                        <button
+                            type="button"
+                            onClick={handleCustomModeSelect}
+                            className="group relative text-left rounded-2xl border-2 p-4 transition-all duration-200 hover:shadow-lg border-dashed"
+                            style={{
+                                borderColor: paletteMode === 'custom' ? '#fbbf24' : '#e4e4e7',
+                                background: paletteMode === 'custom' ? '#fbbf2410' : '#fafafa',
+                            }}
+                        >
+                            {paletteMode === 'custom' && (
+                                <div className="absolute top-2 right-2">
+                                    <CheckCircle2 className="w-5 h-5 text-amber-400" />
+                                </div>
+                            )}
+                            <div className="flex gap-1.5 mb-3">
+                                <Plus className="w-8 h-8 text-zinc-300 group-hover:text-amber-400 transition-colors" />
+                            </div>
+                            <p className="font-bold text-sm text-zinc-800 uppercase tracking-widest">Custom</p>
+                            <span className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest block mt-1">Manual Adjustment</span>
+                        </button>
                     </div>
 
                     {/* Custom Color Editor */}
-                    <div className="border-t border-zinc-100 pt-6">
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1">Sesuaikan Palet Aktif</p>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {([
-                                { key: 'primary', label: 'Primary (Utama)' },
-                                { key: 'secondary', label: 'Secondary (Sekunder)' },
-                                { key: 'surface', label: 'Surface / Background' },
-                                { key: 'text', label: 'Text (Teks)' },
-                            ] as const).map(({ key, label }) => (
-                                <div key={key}>
-                                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{label}</label>
-                                    <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2 focus-within:border-amber-400 transition-all">
-                                        <input
-                                            type="color"
-                                            value={activePalette[key]}
-                                            onChange={(e) => handleCustomColorChange(key, e.target.value)}
-                                            className="w-8 h-8 rounded-lg border-0 cursor-pointer p-0 bg-transparent"
-                                            style={{ WebkitAppearance: 'none' }}
-                                        />
-                                        <input
-                                            type="text"
-                                            value={activePalette[key]}
-                                            onChange={(e) => handleCustomColorChange(key, e.target.value)}
-                                            className="flex-1 bg-transparent outline-none font-mono text-xs uppercase text-zinc-700 font-bold"
-                                            maxLength={7}
-                                        />
+                    {showCustomEditor && (
+                        <div className="border-t border-zinc-100 pt-6 animate-in slide-in-from-top-4 duration-300">
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1">Pilih Warna</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {([
+                                    { key: 'primary', label: 'Primary (Utama)' },
+                                    { key: 'secondary', label: 'Secondary (Sekunder)' },
+                                    { key: 'surface', label: 'Surface / Background' },
+                                    { key: 'text', label: 'Text (Teks)' },
+                                ] as const).map(({ key, label }) => (
+                                    <div key={key}>
+                                        <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{label}</label>
+                                        <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2 focus-within:border-amber-400 transition-all">
+                                            <div className="relative w-8 h-8 flex-shrink-0">
+                                                <input
+                                                    type="color"
+                                                    value={activePalette[key]}
+                                                    onChange={(e) => handleCustomColorChange(key, e.target.value)}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                />
+                                                <div className="w-full h-full rounded-lg shadow-sm border border-zinc-200" style={{ background: activePalette[key] }} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={activePalette[key]}
+                                                onChange={(e) => handleCustomColorChange(key, e.target.value)}
+                                                className="flex-1 bg-transparent outline-none font-mono text-[10px] uppercase text-zinc-700 font-bold"
+                                                maxLength={7}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Live Preview */}
                     <div className="mt-8 border-t border-zinc-100 pt-6">
@@ -717,52 +772,6 @@ export function Settings() {
 
             {/* Sidebar Stats / Info */}
             <div className="space-y-6">
-                <Card className="p-6 bg-zinc-900 border-zinc-800">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-amber-400/10 flex items-center justify-center rounded-xl">
-                            <Save className="w-5 h-5 text-amber-400" />
-                        </div>
-                        <div>
-                            <p className="text-white font-bold text-sm">Simpan Perubahan</p>
-                            <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest">Terapkan ke Sistem</p>
-                        </div>
-                    </div>
-                    
-                    <button 
-                        type="submit"
-                        disabled={status === 'saving'}
-                        className="w-full py-4 bg-amber-400 text-zinc-950 rounded-2xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
-                    >
-                        {status === 'saving' ? 'Memproses...' : 'Simpan Pengaturan'}
-                    </button>
-
-                    <button 
-                        type="button"
-                        onClick={handleDownloadZip}
-                        disabled={exportStatus === 'exporting'}
-                        className="w-full mt-4 py-4 bg-zinc-100 text-zinc-900 rounded-2xl font-bold hover:bg-zinc-200 transition-all border border-zinc-200 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        <Download className="w-5 h-5 text-zinc-500" />
-                        {exportStatus === 'exporting' ? 'Menyiapkan Kode...' : 'Download Source Code (ZIP)'}
-                    </button>
-
-
-                    <div className="mt-8 pt-6 border-t border-zinc-800 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Status Server</span>
-                            <span className="text-green-500 text-[10px] font-bold uppercase">Online</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Palet Aktif</span>
-                            <span className="text-zinc-300 text-[10px] font-bold">{activePalette.name || 'Kustom'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Terakhir Disinkron</span>
-                            <span className="text-zinc-300 text-[10px] font-bold tabular-nums">Baru Saja</span>
-                        </div>
-                    </div>
-                </Card>
-
                 {/* Active Palette Summary */}
                 <Card className="p-6">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Token Palet Aktif</p>
@@ -782,7 +791,7 @@ export function Settings() {
                             </div>
                         ))}
                     </div>
-                </Card>
+                </div>
 
                 <div className="px-4 text-center">
                     <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
