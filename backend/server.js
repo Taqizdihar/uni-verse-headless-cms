@@ -24,27 +24,28 @@ cloudinary.config({
 
 const app = express();
 
-// Middleware — CORS must come FIRST, before all routes
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://uni-verse-cms.netlify.app'
-];
+// Use a function to log incoming origins for debugging in Back4App logs
+app.use((req, res, next) => {
+  console.log('Incoming Request from Origin:', req.headers.origin);
+  next();
+});
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app')) {
-      callback(null, true);
-    } else {
-      console.error(`[CORS REJECTED] Origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: true, // This allows all origins temporarily to verify it fixes the issue
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Explicitly handle OPTIONS (Preflight) requests
+app.options('*', cors());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 app.use(express.json());
 
 // Verbose Request Logging
