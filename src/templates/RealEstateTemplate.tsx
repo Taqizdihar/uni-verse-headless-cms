@@ -151,7 +151,7 @@ export default function RealEstateTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.3rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -163,7 +163,7 @@ export default function RealEstateTemplate({
           <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '10rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, letterSpacing: '-0.04em' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.25rem', opacity: 0.3, marginTop: '2.5rem', maxWidth: '700px', margin: '2.5rem auto 0' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.25rem', opacity: 0.3, marginTop: '2.5rem', maxWidth: '700px', margin: '2.5rem auto 0' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '4rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -183,7 +183,7 @@ export default function RealEstateTemplate({
                 <div style={{ padding: '8rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>EXCLUSIVE LISTINGS</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.04em', marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -258,7 +258,7 @@ export default function RealEstateTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '12rem 4vw' }}>
-             <div style={{ fontSize: '1.3rem', lineHeight: 2, opacity: 0.6 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.3rem', lineHeight: 2, opacity: 0.6 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

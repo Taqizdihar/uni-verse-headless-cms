@@ -160,7 +160,7 @@ export default function FintechTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.2rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -173,7 +173,7 @@ export default function FintechTemplate({
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '8rem' }}>
                 <div>
                    {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 900, color: 'var(--primary-color)' }}>{content.gallery_title}</h1>}
-                   {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.4, marginTop: '1rem' }}>{content.description}</p>}
+                   {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.4, marginTop: '1rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
                 </div>
                 <div style={{ display: 'flex', gap: '2rem' }}>
                    <div style={{ width: '40px', height: '10px', background: 'var(--secondary-color)', borderRadius: '100px' }} />
@@ -199,7 +199,7 @@ export default function FintechTemplate({
                       <Activity size={18} /> MARKET_SIGNAL: ACCESSED
                    </div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '2.5rem', color: 'var(--primary-color)' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.7 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -221,7 +221,7 @@ export default function FintechTemplate({
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.7rem', fontWeight: 900, color: 'var(--primary-color)', marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
-                        <p style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--primary-color)' }}>
                            ANALYZE REPORT <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -278,7 +278,7 @@ export default function FintechTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

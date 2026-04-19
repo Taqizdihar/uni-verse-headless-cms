@@ -108,7 +108,7 @@ export default function BlogTemplate({
              </div>
              <div 
                style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.9, whiteSpace: 'pre-wrap' }}
-               dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+               className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
              />
           </div>
         );
@@ -119,7 +119,7 @@ export default function BlogTemplate({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
              <div style={{ marginBottom: '6rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '1.5rem' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.5 }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.5 }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '4rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -139,7 +139,7 @@ export default function BlogTemplate({
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <h1 style={{ fontSize: '4rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2.5rem' }}>{pageData.title}</h1>
-                <div style={{ fontSize: '1.4rem', lineHeight: 1.8, opacity: 0.7 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                <div style={{ fontSize: '1.4rem', lineHeight: 1.8, opacity: 0.7 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
              </div>
 
              <h2 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', opacity: 0.3, marginBottom: '4rem' }}>Recent Publications</h2>
@@ -156,7 +156,7 @@ export default function BlogTemplate({
                               <Bookmark size={14} /> {post.category}
                            </div>
                            <h3 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
-                           <p style={{ opacity: 0.5, fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '2rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.8rem' }}>
                               READ STORY <ArrowRight size={16} />
                            </div>
@@ -204,7 +204,7 @@ export default function BlogTemplate({
       default:
         return (
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '8rem 2rem' }}>
-             <div style={{ fontSize: '1.3rem', lineHeight: 1.9 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.3rem', lineHeight: 1.9 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

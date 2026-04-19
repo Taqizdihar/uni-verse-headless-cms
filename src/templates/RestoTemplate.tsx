@@ -140,7 +140,7 @@ export default function RestoTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.4rem', lineHeight: 2, opacity: 0.7, fontStyle: 'italic', whiteSpace: 'pre-wrap', color: 'var(--text-color)', fontFamily: "'Inter', sans-serif" }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -152,7 +152,7 @@ export default function RestoTemplate({
           <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '10rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '6rem', fontWeight: 300, fontStyle: 'italic', color: 'var(--secondary-color)' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.3rem', opacity: 0.4, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0', fontStyle: 'italic' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.3rem', opacity: 0.4, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0', fontStyle: 'italic' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '4rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -171,7 +171,7 @@ export default function RestoTemplate({
                 <div style={{ padding: '8rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.5rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>CHEF'S SIGNATURE</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 300, fontStyle: 'italic', lineHeight: 1, marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.4rem', opacity: 0.6, lineHeight: 1.8, fontStyle: 'italic', fontFamily: "'Inter', sans-serif" }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.4rem', opacity: 0.6, lineHeight: 1.8, fontStyle: 'italic', fontFamily: "'Inter', sans-serif" }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured dish" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -190,7 +190,7 @@ export default function RestoTemplate({
                         </div>
                         <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2rem', marginBottom: '1.5rem', display: 'block' }}>{post.category}</span>
                         <h3 style={{ fontSize: '2.2rem', fontWeight: 300, fontStyle: 'italic', marginBottom: '2rem', lineHeight: 1.1 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.4, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3rem', fontStyle: 'italic', fontFamily: "'Inter', sans-serif" }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.4, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3rem', fontStyle: 'italic', fontFamily: "'Inter', sans-serif" }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ color: 'var(--secondary-color)', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.3em' }}>
                            EXPLORE DISH
                         </div>
@@ -237,7 +237,7 @@ export default function RestoTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '12rem 4vw' }}>
-             <div style={{ fontSize: '1.4rem', lineHeight: 2, opacity: 0.6, fontStyle: 'italic' }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.4rem', lineHeight: 2, opacity: 0.6, fontStyle: 'italic' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

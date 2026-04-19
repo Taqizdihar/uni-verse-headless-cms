@@ -118,7 +118,7 @@ export default function BeautyTemplate({
              </div>
              <div 
                style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.8, whiteSpace: 'pre-wrap', textAlign: 'center' }}
-               dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+               className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
              />
           </div>
         );
@@ -129,7 +129,7 @@ export default function BeautyTemplate({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontStyle: 'italic', fontWeight: 300, marginBottom: '1rem' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.5 }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.5 }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -151,7 +151,7 @@ export default function BeautyTemplate({
                 <div>
                    <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: 'var(--secondary-color)', marginBottom: '1.5rem', display: 'block' }}>Wellness Journal</span>
                    <h1 style={{ fontSize: '3.5rem', fontStyle: 'italic', fontWeight: 300, lineHeight: 1.1, marginBottom: '2rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
              </div>
 
@@ -171,7 +171,7 @@ export default function BeautyTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <h3 style={{ fontSize: '1.6rem', fontStyle: 'italic', fontWeight: 300, marginBottom: '1rem' }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--secondary-color)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>
                            DISCOVER <ArrowRight size={16} />
                         </div>
@@ -229,7 +229,7 @@ export default function BeautyTemplate({
       default:
         return (
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '8rem 2rem' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -67,7 +67,7 @@ export default function UnifiedPostLayout({ postData, palette }: UnifiedPostLayo
                </div>
             </div>
 
-            <div style={{ fontSize: '1.1rem', lineHeight: 1.8, color: `${p.text}cc`, marginTop: '1rem' }} className="prose prose-lg max-w-none prose-invert" dangerouslySetInnerHTML={{ __html: c.event_description || c.body || '' }} />
+            <div style={{ fontSize: '1.1rem', lineHeight: 1.8, color: `${p.text}cc`, marginTop: '1rem' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: c.event_description || c.body || '' }} />
          </div>
       </article>
     );

@@ -146,7 +146,7 @@ export default function PhotoTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.3rem', lineHeight: 2, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -158,7 +158,7 @@ export default function PhotoTemplate({
           <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ marginBottom: '10rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '5rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '6rem', fontWeight: 200, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.3, textTransform: 'uppercase', letterSpacing: '0.3em', marginTop: '2.5rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.3, textTransform: 'uppercase', letterSpacing: '0.3em', marginTop: '2.5rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '3px' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -177,7 +177,7 @@ export default function PhotoTemplate({
                 <div style={{ borderRight: '1px solid rgba(255,255,255,0.05)', paddingRight: '8rem' }}>
                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', color: 'var(--primary-color)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', fontSize: '0.75rem', marginBottom: '4rem' }}><Layers size={18} /> EDITORIAL_FEED</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 200, textTransform: 'uppercase', lineHeight: 1, marginBottom: '4rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.25rem', opacity: 0.3, lineHeight: 2, textTransform: 'uppercase', letterSpacing: '0.1em' }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.25rem', opacity: 0.3, lineHeight: 2, textTransform: 'uppercase', letterSpacing: '0.1em' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '700px', objectFit: 'cover', filter: 'grayscale(1)' }} />
              </div>
@@ -199,7 +199,7 @@ export default function PhotoTemplate({
                            <span style={{ fontSize: '0.7rem', opacity: 0.2, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '2.5rem', fontWeight: 200, textTransform: 'uppercase', marginBottom: '2.5rem', lineHeight: 1 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.3, fontSize: '1rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '3.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.3, fontSize: '1rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '3.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--primary-color)', letterSpacing: '0.2em' }}>
                            VIEW_SERIES <ArrowRight size={20} className="group-hover:translate-x-6 transition-transform" />
                         </div>
@@ -246,7 +246,7 @@ export default function PhotoTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '15rem 4vw' }}>
-             <div style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.4 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.4 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -157,7 +157,7 @@ export default function SaaSTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.3rem', lineHeight: 1.8, opacity: 0.5, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -169,7 +169,7 @@ export default function SaaSTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '10rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 950, color: '#FFF' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.3rem', opacity: 0.3, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.3rem', opacity: 0.3, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -188,7 +188,7 @@ export default function SaaSTemplate({
                 <div style={{ padding: '8rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--secondary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>GEN_RELEASE_4.0</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 950, lineHeight: 0.9, color: '#FFF', marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.3rem', opacity: 0.4, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.3rem', opacity: 0.4, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Update context" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
              </div>
@@ -207,7 +207,7 @@ export default function SaaSTemplate({
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#FFF', marginBottom: '2.5rem', lineHeight: 1.1 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.4, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.4, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary-color)' }}>
                            PULL LOGS <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -254,7 +254,7 @@ export default function SaaSTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '12rem 4vw' }}>
-             <div style={{ fontSize: '1.3rem', lineHeight: 2, opacity: 0.4 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.3rem', lineHeight: 2, opacity: 0.4 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

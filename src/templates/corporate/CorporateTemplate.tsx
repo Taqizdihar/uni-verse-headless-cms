@@ -124,7 +124,7 @@ export default function CorporateTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.15rem', lineHeight: 1.9, opacity: 0.8, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -136,7 +136,7 @@ export default function CorporateTemplate({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
              <header style={{ marginBottom: '5rem', borderLeft: '8px solid var(--primary-color)', paddingLeft: '2rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.04em' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.6, marginTop: '1rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.6, marginTop: '1rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </header>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -174,7 +174,7 @@ export default function CorporateTemplate({
                         </div>
                         <div style={{ padding: '0.5rem 1rem 1rem' }}>
                            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.25 }}>{post.title}</h3>
-                           <p style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', fontWeight: 800, fontSize: '0.85rem' }}>
                               DETAIL REPORT <ArrowRight size={16} />
                            </div>
@@ -228,7 +228,7 @@ export default function CorporateTemplate({
       default:
         return (
           <div style={{ maxWidth: '900px', margin: '0 auto', padding: '8rem 2rem' }}>
-             <div style={{ fontSize: '1.15rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.15rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -121,7 +121,7 @@ export default function EduTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.8, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -133,7 +133,7 @@ export default function EduTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <header style={{ marginBottom: '6rem', borderBottom: '2px solid #EEE', paddingBottom: '3rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--primary-color)' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.5, marginTop: '1rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.5, marginTop: '1rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </header>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -155,7 +155,7 @@ export default function EduTemplate({
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                    <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'var(--secondary-color)', marginBottom: '1.5rem' }}>Collegiate Broadcast</span>
                    <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2rem', color: 'var(--primary-color)' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
              </div>
 
@@ -174,7 +174,7 @@ export default function EduTemplate({
                         </div>
                         <div style={{ padding: '2rem' }}>
                            <h3 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--primary-color)' }}>{post.title}</h3>
-                           <p style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.75rem', color: 'var(--secondary-color)' }}>
                               VIEW DETAILS <ChevronRight size={16} />
                            </div>
@@ -222,7 +222,7 @@ export default function EduTemplate({
       default:
         return (
           <div style={{ maxWidth: '900px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.25rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.25rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -120,7 +120,7 @@ export default function CreativeTemplate({
                 <h1 style={{ fontSize: '6rem', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.05em' }}>The <span style={{ color: 'var(--primary-color)' }}>DNA</span> of our Works.</h1>
                 <div 
                   style={{ fontSize: '1.5rem', lineHeight: 1.6, opacity: 0.8, whiteSpace: 'pre-wrap', fontWeight: 300 }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -167,7 +167,7 @@ export default function CreativeTemplate({
                         </div>
                         <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)', textTransform: 'uppercase', letterSpacing: '0.3em' }}>{post.category}</span>
                         <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginTop: '1rem', letterSpacing: '-0.03em' }}>{post.title}</h3>
-                        <p style={{ opacity: 0.4, fontSize: '1.1rem', marginTop: '1.5rem', maxWidth: '450px' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.4, fontSize: '1.1rem', marginTop: '1.5rem', maxWidth: '450px' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                      </article>
                   </Link>
                 ))}
@@ -211,7 +211,7 @@ export default function CreativeTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4rem' }}>
-             <div style={{ fontSize: '1.5rem', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.5rem', lineHeight: 1.6 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

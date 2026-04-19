@@ -153,7 +153,7 @@ export default function NGOTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.4rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -165,7 +165,7 @@ export default function NGOTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '8rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, color: 'var(--text-color)', letterSpacing: '-0.05em' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.25rem', opacity: 0.4, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.25rem', opacity: 0.4, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -184,7 +184,7 @@ export default function NGOTemplate({
                 <div style={{ padding: '6rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.5rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>IMPACT_UPDATES</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.04em', marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -206,7 +206,7 @@ export default function NGOTemplate({
                            <span style={{ fontSize: '0.75rem', opacity: 0.3, fontWeight: 800 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem', lineHeight: 1.1 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                            READ IMPACT STORY <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -263,7 +263,7 @@ export default function NGOTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.25rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.25rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

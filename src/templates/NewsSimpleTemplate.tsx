@@ -137,7 +137,7 @@ export default function NewsSimpleTemplate({
              </div>
              <div 
                style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.8, color: '#333', textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}
-               dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+               className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
              />
           </div>
         );
@@ -148,7 +148,7 @@ export default function NewsSimpleTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ borderBottom: '4px solid #000', paddingBottom: '3rem', marginBottom: '6rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, fontFamily: "'Playfair Display', serif" }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.5, marginTop: '2rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.5, marginTop: '2rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -168,7 +168,7 @@ export default function NewsSimpleTemplate({
                 <div style={{ padding: '0 4rem 4rem 0', borderRight: '1px solid #EEE' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '3rem' }}>SOROTAN UTAMA</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", lineHeight: 1.1, marginBottom: '2.5rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '600px', objectFit: 'cover' }} />
              </div>
@@ -189,7 +189,7 @@ export default function NewsSimpleTemplate({
                            <Tag size={12} /> {post.category?.toUpperCase() || 'UMUM'}
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.8rem', color: '#000' }}>
                            BACA SELENGKAPNYA <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -236,7 +236,7 @@ export default function NewsSimpleTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

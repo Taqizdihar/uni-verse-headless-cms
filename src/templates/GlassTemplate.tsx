@@ -133,7 +133,7 @@ export default function GlassTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.6, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -145,7 +145,7 @@ export default function GlassTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '8rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 800, marginBottom: '1.5rem' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.4 }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.4 }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -166,7 +166,7 @@ export default function GlassTemplate({
                       <Waves size={20} /> FLUID_SIGNAL_ACQUIRED
                    </div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(1.1) contrast(1.1)' }} />
              </div>
@@ -188,7 +188,7 @@ export default function GlassTemplate({
                            <span style={{ fontSize: '0.75rem', opacity: 0.3, fontWeight: 700 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary-color)' }}>
                            READ JOURNAL <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -246,7 +246,7 @@ export default function GlassTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

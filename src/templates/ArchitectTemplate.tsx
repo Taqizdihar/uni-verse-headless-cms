@@ -115,7 +115,7 @@ export default function ArchitectTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '2rem', fontWeight: 300, lineHeight: 1.5, opacity: 0.9, whiteSpace: 'pre-wrap', letterSpacing: '-0.02em' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -128,7 +128,7 @@ export default function ArchitectTemplate({
              <header style={{ marginBottom: '8rem', display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
                 <div>
                   {content.gallery_title && <h1 style={{ fontSize: '6rem', fontWeight: 900, letterSpacing: '-0.05em', textTransform: 'uppercase', lineHeight: 0.9 }}>{content.gallery_title}</h1>}
-                  {content.description && <p style={{ fontSize: '1rem', opacity: 0.4, marginTop: '2rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>{content.description}</p>}
+                  {content.description && <div className="rich-text-content" style={{ fontSize: '1rem', opacity: 0.4, marginTop: '2rem', textTransform: 'uppercase', letterSpacing: '0.2em' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
                 </div>
                 <div style={{ fontSize: '4rem', fontWeight: 100, opacity: 0.1 }}>{galleryImages.length < 10 ? `0${galleryImages.length}` : galleryImages.length}</div>
              </header>
@@ -153,7 +153,7 @@ export default function ArchitectTemplate({
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', borderLeft: '1px solid #EEE', paddingLeft: '4rem' }}>
                    <span style={{ fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.3, marginBottom: '2rem' }}>Publication_Main</span>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: '2rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.7 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
              </div>
 
@@ -214,7 +214,7 @@ export default function ArchitectTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4rem' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

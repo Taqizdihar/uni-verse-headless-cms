@@ -140,7 +140,7 @@ export default function LegalTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.2rem', lineHeight: 2, opacity: 0.8, fontFamily: "'Inter', sans-serif", whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -152,7 +152,7 @@ export default function LegalTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '8rem', borderBottom: '2px solid #EEE', paddingBottom: '4rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--primary-color)', textTransform: 'uppercase' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.25rem', opacity: 0.5, marginTop: '1.5rem', fontFamily: "'Inter', sans-serif" }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.25rem', opacity: 0.5, marginTop: '1.5rem', fontFamily: "'Inter', sans-serif" }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '4rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -173,7 +173,7 @@ export default function LegalTemplate({
                       <FileText size={20} /> LEGAL_JOURNAL: UPDATED
                    </div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.25rem', opacity: 0.8, lineHeight: 1.8, fontFamily: "'Inter', sans-serif" }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.25rem', opacity: 0.8, lineHeight: 1.8, fontFamily: "'Inter', sans-serif" }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'sepia(0.3) contrast(1.1)' }} />
              </div>
@@ -195,7 +195,7 @@ export default function LegalTemplate({
                            <span style={{ fontSize: '0.75rem', opacity: 0.3, fontWeight: 700 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary-color)', marginBottom: '2rem' }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, fontFamily: "'Inter', sans-serif", marginBottom: '3rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, fontFamily: "'Inter', sans-serif", marginBottom: '3rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary-color)' }}>
                            REVIEW BRIEF <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -242,7 +242,7 @@ export default function LegalTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.25rem', lineHeight: 2, fontFamily: "'Inter', sans-serif" }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.25rem', lineHeight: 2, fontFamily: "'Inter', sans-serif" }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

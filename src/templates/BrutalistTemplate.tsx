@@ -127,7 +127,7 @@ export default function BrutalistTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '2.5rem', fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -158,7 +158,7 @@ export default function BrutalistTemplate({
                 <div style={{ flex: 1, padding: '4rem' }}>
                    <span style={{ background: '#000', color: '#FFF', padding: '0.5rem 1rem', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', display: 'inline-block', marginBottom: '2rem' }}>TOP_SECURE_FEED</span>
                    <h1 style={{ fontSize: '6rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: '2rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.5rem', fontWeight: 900 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.5rem', fontWeight: 900 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <div style={{ width: '40%', borderLeft: '15px solid #000' }}>
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -175,7 +175,7 @@ export default function BrutalistTemplate({
                         <div style={{ padding: '2rem' }}>
                            <span style={{ fontWeight: 900, color: 'var(--primary-color)', background: '#000', padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>{post.category}</span>
                            <h3 style={{ fontSize: '2.5rem', fontWeight: 900, textTransform: 'uppercase', margin: '1rem 0', lineHeight: 1 }}>{post.title}</h3>
-                           <p style={{ fontWeight: 900, opacity: 0.7, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ fontWeight: 900, opacity: 0.7, marginBottom: '2rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ border: '5px solid #000', padding: '0.75rem', textAlign: 'center', fontWeight: 900, background: 'var(--primary-color)' }}>EXTRACT_DATA_NODE.exe</div>
                         </div>
                      </article>
@@ -221,7 +221,7 @@ export default function BrutalistTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', padding: '8rem 4rem' }}>
-             <div style={{ fontSize: '1.5rem', fontWeight: 900 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.5rem', fontWeight: 900 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

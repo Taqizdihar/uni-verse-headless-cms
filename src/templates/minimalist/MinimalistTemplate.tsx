@@ -115,7 +115,7 @@ export default function MinimalistTemplate({
             <h2 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>About Us</h2>
             <div 
               style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.9, whiteSpace: 'pre-wrap' }}
-              dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+              className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
             />
           </div>
         );
@@ -125,7 +125,7 @@ export default function MinimalistTemplate({
         return (
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '6rem 2rem' }} className="animate-in fade-in duration-700">
             {content.gallery_title && <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem', letterSpacing: '-0.03em' }}>{content.gallery_title}</h1>}
-            {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.6, marginBottom: '4rem', maxWidth: '700px' }}>{content.description}</p>}
+            {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.6, marginBottom: '4rem', maxWidth: '700px' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {galleryImages.map((img: string, i: number) => (
                 <div key={i} style={{ borderRadius: '1.5rem', overflow: 'hidden', aspectRatio: '1', background: 'var(--text-color)08' }}>
@@ -146,7 +146,7 @@ export default function MinimalistTemplate({
              )}
              <div style={{ maxWidth: '800px', marginBottom: '6rem' }}>
                 <h1 style={{ fontSize: '3.5rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '2rem', letterSpacing: '-0.04em' }}>{pageData.title}</h1>
-                <div style={{ fontSize: '1.2rem', lineHeight: 1.7, opacity: 0.8 }} dangerouslySetInnerHTML={{ __html: content.body || content.main_content || '' }} />
+                <div style={{ fontSize: '1.2rem', lineHeight: 1.7, opacity: 0.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || content.main_content || '' }} />
              </div>
 
              <div style={{ borderTop: '1px solid var(--text-color)11', paddingTop: '6rem' }}>
@@ -160,7 +160,7 @@ export default function MinimalistTemplate({
                             </div>
                             <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)' }}>{post.category}</span>
                             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0.5rem 0 1rem', lineHeight: 1.2 }}>{post.title}</h3>
-                            <p style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.excerpt || post.content?.summary}</p>
+                            <div className="rich-text-content" style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.85rem' }}>
                                READ MORE <ArrowRight size={16} />
                             </div>
@@ -218,7 +218,7 @@ export default function MinimalistTemplate({
       default:
         return (
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '6rem 2rem' }}>
-             <div dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -149,7 +149,7 @@ export default function VlogTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.5, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -161,7 +161,7 @@ export default function VlogTemplate({
           <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '8rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4.5rem', fontWeight: 950, color: '#FFF' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.3, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.3, marginTop: '2rem', maxWidth: '700px', margin: '2rem auto 0' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '2.5rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -183,7 +183,7 @@ export default function VlogTemplate({
                 <div style={{ padding: '6rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.7rem', borderRadius: '5px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>CHANNEL SPOTLIGHT</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 950, lineHeight: 1, color: '#FFF', marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.25rem', opacity: 0.4, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.25rem', opacity: 0.4, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <div style={{ position: 'relative' }}>
                    <img src={fixImg(content.featured_image)} alt="Lead video" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
@@ -267,7 +267,7 @@ export default function VlogTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '12rem 4vw' }}>
-             <div style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.4 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.4 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

@@ -3,6 +3,7 @@ import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, 
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import RichTextEditor from '../components/RichTextEditor';
 
 export function Posts() {
   const { posts, savePost, deletePost, togglePostStatus, media, fetchAllData } = useCMS();
@@ -137,11 +138,11 @@ export function Posts() {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
-            <textarea value={formData.excerpt || ''} onChange={e => handleInputChange('excerpt', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[80px]" placeholder="Ringkasan singkat tentang post ini..." />
+            <RichTextEditor value={formData.excerpt || ''} onChange={val => handleInputChange('excerpt', val)} placeholder="Ringkasan singkat tentang post ini..." />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
-            <textarea value={formData.body || ''} onChange={e => handleInputChange('body', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[250px] font-serif" placeholder="Tuliskan isi artikel lengkap di sini..." />
+            <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
           </div>
         </div>
       );
@@ -171,7 +172,7 @@ export function Posts() {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
-            <textarea value={formData.body || ''} onChange={e => handleInputChange('body', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[120px]" placeholder="Deskripsi lengkap mengenai event ini..." />
+            <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Deskripsi lengkap mengenai event ini..." />
           </div>
 
           {/* Agenda Section */}

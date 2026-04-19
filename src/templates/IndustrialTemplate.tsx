@@ -148,7 +148,7 @@ export default function IndustrialTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.7, textTransform: 'uppercase', fontWeight: 700, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -160,7 +160,7 @@ export default function IndustrialTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ borderLeft: '12px solid var(--primary-color)', paddingLeft: '4vw', marginBottom: '8rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, textTransform: 'uppercase', fontStyle: 'italic' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.5, textTransform: 'uppercase', maxWidth: '600px', marginTop: '1.5rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.2rem', opacity: 0.5, textTransform: 'uppercase', maxWidth: '600px', marginTop: '1.5rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -179,7 +179,7 @@ export default function IndustrialTemplate({
                 <div style={{ padding: '6rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '2.5rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>OPERATIONAL_LOG</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, textTransform: 'uppercase', marginBottom: '2.5rem', fontStyle: 'italic' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8, textTransform: 'uppercase' }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8, textTransform: 'uppercase' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1)' }} />
              </div>
@@ -202,7 +202,7 @@ export default function IndustrialTemplate({
                               <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                            </div>
                            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem', lineHeight: 1.1 }}>{post.title}</h3>
-                           <p style={{ opacity: 0.5, fontSize: '0.9rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '0.9rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                               OPEN_LOG <ArrowRight size={18} className="group-hover:translate-x-4 transition-transform" />
                            </div>
@@ -250,7 +250,7 @@ export default function IndustrialTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

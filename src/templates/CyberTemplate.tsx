@@ -141,7 +141,7 @@ export default function CyberTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '2.5rem', fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', whiteSpace: 'pre-wrap', opacity: 0.9 }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -181,7 +181,7 @@ export default function CyberTemplate({
                       <Wifi size={20} className="animate-pulse" /> SIGNAL_STREAM
                    </div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', fontStyle: 'italic', marginBottom: '2rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', fontWeight: 900, opacity: 0.6, lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', fontWeight: 900, opacity: 0.6, lineHeight: 1.6 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <div style={{ borderLeft: '1px solid var(--secondary-color)22' }}>
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) contrast(1.2)' }} />
@@ -206,7 +206,7 @@ export default function CyberTemplate({
                               <Database size={14} /> <span style={{ fontSize: '0.6rem', fontWeight: 900 }}>DATA_PACKET_v2</span>
                            </div>
                            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, textTransform: 'uppercase', fontStyle: 'italic', marginBottom: '1.5rem' }}>{post.title}</h3>
-                           <p style={{ fontSize: '0.9rem', opacity: 0.5, fontWeight: 900, marginBottom: '2.5rem', lineHeight: 1.6 }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ fontSize: '0.9rem', opacity: 0.5, fontWeight: 900, marginBottom: '2.5rem', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--secondary-color)' }}>
                               DECRYPT_LOG <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                            </div>
@@ -255,7 +255,7 @@ export default function CyberTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw', fontFamily: 'monospace' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

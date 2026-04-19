@@ -153,7 +153,7 @@ export default function RetroTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.2rem', lineHeight: 2, color: 'var(--text-color)', textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -165,7 +165,7 @@ export default function RetroTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '10rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--secondary-color)', textShadow: '4px 4px 0 var(--primary-color)' }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.1rem', color: 'var(--primary-color)', textTransform: 'uppercase', letterSpacing: '0.4em', marginTop: '2.5rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', color: 'var(--primary-color)', textTransform: 'uppercase', letterSpacing: '0.4em', marginTop: '2.5rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -186,7 +186,7 @@ export default function RetroTemplate({
                 <div style={{ padding: '6rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: 'black', fontWeight: 900, fontSize: '0.75rem', marginBottom: '3rem', textTransform: 'uppercase' }}>NEW_SIGNAL_DETECTED</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--primary-color)', lineHeight: 1, marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', color: 'var(--text-color)', textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', color: 'var(--text-color)', textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Signal" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'hue-rotate(45deg)' }} />
              </div>
@@ -206,7 +206,7 @@ export default function RetroTemplate({
                         </div>
                         <span style={{ fontWeight: 900, color: 'var(--secondary-color)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '1.5rem', display: 'block' }}>{post.category}</span>
                         <h3 style={{ fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase', color: 'var(--primary-color)', marginBottom: '2rem', lineHeight: 1.1 }}>{post.title}</h3>
-                        <p style={{ color: 'var(--text-color)', fontSize: '1rem', textTransform: 'uppercase', opacity: 0.6, marginBottom: '3rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ color: 'var(--text-color)', fontSize: '1rem', textTransform: 'uppercase', opacity: 0.6, marginBottom: '3rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--secondary-color)', textTransform: 'uppercase', letterSpacing: '0.3em' }}>
                            ACCESS_TERMINAL <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -253,7 +253,7 @@ export default function RetroTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '12rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 2, textTransform: 'uppercase' }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 2, textTransform: 'uppercase' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

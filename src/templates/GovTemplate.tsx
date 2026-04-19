@@ -125,7 +125,7 @@ export default function GovTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.15rem', lineHeight: 2, opacity: 0.8 }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -137,7 +137,7 @@ export default function GovTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ borderBottom: '8px solid var(--primary-color)', paddingBottom: '3rem', marginBottom: '6rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 900 }}>{content.gallery_title}</h1>}
-                {content.description && <p style={{ fontSize: '1.25rem', opacity: 0.5, marginTop: '1.5rem' }}>{content.description}</p>}
+                {content.description && <div className="rich-text-content" style={{ fontSize: '1.25rem', opacity: 0.5, marginTop: '1.5rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
                 {galleryImages.map((img: string, i: number) => (
@@ -158,7 +158,7 @@ export default function GovTemplate({
                       <Bell size={20} className="animate-bounce" /> BERITA UTAMA
                    </div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '2.5rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -178,7 +178,7 @@ export default function GovTemplate({
                         </div>
                         <div style={{ padding: '2.5rem' }}>
                            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary-color)', marginBottom: '1.5rem' }}>{post.title}</h3>
-                           <p style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                           <div className="rich-text-content" style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--secondary-color)' }}>
                               BACA SELENGKAPNYA <ChevronRight size={18} />
                            </div>
@@ -226,7 +226,7 @@ export default function GovTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }

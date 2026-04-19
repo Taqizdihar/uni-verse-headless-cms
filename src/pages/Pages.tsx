@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon } from 
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import RichTextEditor from '../components/RichTextEditor';
 import axios from 'axios';
 
 export function Pages() {
@@ -197,7 +198,7 @@ export function Pages() {
         return (
           <div className="space-y-4">
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Tentang Kami</label>
-            <textarea value={formData.about_us || ''} onChange={e => handleInputChange('about_us', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[160px] resize-y" placeholder="Misi perusahaan kami..." />
+            <RichTextEditor value={formData.about_us || ''} onChange={val => handleInputChange('about_us', val)} placeholder="Misi perusahaan kami..." />
           </div>
         );
       case 'gallery':
@@ -209,7 +210,7 @@ export function Pages() {
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 italic">Deskripsi</label>
-                <textarea value={formData.description || ''} onChange={e => handleInputChange('description', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[80px]" placeholder="Deskripsikan secara singkat koleksi ini..." />
+                <RichTextEditor value={formData.description || ''} onChange={val => handleInputChange('description', val)} placeholder="Deskripsikan secara singkat koleksi ini..." />
             </div>
             <div>
                 <div className="flex items-center justify-between mb-2">
@@ -275,11 +276,11 @@ export function Pages() {
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Ringkasan</label>
-                <textarea value={formData.summary || ''} onChange={e => handleInputChange('summary', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[100px]" placeholder="Pengantar singkat..." />
+                <RichTextEditor value={formData.summary || ''} onChange={val => handleInputChange('summary', val)} placeholder="Pengantar singkat..." />
             </div>
             <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
-                <textarea value={formData.body || ''} onChange={e => handleInputChange('body', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 min-h-[250px] font-serif py-4" placeholder="Tuliskan isi artikel lengkap di sini..." />
+                <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
             </div>
           </div>
         );

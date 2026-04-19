@@ -149,7 +149,7 @@ export default function PortfolioTemplate({
                 </div>
                 <div 
                   style={{ fontSize: '1.3rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
-                  dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
+                  className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
                 />
              </div>
           </div>
@@ -162,7 +162,7 @@ export default function PortfolioTemplate({
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8rem' }}>
                 <div>
                    {content.gallery_title && <h1 style={{ fontSize: '4.5rem', fontWeight: 900 }}>{content.gallery_title}</h1>}
-                   {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.4, marginTop: '2rem' }}>{content.description}</p>}
+                   {content.description && <div className="rich-text-content" style={{ fontSize: '1.1rem', opacity: 0.4, marginTop: '2rem' }} dangerouslySetInnerHTML={{ __html: content.description }} />}
                 </div>
                 <div style={{ fontSize: '0.7rem', fontWeight: 900, opacity: 0.2, textTransform: 'uppercase', letterSpacing: '0.4em' }}>TOTAL_ASSETS_{galleryImages.length}</div>
              </div>
@@ -184,7 +184,7 @@ export default function PortfolioTemplate({
                 <div style={{ padding: '6rem' }}>
                    <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 800, fontSize: '0.7rem', borderRadius: '5px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>CREATOR_LOGS</div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '3rem' }}>{pageData.title}</h1>
-                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
+                   <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
                 <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
              </div>
@@ -206,7 +206,7 @@ export default function PortfolioTemplate({
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 800 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
-                        <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
+                        <div className="rich-text-content" style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }} dangerouslySetInnerHTML={{ __html: post.excerpt || post.content?.summary || '' }} />
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                            DIVE DEEPER <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
@@ -253,7 +253,7 @@ export default function PortfolioTemplate({
       default:
         return (
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 4vw' }}>
-             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.body || '' }} />
+             <div style={{ fontSize: '1.2rem', lineHeight: 1.8 }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: content.body || '' }} />
           </div>
         );
     }
