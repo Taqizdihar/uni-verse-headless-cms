@@ -39,43 +39,90 @@ export default function UnifiedPostLayout({ postData, palette, settings, navPage
   };
   
   if (type === 'event') {
+    const hasAgenda = c.agenda && Array.isArray(c.agenda) && c.agenda.length > 0;
+    const hasSpeakers = c.speakers && Array.isArray(c.speakers) && c.speakers.length > 0;
+
     return (
-      <article style={{ maxWidth: '900px', margin: '0 auto', padding: '6rem 2rem', fontFamily: 'inherit' }}>
+      <article style={{ maxWidth: '1000px', margin: '0 auto', padding: '6rem 2rem', fontFamily: 'inherit' }}>
          <a href="#" onClick={handleBack} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: p.primary, textDecoration: 'none', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             &larr; Kembali
          </a>
          {c.featured_image && (
-             <img src={fixImg(c.featured_image)} alt={postData.title} style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'cover', borderRadius: '1.5rem', marginBottom: '3rem', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+             <img src={fixImg(c.featured_image)} alt={postData.title} style={{ width: '100%', height: 'auto', maxHeight: '550px', objectFit: 'cover', borderRadius: '2rem', marginBottom: '4rem', boxShadow: '0 30px 60px rgba(0,0,0,0.12)' }} />
          )}
-         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
             <div>
-               <span style={{ display: 'inline-block', padding: '0.4rem 1rem', background: p.primary, color: p.surface, borderRadius: '99px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>Acara Khusus</span>
-               <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.03em', color: p.text, marginBottom: '1.5rem', margin: 0 }}>{postData.title}</h1>
+               <span style={{ display: 'inline-block', padding: '0.4rem 1.25rem', background: p.primary, color: p.surface, borderRadius: '99px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '1.5rem' }}>Event</span>
+               <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.04em', color: p.text, marginBottom: '2rem', margin: 0 }}>{postData.title}</h1>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', background: `${p.text}08`, padding: '2.5rem', borderRadius: '1.5rem', border: `1px solid ${p.text}11` }}>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 800, color: `${p.text}88`, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                     <Calendar size={18} color={p.primary} /> Tanggal & Waktu
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', background: `${p.text}05`, padding: '3rem', borderRadius: '2rem', border: `1px solid ${p.text}0a` }}>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', fontWeight: 800, color: `${p.text}66`, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                     <Calendar size={20} color={p.primary} strokeWidth={2.5} /> Tanggal & Waktu
                   </span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: p.text, paddingLeft: '1.75rem' }}>{c.event_date ? new Date(c.event_date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : 'Menunggu Jadwal'}</span>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: p.text }}>{c.event_date || 'Akan Datang'}</span>
                </div>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 800, color: `${p.text}88`, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                     <MapPin size={18} color={p.primary} /> Lokasi Acara
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8rem', fontWeight: 800, color: `${p.text}66`, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                     <MapPin size={20} color={p.primary} strokeWidth={2.5} /> Lokasi Acara
                   </span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: p.text, paddingLeft: '1.75rem' }}>{c.event_location || 'Akan diumumkan'}</span>
-               </div>
-               <div style={{ display: 'center', alignItems: 'center' }}>
-                  {c.registration_link && (
-                     <a href={c.registration_link} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', justifyContent: 'center', width: '100%', padding: '1rem 2.5rem', background: p.primary, color: p.surface, borderRadius: '99px', fontSize: '0.9rem', fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: `0 10px 30px ${p.primary}44`, transition: 'transform 0.2s', marginTop: '1rem' }} onMouseOver={(e)=>e.currentTarget.style.transform='translateY(-2px)'} onMouseOut={(e)=>e.currentTarget.style.transform='translateY(0)'}>
-                        Daftar Sekarang
-                     </a>
-                  )}
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: p.text }}>{c.location || 'Segera Diumumkan'}</span>
                </div>
             </div>
 
-            <div style={{ fontSize: '1.1rem', lineHeight: 1.8, color: `${p.text}cc`, marginTop: '1rem' }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: c.event_description || c.body || '' }} />
+            <div style={{ fontSize: '1.2rem', lineHeight: 1.8, color: `${p.text}ee` }} className="rich-text-content" dangerouslySetInnerHTML={{ __html: c.body || '' }} />
+
+            {/* Agenda & Speakers Section */}
+            {(hasAgenda || hasSpeakers) && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '4rem', marginTop: '2rem', paddingTop: '4rem', borderTop: `1px solid ${p.text}11` }}>
+                 {hasAgenda && (
+                   <div>
+                      <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', letterSpacing: '-0.02em' }}>
+                         <Clock size={24} color={p.primary} strokeWidth={2.5} /> Agenda Acara
+                      </h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', position: 'relative' }}>
+                         {/* Visual Timeline Line */}
+                         <div style={{ position: 'absolute', left: '7px', top: '10px', bottom: '10px', width: '2px', background: `${p.primary}22`, zIndex: 0 }}></div>
+                         
+                         {c.agenda.map((item: any, i: number) => (
+                            <div key={i} style={{ display: 'flex', gap: '2rem', position: 'relative', zIndex: 1 }}>
+                               <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: p.primary, border: `4px solid ${p.surface}`, marginTop: '4px', boxShadow: '0 0 0 4px white' }}></div>
+                               <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: '0.85rem', fontWeight: 900, color: p.primary, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>{item.time}</div>
+                                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: p.text, lineHeight: 1.4 }}>{item.activity}</div>
+                               </div>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+                 )}
+                 
+                 {hasSpeakers && (
+                   <div>
+                      <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', letterSpacing: '-0.02em' }}>
+                         <User size={24} color={p.primary} strokeWidth={2.5} /> Narasumber
+                      </h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                         {c.speakers.map((item: any, i: number) => (
+                            <div key={i} style={{ padding: '1.5rem', background: `${p.text}03`, borderRadius: '1.5rem', border: `1px solid ${p.text}08` }}>
+                               <div style={{ fontSize: '1.15rem', fontWeight: 800, color: p.text, marginBottom: '0.25rem' }}>{item.name}</div>
+                               <div style={{ fontSize: '0.9rem', color: `${p.text}66`, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.role}</div>
+                            </div>
+                         ))}
+                      </div>
+                   </div>
+                 )}
+              </div>
+            )}
+
+            {c.registration_link && (
+               <div style={{ marginTop: '4rem', textAlign: 'center' }}>
+                  <a href={c.registration_link} target="_blank" rel="noreferrer" style={{ display: 'inline-block', padding: '1.5rem 4rem', background: p.primary, color: p.surface, borderRadius: '99px', fontSize: '1.1rem', fontWeight: 900, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.1em', boxShadow: `0 20px 50px ${p.primary}44`, transition: 'all 0.3s' }} onMouseOver={(e)=>e.currentTarget.style.transform='translateY(-5px) scale(1.02)'} onMouseOut={(e)=>e.currentTarget.style.transform='translateY(0) scale(1)'}>
+                     Daftar Sekarang &rarr;
+                  </a>
+               </div>
+            )}
          </div>
       </article>
     );
