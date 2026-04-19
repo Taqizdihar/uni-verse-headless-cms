@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Layout as LayoutIcon, Mail, Lock, User, ShieldPlus, ArrowRight, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import universeLogo from '../assets/logo/UNI-VERSE Logo.png';
 import { useCMS } from '../context/CMSContext';
 
 export function Register() {
@@ -52,11 +53,8 @@ export function Register() {
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col justify-center items-center py-12 px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-          <div className="p-3 bg-amber-400 rounded-2xl text-black group-hover:scale-110 transition-transform">
-              <LayoutIcon className="w-8 h-8" />
-          </div>
-          <span className="text-2xl font-black text-white tracking-tighter uppercase">Uni-Inside</span>
+        <Link to="/" className="mb-8 block group">
+          <img src={universeLogo} alt="UNI-VERSE" className="h-12 w-auto mx-auto group-hover:scale-105 transition-transform" />
         </Link>
         <h2 className="text-3xl font-black text-white tracking-tight">Buat Akun</h2>
         <p className="mt-2 text-sm text-gray-500 font-medium tracking-wide">Daftar sebagai administrator utama.</p>

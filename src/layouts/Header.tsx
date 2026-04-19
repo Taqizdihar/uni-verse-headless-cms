@@ -24,7 +24,7 @@ export function Header() {
     <header className="h-20 bg-white border-b border-zinc-200 flex items-center justify-between px-8 sticky top-0 z-10 w-full">
       <div className="flex items-center gap-6">
         <div className="flex flex-col items-start leading-tight">
-          <img src={universeLogo} alt="UNI-VERSE" className="h-4 w-auto mb-0.5" />
+          <img src={universeLogo} alt="UNI-VERSE" className="h-7 w-auto mb-0.5" />
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
             Uni-Inside <span className="text-amber-500">CMS</span>
           </span>
