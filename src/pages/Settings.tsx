@@ -115,6 +115,13 @@ export function Settings() {
     }
   });
   const [activePalette, setActivePalette] = useState<BrandingPalette>(PRESET_PALETTES[0]);
+  const [customPalette, setCustomPalette] = useState<BrandingPalette>({
+    name: 'Custom',
+    primary: '#18181b',
+    secondary: '#3f3f46',
+    surface: '#ffffff',
+    text: '#09090b',
+  });
   const [paletteMode, setPaletteMode] = useState<'preset' | 'custom'>('preset');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'general' | 'footer'>('general');
@@ -169,7 +176,12 @@ export function Settings() {
         setActivePalette(savedPalette);
         // Check if it matches a preset
         const matchedPreset = PRESET_PALETTES.find(p => p.primary === savedPalette.primary && p.secondary === savedPalette.secondary);
-        setPaletteMode(matchedPreset ? 'preset' : 'custom');
+        if (matchedPreset) {
+            setPaletteMode('preset');
+        } else {
+            setPaletteMode('custom');
+            setCustomPalette({ ...savedPalette, name: 'Custom' });
+        }
       }
     }
   }, [settings]);
@@ -226,15 +238,16 @@ export function Settings() {
       });
   };
 
-  const handlePaletteSelect = (palette: BrandingPalette) => {
+  const handlePaletteSelect = (palette: BrandingPalette, mode: 'preset' | 'custom' = 'preset') => {
     setActivePalette(palette);
-    setPaletteMode('preset');
+    setPaletteMode(mode);
     // Also update theme_color to match primary for backward compatibility
     setFormData(prev => ({ ...prev, theme_color: palette.primary }));
   };
 
   const handleCustomColorChange = (key: keyof BrandingPalette, value: string) => {
     setActivePalette(prev => ({ ...prev, [key]: value }));
+    setCustomPalette(prev => ({ ...prev, [key]: value }));
     setPaletteMode('custom');
     if (key === 'primary') {
       setFormData(prev => ({ ...prev, theme_color: value }));
@@ -333,14 +346,15 @@ export function Settings() {
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOpen(true); }} className="space-y-6">
+        {/* Tabs moved outside the grid to align sidebar height properly */}
+        <div className="flex space-x-2 border-b border-zinc-200 mb-6 pb-2">
+          <button type="button" onClick={() => setActiveTab('general')} className={`px-4 py-2 font-bold text-sm rounded-t-xl transition-all ${activeTab === 'general' ? 'text-amber-600 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-800'}`}>Pengaturan Umum</button>
+          <button type="button" onClick={() => setActiveTab('footer')} className={`px-4 py-2 font-bold text-sm rounded-t-xl transition-all ${activeTab === 'footer' ? 'text-amber-600 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-800'}`}>Konfigurasi Footer</button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Tabs */}
             <div className="lg:col-span-2">
-              <div className="flex space-x-2 border-b border-zinc-200 mb-6 pb-2">
-                <button type="button" onClick={() => setActiveTab('general')} className={`px-4 py-2 font-bold text-sm rounded-t-xl transition-all ${activeTab === 'general' ? 'text-amber-600 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-800'}`}>Pengaturan Umum</button>
-                <button type="button" onClick={() => setActiveTab('footer')} className={`px-4 py-2 font-bold text-sm rounded-t-xl transition-all ${activeTab === 'footer' ? 'text-amber-600 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-800'}`}>Konfigurasi Footer</button>
-              </div>
 
             {/* General Section */}
             {activeTab === 'general' && (
@@ -492,45 +506,36 @@ export function Settings() {
                                 </button>
                             );
                         })}
-                        {/* Custom Palette Card */}
+                        
+                        {/* Custom Card */}
                         <button
                             type="button"
-                            onClick={() => {
-                                setPaletteMode('custom');
-                                setActivePalette(prev => ({ ...prev, name: 'Custom' }));
-                            }}
+                            onClick={() => handlePaletteSelect(customPalette, 'custom')}
                             className="group relative text-left rounded-2xl border-2 p-4 transition-all duration-200 hover:shadow-lg"
                             style={{
-                                borderColor: paletteMode === 'custom' ? activePalette.primary : '#e4e4e7',
-                                background: paletteMode === 'custom' ? `${activePalette.primary}08` : '#fafafa',
+                                borderColor: paletteMode === 'custom' ? customPalette.primary : '#e4e4e7',
+                                background: paletteMode === 'custom' ? `${customPalette.primary}08` : '#fafafa',
                             }}
                         >
                             {paletteMode === 'custom' && (
                                 <div className="absolute top-2 right-2">
-                                    <CheckCircle2 className="w-5 h-5" style={{ color: activePalette.primary }} />
+                                    <CheckCircle2 className="w-5 h-5" style={{ color: customPalette.primary }} />
                                 </div>
                             )}
                             <div className="flex gap-1.5 mb-3">
-                                <div className="w-8 h-8 rounded-lg shadow-sm border-2 border-dashed border-zinc-300 flex items-center justify-center bg-white">
-                                    <Palette className="w-4 h-4 text-zinc-400" />
-                                </div>
-                                <div className="w-8 h-8 rounded-lg shadow-sm border-2 border-dashed border-zinc-300 bg-white" />
-                                <div className="w-8 h-8 rounded-lg shadow-sm border-2 border-dashed border-zinc-300 bg-white" />
-                                <div className="w-8 h-8 rounded-lg shadow-sm border-2 border-dashed border-zinc-300 bg-white" />
+                                <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: customPalette.primary }} title="Primary" />
+                                <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: customPalette.secondary }} title="Secondary" />
+                                <div className="w-8 h-8 rounded-lg shadow-sm border border-zinc-200" style={{ background: customPalette.surface }} title="Surface" />
+                                <div className="w-8 h-8 rounded-lg shadow-sm border border-black/5" style={{ background: customPalette.text }} title="Text" />
                             </div>
                             <p className="font-bold text-sm text-zinc-800">Custom</p>
-                            <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-                                Buat Palet Sendiri
-                            </span>
                         </button>
                     </div>
 
-                    {/* Custom Color Editor - Only visible when Custom palette is selected */}
+                    {/* Custom Color Editor */}
                     {paletteMode === 'custom' && (
-                    <div className="border-t border-zinc-100 pt-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
-                            <Palette className="w-3.5 h-3.5" /> Pilih Warna
-                        </p>
+                    <div className="border-t border-zinc-100 pt-6 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1">Pilih Warna</p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {([
                                 { key: 'primary', label: 'Primary (Utama)' },
@@ -540,21 +545,20 @@ export function Settings() {
                             ] as const).map(({ key, label }) => (
                                 <div key={key}>
                                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">{label}</label>
-                                    <div className="flex items-center gap-2.5 bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2.5 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/10 transition-all">
-                                        <label className="relative cursor-pointer flex-shrink-0">
-                                            <div className="w-9 h-9 rounded-xl shadow-inner border border-black/10" style={{ background: activePalette[key] }} />
+                                    <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-100 rounded-xl px-3 py-2 text-sm focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all shadow-sm">
+                                        <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-zinc-200 shadow-inner flex-shrink-0">
                                             <input
                                                 type="color"
                                                 value={activePalette[key]}
                                                 onChange={(e) => handleCustomColorChange(key, e.target.value)}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                className="absolute -top-2 -left-2 w-12 h-12 cursor-pointer outline-none border-0 p-0"
                                             />
-                                        </label>
+                                        </div>
                                         <input
                                             type="text"
                                             value={activePalette[key]}
                                             onChange={(e) => handleCustomColorChange(key, e.target.value)}
-                                            className="flex-1 bg-transparent outline-none font-mono text-xs uppercase text-zinc-700 font-bold"
+                                            className="w-full bg-transparent outline-none font-mono text-xs uppercase text-zinc-700 font-bold tracking-wider"
                                             maxLength={7}
                                         />
                                     </div>
@@ -753,7 +757,7 @@ export function Settings() {
             </div>
 
             {/* Sidebar Stats / Info */}
-            <div className="space-y-6 lg:sticky lg:top-24 self-start">
+            <div className="space-y-6">
                 <Card className="p-6 bg-zinc-900 border-zinc-800">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 bg-amber-400/10 flex items-center justify-center rounded-xl">
