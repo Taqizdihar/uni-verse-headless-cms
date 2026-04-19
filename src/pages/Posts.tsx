@@ -125,34 +125,30 @@ export function Posts() {
       return (
         <div className="space-y-6">
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Gambar Utama</label>
-            <div className="flex gap-2 items-center mb-3">
-                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih gambar header..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Utama</label>
+            <div className="flex gap-2 items-center">
+                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
+                {formData.featured_image && (
+                    <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                )}
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
-            
             {formData.featured_image && (
-              <div className="relative group w-48 aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
-                <button 
-                  type="button" 
-                  onClick={() => handleInputChange('featured_image', null)}
-                  className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-md hover:bg-red-50 transition-all shadow-sm"
-                  title="Hapus Gambar"
-                >
-                  <Trash2 className="w-3.5 h-3.5 font-bold" />
-                </button>
-              </div>
+                <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
+                    <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
+                </div>
             )}
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-1.5 font-black text-zinc-400"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
             <RichTextEditor value={formData.excerpt || ''} onChange={val => handleInputChange('excerpt', val)} placeholder="Ringkasan singkat tentang post ini..." />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Konten Utama</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
             <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
           </div>
         </div>
@@ -163,40 +159,36 @@ export function Posts() {
       return (
         <div className="space-y-6">
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Sampul Event</label>
-            <div className="flex gap-2 items-center mb-3">
-                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih banner event..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Sampul Event</label>
+            <div className="flex gap-2 items-center">
+                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
+                {formData.featured_image && (
+                    <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
+                        <Trash2 className="w-5 h-5" />
+                    </button>
+                )}
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
-
             {formData.featured_image && (
-              <div className="relative group w-48 aspect-video rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
-                <button 
-                  type="button" 
-                  onClick={() => handleInputChange('featured_image', null)}
-                  className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-lg shadow-md hover:bg-red-50 transition-all shadow-sm"
-                  title="Hapus Gambar"
-                >
-                  <Trash2 className="w-3.5 h-3.5 font-bold" />
-                </button>
-              </div>
+                <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
+                    <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
+                </div>
             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><Calendar className="w-3 h-3"/> Tanggal & Waktu Event</label>
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><Calendar className="w-3 h-3"/> Tanggal & Waktu Event</label>
               <input type="text" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: 24 Okt 2026, 09:00 AM" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><MapPin className="w-3 h-3"/> Lokasi</label>
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><MapPin className="w-3 h-3"/> Lokasi</label>
               <input type="text" value={formData.location || ''} onChange={e => handleInputChange('location', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: Grand Ballroom, Tech Valley" />
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
             <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Deskripsi lengkap mengenai event ini..." />
           </div>
 
@@ -254,8 +246,8 @@ export function Posts() {
     <div className="animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">Posts</h2>
-          <p className="text-zinc-500 text-sm mt-1">Kelola konten dinamis secara kronologis.</p>
+          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Posts</h2>
+          <p className="text-zinc-500 text-sm mt-1 font-medium">Kelola konten dinamis secara kronologis.</p>
         </div>
         <button 
           onClick={() => openEditor()}
@@ -374,7 +366,7 @@ export function Posts() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Sticky Header */}
-            <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-white z-10">
+            <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0 z-10">
               <div>
                 <h2 className="text-2xl font-black text-zinc-900 tracking-tight">{editingId ? 'Edit Post' : 'Buat Post Baru'}</h2>
                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-0.5">{category} Format</p>
@@ -383,8 +375,8 @@ export function Posts() {
             </div>
             
             {/* Scrollable Content Container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-10">
-              <form onSubmit={handleSave} className="space-y-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 py-6 md:px-10">
+              <form id="post-edit-form" onSubmit={handleSave} className="space-y-6 flex flex-col p-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Judul Post</label>
@@ -414,21 +406,18 @@ export function Posts() {
                     <h3 className="text-[10px] font-black text-zinc-300 mb-6 uppercase tracking-[0.25em]">Elemen Konten Khusus</h3>
                     {renderDynamicInputs()}
                 </div>
-
-                <div className="pt-6 flex justify-end gap-3 sticky bottom-0 bg-white border-t border-zinc-100 -mx-10 px-10 py-6 mt-10 rounded-b-[2.5rem]">
-                  <button 
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-8 py-3.5 rounded-2xl font-bold border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-all active:scale-95"
-                  >
-                    Batal
-                  </button>
-                  <button type="submit" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
-                    <Send className="w-5 h-5" />
-                    Simpan Perubahan
-                  </button>
-                </div>
               </form>
+            </div>
+            
+            {/* Modal Footer (Sticky) */}
+            <div className="p-6 border-t border-zinc-100 shrink-0 flex justify-end gap-3 bg-white rounded-b-[2.5rem] sticky bottom-0 z-10 w-full">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-2xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
+                  Batal
+                </button>
+                <button type="submit" form="post-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
+                  <Send className="w-5 h-5" />
+                  Simpan Perubahan
+                </button>
             </div>
           </div>
         </div>

@@ -458,7 +458,10 @@ export function Pages() {
             </div>
             
             {/* Modal Footer (Sticky) */}
-            <div className="p-8 border-t border-zinc-100 shrink-0 flex justify-end bg-zinc-50/50 rounded-b-[2rem]">
+            <div className="p-6 border-t border-zinc-100 shrink-0 flex justify-end gap-3 bg-white rounded-b-[2rem] sticky bottom-0 z-10 w-full">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-2xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
+                  Batal
+                </button>
                 <button type="submit" form="page-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
                   <Send className="w-5 h-5" />
                   Simpan Halaman
