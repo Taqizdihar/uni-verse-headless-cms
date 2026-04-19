@@ -18,7 +18,6 @@ import {
   Users
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
-import { getThemeVariables } from '../../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith("/uploads") ? `${BASE_URL}${url}` : url;
@@ -66,25 +65,17 @@ export default function CorporateTemplate({
   const siteName = settings?.site_name || 'Corporate';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#0066FF', 
-    secondary: '#1A1A1A', 
-    surface: '#FFFFFF', 
-    text: '#333333', 
-    name: 'Corporate' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = getThemeVariables(p);
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <CorporateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <CorporateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -244,17 +235,17 @@ export default function CorporateTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <CorporateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <CorporateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function CorporateNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function CorporateNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '80px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--secondary-color)', color: '#FFFFFF', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid #FFFFFF15' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -286,7 +277,7 @@ function CorporateNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
   );
 }
 
-function CorporateFooter({ settings, siteName, footerCfg, p }: any) {
+function CorporateFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: 'var(--secondary-color)', color: '#FFFFFF', padding: '8rem 4rem 4rem' }}>

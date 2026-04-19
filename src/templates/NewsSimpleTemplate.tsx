@@ -70,31 +70,18 @@ export default function NewsSimpleTemplate({
   const siteName = settings?.site_name || 'News Portal';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#DC2626', 
-    secondary: '#18181B', 
-    surface: '#FFFFFF', 
-    text: '#27272A', 
-    name: 'News' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
         <NewsTicker siteName={siteName} />
-        <NewsNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+        <NewsNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <NewsFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <NewsFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -106,7 +93,7 @@ export default function NewsSimpleTemplate({
           <div className="animate-in fade-in duration-1000">
              <section style={{ padding: '6rem 4vw', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', alignItems: 'start', borderBottom: '1px solid #EEE' }}>
                 <div>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2rem', fontSize: '0.8rem', marginBottom: '2.5rem' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary-color)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2rem', fontSize: '0.8rem', marginBottom: '2.5rem' }}>
                       <TrendingUp size={18} /> TERKINI DAN TERPERCAYA
                    </div>
                    {content.headline && (
@@ -119,7 +106,7 @@ export default function NewsSimpleTemplate({
                         {content.sub_headline}
                      </p>
                    )}
-                   <Link to={`/preview/${subdomain}/news`} style={{ borderBottom: '4px solid var(--primary)', paddingBottom: '8px', textDecoration: 'none', color: '#000', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.85rem' }}>
+                   <Link to={`/preview/${subdomain}/news`} style={{ borderBottom: '4px solid var(--primary-color)', paddingBottom: '8px', textDecoration: 'none', color: '#000', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.85rem' }}>
                       LIHAT SEMUA BERITA <ArrowRight size={20} style={{ marginLeft: '1rem' }} />
                    </Link>
                 </div>
@@ -146,7 +133,7 @@ export default function NewsSimpleTemplate({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '8rem' }}>
                 <h2 style={{ fontSize: '4rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", textTransform: 'uppercase', marginBottom: '2rem' }}>Dibalik Redaksi.</h2>
-                <div style={{ width: '80px', height: '4px', background: 'var(--primary)', margin: '0 auto' }} />
+                <div style={{ width: '80px', height: '4px', background: 'var(--primary-color)', margin: '0 auto' }} />
              </div>
              <div 
                style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.8, color: '#333', textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}
@@ -179,7 +166,7 @@ export default function NewsSimpleTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem' }}>
                 <div style={{ padding: '0 4rem 4rem 0', borderRight: '1px solid #EEE' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.4rem 1rem', background: 'var(--primary)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '3rem' }}>SOROTAN UTAMA</div>
+                   <div style={{ display: 'inline-flex', padding: '0.4rem 1rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '3rem' }}>SOROTAN UTAMA</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", lineHeight: 1.1, marginBottom: '2.5rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -198,7 +185,7 @@ export default function NewsSimpleTemplate({
                         <div style={{ height: '300px', overflow: 'hidden', marginBottom: '2.5rem' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'grayscale 0.5s' }} className="group-hover:grayscale" />
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary-color)', marginBottom: '1.5rem' }}>
                            <Tag size={12} /> {post.category?.toUpperCase() || 'UMUM'}
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
@@ -224,7 +211,7 @@ export default function NewsSimpleTemplate({
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', opacity: 0.4, letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Email Redaksi</span>
-                           <b style={{ fontSize: '2rem', borderBottom: '4px solid var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '2rem', borderBottom: '4px solid var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -256,13 +243,13 @@ export default function NewsSimpleTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
       <NewsTicker siteName={siteName} />
-      <NewsNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <NewsNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <NewsFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <NewsFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
@@ -279,14 +266,14 @@ function NewsTicker({ siteName }: any) {
   );
 }
 
-function NewsNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function NewsNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '110px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.95)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', borderBottom: '4px solid #000' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '2rem' }}>
         {settings?.logo_url ? (
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '56px', width: 'auto' }} />
         ) : (
-          <span style={{ fontWeight: 900, fontSize: '2.5rem', textTransform: 'uppercase', fontFamily: "'Playfair Display', serif", borderBottom: '6px solid var(--primary)', lineHeight: 1 }}>{siteName}</span>
+          <span style={{ fontWeight: 900, fontSize: '2.5rem', textTransform: 'uppercase', fontFamily: "'Playfair Display', serif", borderBottom: '6px solid var(--primary-color)', lineHeight: 1 }}>{siteName}</span>
         )}
       </Link>
       <div style={{ display: 'flex', gap: '2.5vw' }}>
@@ -298,7 +285,7 @@ function NewsNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'inherit', 
+                color: isActive ? 'var(--primary-color)' : 'inherit', 
                 fontSize: '0.85rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -315,7 +302,7 @@ function NewsNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
   );
 }
 
-function NewsFooter({ settings, siteName, footerCfg, p }: any) {
+function NewsFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#000', color: '#FFF', padding: '12rem 4vw 4vw' }}>
@@ -327,7 +314,7 @@ function NewsFooter({ settings, siteName, footerCfg, p }: any) {
           <p style={{ opacity: 0.4, lineHeight: 1.8, fontSize: '1rem', marginBottom: '4rem', maxWidth: '400px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2.5rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: '#FFF', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = '#FFF'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: '#FFF', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary-color)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = '#FFF'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
              ))}
@@ -355,7 +342,7 @@ function NewsFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '3.5rem', opacity: 0.3 }}>Markas Redaksi</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', fontSize: '1rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Phone size={18} color="var(--primary)" /> <b>{contact.phone}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Phone size={18} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
               {contact.whatsapp && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><MessageCircle size={18} color="#22C55E" /> <b>{contact.whatsapp}</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Mail size={18} style={{ opacity: 0.3 }} /> <b style={{ fontSize: '0.85rem' }}>{contact.email}</b></div>}
               

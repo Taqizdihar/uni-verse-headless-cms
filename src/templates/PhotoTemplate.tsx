@@ -79,21 +79,15 @@ export default function PhotoTemplate({
   };
   const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <PhotoNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <PhotoNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <PhotoFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <PhotoFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -106,7 +100,7 @@ export default function PhotoTemplate({
              <section style={{ height: '100vh', position: 'relative', overflow: 'hidden' }}>
                 {content.hero_image && <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4 }} />}
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 8vw' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.8em', fontSize: '0.75rem', marginBottom: '4rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', color: 'var(--primary-color)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.8em', fontSize: '0.75rem', marginBottom: '4rem' }}>
                       <Aperture size={20} className="animate-spin-slow" /> VISUAL FIDELITY NODE
                    </div>
                    {content.headline && (
@@ -136,7 +130,7 @@ export default function PhotoTemplate({
                 ].map((s, i) => (
                   <div key={i} style={{ padding: '3rem', borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
                      <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 900, opacity: 0.2, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '1.5rem' }}>{s.l}</label>
-                     <b style={{ fontSize: '2rem', fontWeight: 300, color: 'var(--primary)' }}>{s.v}</b>
+                     <b style={{ fontSize: '2rem', fontWeight: 300, color: 'var(--primary-color)' }}>{s.v}</b>
                   </div>
                 ))}
              </div>
@@ -147,7 +141,7 @@ export default function PhotoTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '15rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '10rem', alignItems: 'start' }}>
-                <div style={{ borderLeft: '1px solid var(--primary)', paddingLeft: '5rem' }}>
+                <div style={{ borderLeft: '1px solid var(--primary-color)', paddingLeft: '5rem' }}>
                    <h2 style={{ fontSize: '4rem', fontWeight: 200, textTransform: 'uppercase', letterSpacing: '0.2em', lineHeight: 1 }}>THE ART<br />OF VISION.</h2>
                 </div>
                 <div 
@@ -181,7 +175,7 @@ export default function PhotoTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '8rem', marginBottom: '12rem' }}>
                 <div style={{ borderRight: '1px solid rgba(255,255,255,0.05)', paddingRight: '8rem' }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', fontSize: '0.75rem', marginBottom: '4rem' }}><Layers size={18} /> EDITORIAL_FEED</div>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', color: 'var(--primary-color)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', fontSize: '0.75rem', marginBottom: '4rem' }}><Layers size={18} /> EDITORIAL_FEED</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 200, textTransform: 'uppercase', lineHeight: 1, marginBottom: '4rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.25rem', opacity: 0.3, lineHeight: 2, textTransform: 'uppercase', letterSpacing: '0.1em' }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -201,12 +195,12 @@ export default function PhotoTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                           <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>{post.category}</span>
+                           <span style={{ fontWeight: 900, color: 'var(--primary-color)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>{post.category}</span>
                            <span style={{ fontSize: '0.7rem', opacity: 0.2, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '2.5rem', fontWeight: 200, textTransform: 'uppercase', marginBottom: '2.5rem', lineHeight: 1 }}>{post.title}</h3>
                         <p style={{ opacity: 0.3, fontSize: '1rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '3.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--primary)', letterSpacing: '0.2em' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--primary-color)', letterSpacing: '0.2em' }}>
                            VIEW_SERIES <ArrowRight size={20} className="group-hover:translate-x-6 transition-transform" />
                         </div>
                      </article>
@@ -227,7 +221,7 @@ export default function PhotoTemplate({
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, opacity: 0.2, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '2rem' }}>Digital Gateway</span>
-                           <b style={{ fontSize: '2.2rem', fontWeight: 200, borderBottom: '1px solid var(--primary)', paddingBottom: '1rem' }}>{content.email}</b>
+                           <b style={{ fontSize: '2.2rem', fontWeight: 200, borderBottom: '1px solid var(--primary-color)', paddingBottom: '1rem' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -259,17 +253,17 @@ export default function PhotoTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <PhotoNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <PhotoNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <PhotoFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <PhotoFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function PhotoNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function PhotoNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(8,8,8,0.8)', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -288,7 +282,7 @@ function PhotoNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'inherit', 
+                color: isActive ? 'var(--primary-color)' : 'inherit', 
                 fontSize: '0.75rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -305,7 +299,7 @@ function PhotoNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }
   );
 }
 
-function PhotoFooter({ settings, siteName, footerCfg, p }: any) {
+function PhotoFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#000', color: '#FFF', padding: '15rem 4vw 6rem', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
@@ -317,7 +311,7 @@ function PhotoFooter({ settings, siteName, footerCfg, p }: any) {
           <p style={{ opacity: 0.2, lineHeight: 2, fontSize: '0.9rem', marginBottom: '5rem', maxWidth: '400px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2.5rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: '#FFF', opacity: 0.1, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-10px) rotate(10deg)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.1'; e.currentTarget.style.color = '#FFF'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: '#FFF', opacity: 0.1, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(-10px) rotate(10deg)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.1'; e.currentTarget.style.color = '#FFF'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={28} />
                 </a>
              ))}
@@ -351,7 +345,7 @@ function PhotoFooter({ settings, siteName, footerCfg, p }: any) {
               
               <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 20px var(--primary)' }} />
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--primary-color)', boxShadow: '0 0 20px var(--primary-color)' }} />
                  </div>
               </div>
            </div>

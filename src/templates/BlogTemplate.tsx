@@ -66,30 +66,17 @@ export default function BlogTemplate({
   const siteName = settings?.site_name || 'Blog Echo';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#4F46E5', 
-    secondary: '#1F2937', 
-    surface: '#FFFFFF', 
-    text: '#111827', 
-    name: 'Journal' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
-        <BlogNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
+        <BlogNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <BlogFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <BlogFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -99,7 +86,7 @@ export default function BlogTemplate({
       case 'home':
         return (
           <div className="animate-in fade-in duration-1000">
-             <section style={{ padding: '6rem 2rem', borderBottom: '1px solid var(--text-main)0a' }}>
+             <section style={{ padding: '6rem 2rem', borderBottom: '1px solid var(--text-color)0a' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
                    {content.headline && <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '2rem' }}>{content.headline}</h1>}
                    {content.sub_headline && <p style={{ fontSize: '1.4rem', opacity: 0.5, lineHeight: 1.6, maxWidth: '700px', margin: '0 auto' }}>{content.sub_headline}</p>}
@@ -116,7 +103,7 @@ export default function BlogTemplate({
       case 'profile':
         return (
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
-             <div style={{ paddingBottom: '3rem', borderBottom: '1px solid var(--text-main)11', marginBottom: '4rem' }}>
+             <div style={{ paddingBottom: '3rem', borderBottom: '1px solid var(--text-color)11', marginBottom: '4rem' }}>
                 <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>The Editor's Note</h1>
              </div>
              <div 
@@ -136,7 +123,7 @@ export default function BlogTemplate({
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '4rem' }}>
                 {galleryImages.map((img: string, i: number) => (
-                  <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderBottom: '4px solid var(--primary)' }}>
+                  <div key={i} style={{ aspectRatio: '1', overflow: 'hidden', borderBottom: '4px solid var(--primary-color)' }}>
                      <img src={fixImg(img)} alt={`Gallery ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ))}
@@ -147,7 +134,7 @@ export default function BlogTemplate({
       case 'news':
         return (
           <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
-             <div style={{ borderBottom: '1px solid var(--text-main)11', paddingBottom: '6rem', marginBottom: '6rem' }}>
+             <div style={{ borderBottom: '1px solid var(--text-color)11', paddingBottom: '6rem', marginBottom: '6rem' }}>
                 <div style={{ height: '500px', overflow: 'hidden', marginBottom: '4rem' }}>
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
@@ -165,7 +152,7 @@ export default function BlogTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--primary-color)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>
                               <Bookmark size={14} /> {post.category}
                            </div>
                            <h3 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
@@ -192,7 +179,7 @@ export default function BlogTemplate({
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.3, marginBottom: '0.5rem' }}>E-Post</span>
-                           <b style={{ fontSize: '1.5rem', textDecoration: 'underline', textDecorationColor: 'var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '1.5rem', textDecoration: 'underline', textDecorationColor: 'var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -205,7 +192,7 @@ export default function BlogTemplate({
                 </div>
                 <div>
                    {mapUrl && (
-                     <div style={{ width: '100%', height: '550px', border: '1px solid var(--text-main)11', padding: '0.5rem' }}>
+                     <div style={{ width: '100%', height: '550px', border: '1px solid var(--text-color)11', padding: '0.5rem' }}>
                         <iframe src={mapUrl} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"></iframe>
                      </div>
                    )}
@@ -224,19 +211,19 @@ export default function BlogTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
-      <BlogNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
+      <BlogNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <BlogFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <BlogFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function BlogNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function BlogNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
-    <nav style={{ height: '90px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--text-main)0a' }}>
+    <nav style={{ height: '90px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--text-color)0a' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {settings?.logo_url ? (
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '36px', width: 'auto' }} />
@@ -259,7 +246,7 @@ function BlogNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
                 opacity: isActive ? 1 : 0.4,
-                borderBottom: isActive ? '3px solid var(--primary)' : 'none',
+                borderBottom: isActive ? '3px solid var(--primary-color)' : 'none',
                 paddingBottom: '0.25rem',
                 transition: 'all 0.3s'
               }}>
@@ -272,10 +259,10 @@ function BlogNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
   );
 }
 
-function BlogFooter({ settings, siteName, footerCfg, p }: any) {
+function BlogFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-main)0a', padding: '10rem 4rem 4rem' }}>
+    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-color)0a', padding: '10rem 4rem 4rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '6rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -298,7 +285,7 @@ function BlogFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '3rem', opacity: 0.3 }}>Syndication</h4>
            <div style={{ display: 'flex', gap: '2rem' }}>
               {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.4, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.style.color = 'inherit'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.4, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary-color)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.4'; e.currentTarget.style.color = 'inherit'; }}>
                    <SocialIcon type={social.icon} size={28} />
                 </a>
               ))}
@@ -314,14 +301,14 @@ function BlogFooter({ settings, siteName, footerCfg, p }: any) {
               {contact.service_hours && <div style={{ display: 'flex', gap: '1rem', opacity: 0.3 }}><Clock size={18} /> <span>{contact.service_hours}</span></div>}
               
               {footerCfg.location_embed_link && (
-                <div style={{ width: '100%', height: '180px', borderRadius: '3rem', overflow: 'hidden', marginTop: '1.5rem', border: '1px solid var(--text-main)11', filter: 'grayscale(100%)' }}>
+                <div style={{ width: '100%', height: '180px', borderRadius: '3rem', overflow: 'hidden', marginTop: '1.5rem', border: '1px solid var(--text-color)11', filter: 'grayscale(100%)' }}>
                    <iframe src={footerCfg.location_embed_link.includes('<iframe') ? footerCfg.location_embed_link.match(/src="([^"]+)"/)?.[1] : footerCfg.location_embed_link} width="100%" height="100%" style={{ border: 0 }} loading="lazy"></iframe>
                 </div>
               )}
            </div>
         </div>
       </div>
-      <div style={{ maxWidth: '1400px', margin: '8rem auto 0', paddingTop: '4rem', borderTop: '1px solid var(--text-main)0a', fontSize: '0.8rem', opacity: 0.3, textAlign: 'center', fontStyle: 'italic', letterSpacing: '0.2em' }}>
+      <div style={{ maxWidth: '1400px', margin: '8rem auto 0', paddingTop: '4rem', borderTop: '1px solid var(--text-color)0a', fontSize: '0.8rem', opacity: 0.3, textAlign: 'center', fontStyle: 'italic', letterSpacing: '0.2em' }}>
          © {new Date().getFullYear()} {siteName.toUpperCase()} / PRINTED_IN_UNI_VERSE
       </div>
     </footer>

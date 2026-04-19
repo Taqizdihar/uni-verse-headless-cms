@@ -4,7 +4,6 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
-import { injectGlobalTheme, getThemeVariables } from '../utils/theme';
 
 class ErrorBoundary extends React.Component<{ fallback: React.ReactNode, children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
@@ -82,9 +81,11 @@ export function PublicView() {
 
   // Inject CSS variables for the full branding palette
   useEffect(() => {
-    if (palette) {
-      injectGlobalTheme(palette);
-    }
+    const root = document.documentElement;
+    root.style.setProperty('--primary-color', palette.primary);
+    root.style.setProperty('--secondary-color', palette.secondary);
+    root.style.setProperty('--bg-color', palette.surface);
+    root.style.setProperty('--text-color', palette.text);
   }, [palette]);
 
   useEffect(() => {
@@ -288,8 +289,13 @@ export function PublicView() {
         <div 
           className="content-root"
           style={{
-            ...getThemeVariables(palette),
-            minHeight: '100vh'
+            '--primary-color': palette.primary,
+            '--secondary-color': palette.secondary,
+            '--bg-color': palette.surface,
+            '--text-color': palette.text,
+            minHeight: '100vh',
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)'
           } as React.CSSProperties}
         >
           <SelectedTemplate {...sharedProps} />

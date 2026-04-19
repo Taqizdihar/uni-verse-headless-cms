@@ -109,30 +109,17 @@ export default function EventTemplate({
   const siteName = settings?.site_name || 'Vibrant Events';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#F43F5E', 
-    secondary: '#8B5CF6', 
-    surface: '#020617', 
-    text: '#F1F5F9', 
-    name: 'Conference' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <EventNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <EventNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <EventFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <EventFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -144,12 +131,12 @@ export default function EventTemplate({
           <div className="animate-in fade-in duration-1000">
              <section style={{ padding: '10rem 4vw', position: 'relative', overflow: 'hidden', minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-                   <div style={{ position: 'absolute', top: '10%', right: '-5vw', width: '40vw', height: '40vw', background: 'var(--primary)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
-                   <div style={{ position: 'absolute', bottom: '10%', left: '-5vw', width: '35vw', height: '35vw', background: 'var(--secondary)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
+                   <div style={{ position: 'absolute', top: '10%', right: '-5vw', width: '40vw', height: '40vw', background: 'var(--primary-color)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
+                   <div style={{ position: 'absolute', bottom: '10%', left: '-5vw', width: '35vw', height: '35vw', background: 'var(--secondary-color)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
                 </div>
                 <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 10 }}>
                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '3rem' }}>
-                      <Zap size={16} color="var(--primary)" /> Ready for the show?
+                      <Zap size={16} color="var(--primary-color)" /> Ready for the show?
                    </div>
                    {content.headline && (
                      <h1 style={{ fontSize: 'clamp(3rem, 8vw, 6.5rem)', fontWeight: 900, lineHeight: 1, textTransform: 'uppercase', letterSpacing: '-0.04em', marginBottom: '2rem' }}>
@@ -177,8 +164,8 @@ export default function EventTemplate({
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6rem', alignItems: 'center' }}>
                 <div style={{ position: 'relative' }}>
-                   <div style={{ position: 'absolute', inset: '-2rem', background: 'linear-gradient(45deg, var(--primary), var(--secondary))', borderRadius: '3rem', opacity: 0.2, filter: 'blur(40px)' }} />
-                   <h2 style={{ fontSize: '4rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, position: 'relative' }}>Pure Passion. <br /><span style={{ color: 'transparent', WebkitTextStroke: '2px var(--primary)' }}>Real Impact.</span></h2>
+                   <div style={{ position: 'absolute', inset: '-2rem', background: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))', borderRadius: '3rem', opacity: 0.2, filter: 'blur(40px)' }} />
+                   <h2 style={{ fontSize: '4rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, position: 'relative' }}>Pure Passion. <br /><span style={{ color: 'transparent', WebkitTextStroke: '2px var(--primary-color)' }}>Real Impact.</span></h2>
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
@@ -214,7 +201,7 @@ export default function EventTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4rem', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
                 <div style={{ padding: '6rem' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary)', color: '#FFF', borderRadius: '100px', fontWeight: 900, fontSize: '0.75rem', marginBottom: '2rem' }}>FRESH RELEASE</div>
+                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', borderRadius: '100px', fontWeight: 900, fontSize: '0.75rem', marginBottom: '2rem' }}>FRESH RELEASE</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1.1, textTransform: 'uppercase', marginBottom: '2rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -223,7 +210,7 @@ export default function EventTemplate({
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '6rem' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase' }}>Recent Signal</h2>
-                <div style={{ height: '2px', flex: 1, background: 'linear-gradient(to right, var(--primary), transparent)' }} />
+                <div style={{ height: '2px', flex: 1, background: 'linear-gradient(to right, var(--primary-color), transparent)' }} />
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '4rem' }}>
@@ -234,7 +221,7 @@ export default function EventTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }} className="group-hover:scale-110" />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', items: 'center', marginBottom: '1.5rem' }}>
-                           <span style={{ fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', fontSize: '0.75rem' }}>{post.category}</span>
+                           <span style={{ fontWeight: 900, color: 'var(--primary-color)', textTransform: 'uppercase', fontSize: '0.75rem' }}>{post.category}</span>
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem' }}>{post.title}</h3>
@@ -259,7 +246,7 @@ export default function EventTemplate({
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                       {content.email && (
                         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Mail size={32} color="#FFF" />
                            </div>
                            <div>
@@ -270,7 +257,7 @@ export default function EventTemplate({
                       )}
                       {content.phone && (
                         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--secondary), var(--primary))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--secondary-color), var(--primary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Phone size={32} color="#FFF" />
                            </div>
                            <div>
@@ -302,21 +289,21 @@ export default function EventTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <EventNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <EventNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <EventFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <EventFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function EventNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function EventNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(2,6,23,0.8)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px var(--primary)66' }}>
+        <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px var(--primary-color)66' }}>
           <Star size={24} color="#FFF" />
         </div>
         <span style={{ fontWeight: 900, fontSize: '1.8rem', textTransform: 'uppercase', letterSpacing: '-0.05em' }}>{siteName}</span>
@@ -335,7 +322,7 @@ function EventNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
-                background: isActive ? 'var(--primary)' : 'transparent',
+                background: isActive ? 'var(--primary-color)' : 'transparent',
                 padding: '0.6rem 1.5rem',
                 borderRadius: '100px',
                 opacity: isActive ? 1 : 0.4,
@@ -350,15 +337,15 @@ function EventNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }
   );
 }
 
-function EventFooter({ settings, siteName, footerCfg, p }: any) {
+function EventFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#010411', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12rem 4vw 4vw', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: '30vw', height: '30vw', background: 'var(--primary)', filter: 'blur(150px)', opacity: 0.1, borderRadius: '50%' }} />
+      <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: '30vw', height: '30vw', background: 'var(--primary-color)', filter: 'blur(150px)', opacity: 0.1, borderRadius: '50%' }} />
       <div style={{ maxWidth: '1600px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '8rem', position: 'relative', zIndex: 1 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--secondary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <Music size={24} color="#FFF" />
             </div>
             <span style={{ fontWeight: 900, fontSize: '2.5rem', textTransform: 'uppercase' }}>{siteName}</span>
@@ -379,7 +366,7 @@ function EventFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '3rem', opacity: 0.3 }}>Global Sync</h4>
            <div style={{ display: 'flex', gap: '1.5rem' }}>
               {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.transform = 'scale(1.2) rotate(12deg)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.transform = 'scale(1.2) rotate(12deg)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
               ))}
@@ -389,8 +376,8 @@ function EventFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '3rem', opacity: 0.3 }}>Venue Signal</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '1.1rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Mic size={18} color="var(--primary)" /> <b>{contact.phone}</b></div>}
-              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><MessageCircle size={18} color="var(--secondary)" /> <b>{contact.whatsapp}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Mic size={18} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
+              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><MessageCircle size={18} color="var(--secondary-color)" /> <b>{contact.whatsapp}</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Mail size={18} style={{ opacity: 0.4 }} /> <b>{contact.email}</b></div>}
               {contact.service_hours && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', opacity: 0.3 }}><Timer size={18} /> <span>{contact.service_hours}</span></div>}
               

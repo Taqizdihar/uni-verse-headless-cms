@@ -82,21 +82,15 @@ export default function SaaSTemplate({
   };
   const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <SaaSNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <SaaSNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <SaaSFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <SaaSFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -107,9 +101,9 @@ export default function SaaSTemplate({
         return (
           <div className="animate-in fade-in duration-1000">
              <section style={{ padding: '12rem 4vw', textAlign: 'center', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '600px', background: 'var(--primary)', opacity: 0.1, filter: 'blur(150px)', borderRadius: '50%' }} />
+                <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '600px', background: 'var(--primary-color)', opacity: 0.1, filter: 'blur(150px)', borderRadius: '50%' }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 2rem', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--primary)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4rem' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 2rem', background: 'rgba(255,255,255,0.05)', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--primary-color)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '4rem' }}>
                       <Activity size={18} /> Engine v4.0 Active
                    </div>
                    {content.headline && (
@@ -123,7 +117,7 @@ export default function SaaSTemplate({
                      </p>
                    )}
                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center' }}>
-                      <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1.2rem 4rem', background: 'var(--primary)', color: '#FFF', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', letterSpacing: '0.2em', borderRadius: '100px', fontSize: '0.85rem', boxShadow: '0 20px 40px var(--primary)44' }}>
+                      <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1.2rem 4rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', letterSpacing: '0.2em', borderRadius: '100px', fontSize: '0.85rem', boxShadow: '0 20px 40px var(--primary-color)44' }}>
                          LAUNCH PLATFORM
                       </Link>
                    </div>
@@ -143,7 +137,7 @@ export default function SaaSTemplate({
                   { i: Server, t: 'Edge Ready', d: 'Global Infra Node' }
                 ].map((item: any, i) => (
                   <div key={i} style={{ textAlign: 'center' }}>
-                     <div style={{ width: '64px', height: '64px', margin: '0 auto 2.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                     <div style={{ width: '64px', height: '64px', margin: '0 auto 2.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-color)' }}>
                         {item.i && <item.i size={28} />}
                      </div>
                      <h4 style={{ fontWeight: 900, fontSize: '0.9rem', marginBottom: '0.75rem', color: '#FFF' }}>{item.t}</h4>
@@ -158,7 +152,7 @@ export default function SaaSTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '10rem', alignItems: 'center' }}>
-                <div style={{ padding: '5rem', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', borderRadius: '4rem', boxShadow: '0 40px 80px var(--primary)33' }}>
+                <div style={{ padding: '5rem', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', borderRadius: '4rem', boxShadow: '0 40px 80px var(--primary-color)33' }}>
                    <h2 style={{ fontSize: '5rem', fontWeight: 950, color: '#FFF', lineHeight: 0.9, letterSpacing: '-0.04em' }}>Neural<br />Fabric.</h2>
                 </div>
                 <div 
@@ -192,7 +186,7 @@ export default function SaaSTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '8rem', marginBottom: '12rem', background: 'rgba(255,255,255,0.02)', borderRadius: '4rem', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ padding: '8rem' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--secondary)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>GEN_RELEASE_4.0</div>
+                   <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--secondary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>GEN_RELEASE_4.0</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 950, lineHeight: 0.9, color: '#FFF', marginBottom: '3rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.3rem', opacity: 0.4, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -207,14 +201,14 @@ export default function SaaSTemplate({
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '4rem' }}>
                 {posts.map((post) => (
                   <Link key={post.id} to={`/preview/${subdomain}/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                     <article style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '3rem', padding: '4rem', transition: 'all 0.4s' }} className="group hover:border-[var(--primary)]33 hover:-translate-y-4">
+                     <article style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '3rem', padding: '4rem', transition: 'all 0.4s' }} className="group hover:border-[var(--primary-color)]33 hover:-translate-y-4">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem' }}>
-                           <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>{post.category}</span>
+                           <span style={{ fontWeight: 900, color: 'var(--primary-color)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2rem' }}>{post.category}</span>
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '2.25rem', fontWeight: 950, color: '#FFF', marginBottom: '2.5rem', lineHeight: 1.1 }}>{post.title}</h3>
                         <p style={{ opacity: 0.4, fontSize: '1rem', lineHeight: 1.6, marginBottom: '3.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary-color)' }}>
                            PULL LOGS <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
                      </article>
@@ -235,7 +229,7 @@ export default function SaaSTemplate({
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, opacity: 0.3, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '2rem' }}>Encrypted_Mail</span>
-                           <b style={{ fontSize: '2.2rem', color: 'var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '2.2rem', color: 'var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -267,21 +261,21 @@ export default function SaaSTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <SaaSNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <SaaSNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <SaaSFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <SaaSFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function SaaSNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function SaaSNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '110px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(15,23,42,0.85)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(30px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ width: '52px', height: '52px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px var(--primary)33' }}>
+        <div style={{ width: '52px', height: '52px', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px var(--primary-color)33' }}>
            <Layers size={28} color="#FFF" />
         </div>
         {settings?.logo_url ? (
@@ -299,7 +293,7 @@ function SaaSNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'inherit', 
+                color: isActive ? 'var(--primary-color)' : 'inherit', 
                 fontSize: '0.8rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -311,7 +305,7 @@ function SaaSNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
             </Link>
           );
         })}
-        <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1rem 2.8rem', background: 'var(--primary)', color: '#FFF', borderRadius: '100px', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 15px 30px var(--primary)44' }}>
+        <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1rem 2.8rem', background: 'var(--primary-color)', color: '#FFF', borderRadius: '100px', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 15px 30px var(--primary-color)44' }}>
            SIGN UP
         </Link>
       </div>
@@ -319,20 +313,20 @@ function SaaSNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }:
   );
 }
 
-function SaaSFooter({ settings, siteName, footerCfg, p }: any) {
+function SaaSFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#080C16', color: '#FFF', padding: '15rem 4vw 6rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
       <div style={{ maxWidth: '1800px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr', gap: '10rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '4rem' }}>
-            <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Layers size={22} color="#FFF" /></div>
+            <div style={{ width: '40px', height: '40px', background: 'var(--primary-color)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Layers size={22} color="#FFF" /></div>
             <span style={{ fontWeight: 950, fontSize: '1.8rem', color: '#FFF', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>{siteName}</span>
           </div>
           <p style={{ opacity: 0.3, lineHeight: 2, fontSize: '1rem', marginBottom: '5rem', maxWidth: '450px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
              ))}
@@ -360,12 +354,12 @@ function SaaSFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '4rem', opacity: 0.2 }}>Support Relay</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', fontSize: '1.2rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Zap size={22} color="var(--primary)" /> <b>{contact.phone}</b></div>}
-              {contact.whatsapp && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><MessageCircle size={22} color="var(--secondary)" /> <b>CHANNEL</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Zap size={22} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
+              {contact.whatsapp && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><MessageCircle size={22} color="var(--secondary-color)" /> <b>CHANNEL</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}><Mail size={22} style={{ opacity: 0.2 }} /> <b style={{ fontSize: '1rem', opacity: 0.5 }}>{contact.email}</b></div>}
               
               <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'flex-start' }}>
-                 <div style={{ height: '40px', padding: '0 2rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)' }}>
+                 <div style={{ height: '40px', padding: '0 2rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary-color)' }}>
                     <Server size={18} /> CLUSTER_01_ACTIVE
                  </div>
               </div>

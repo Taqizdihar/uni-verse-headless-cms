@@ -16,7 +16,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
-import { getThemeVariables } from '../../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith('/uploads') ? `${BASE_URL}${url}` : url;
@@ -69,26 +68,18 @@ export default function MinimalistTemplate({
   const siteName = settings?.site_name || 'Uni-Inside';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#FBBF24', 
-    secondary: '#18181B', 
-    surface: '#FFFFFF', 
-    text: '#27272A', 
-    name: 'Default' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = getThemeVariables(p);
-
+  
   // Render Post Detail if postData exists
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
-        <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
+        <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <MinimalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <MinimalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -234,19 +225,19 @@ export default function MinimalistTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
-      <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
+      <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <MinimalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <MinimalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function MinimalistNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function MinimalistNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
-    <nav style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4rem', position: 'sticky', top: 0, zIndex: 100, background: `${p.surface}cc`, backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--text-color)0a' }}>
+    <nav style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4rem', position: 'sticky', top: 0, zIndex: 100, background: `${'var(--bg-color)'}cc`, backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--text-color)0a' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '32px', width: 'auto' }} />}
         <span style={{ fontWeight: 900, fontSize: '1.25rem', letterSpacing: '-0.03em' }}>{siteName}</span>
@@ -276,7 +267,7 @@ function MinimalistNavbar({ settings, siteName, navPages, currentSlug, p, subdom
   );
 }
 
-function MinimalistFooter({ settings, siteName, footerCfg, p }: any) {
+function MinimalistFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-color)0a', padding: '8rem 4rem 4rem' }}>

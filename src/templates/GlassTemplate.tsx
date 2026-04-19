@@ -73,30 +73,17 @@ export default function GlassTemplate({
   const siteName = settings?.site_name || 'Glass Clarity';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#6366F1', 
-    secondary: '#EC4899', 
-    surface: '#FFFFFF', 
-    text: '#1E293B', 
-    name: 'Glassmorphism' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <GlassNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <GlassNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <GlassFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <GlassFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -107,15 +94,15 @@ export default function GlassTemplate({
         return (
           <div className="animate-in fade-in duration-1000">
              <section style={{ padding: '12rem 4vw', textAlign: 'center', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '10%', left: '10%', width: '40vw', height: '40vw', background: 'var(--primary)', filter: 'blur(120px)', opacity: 0.1, borderRadius: '50%', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '30vw', height: '30vw', background: 'var(--secondary)', filter: 'blur(120px)', opacity: 0.1, borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', top: '10%', left: '10%', width: '40vw', height: '40vw', background: 'var(--primary-color)', filter: 'blur(120px)', opacity: 0.1, borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '30vw', height: '30vw', background: 'var(--secondary-color)', filter: 'blur(120px)', opacity: 0.1, borderRadius: '50%', pointerEvents: 'none' }} />
                 
                 <div style={{ position: 'relative', zIndex: 10 }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 2rem', background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '100px', backdropFilter: 'blur(20px)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary)', marginBottom: '3.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.05)' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 2rem', background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', borderRadius: '100px', backdropFilter: 'blur(20px)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary-color)', marginBottom: '3.5rem', boxShadow: '0 8px 32px rgba(0,0,0,0.05)' }}>
                       <Sparkles size={16} /> Refining Digital Clarity
                    </div>
                    {content.headline && (
-                     <h1 style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '2.5rem' }}>
+                     <h1 style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 800, color: 'var(--text-color)', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: '2.5rem' }}>
                         {content.headline}
                      </h1>
                    )}
@@ -141,8 +128,8 @@ export default function GlassTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8rem', alignItems: 'center' }}>
                 <div style={{ padding: '6rem', background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(40px)', borderRadius: '4rem', border: '1px solid rgba(255,255,255,0.4)', position: 'relative' }}>
-                   <div style={{ position: 'absolute', top: '2rem', left: '2rem', width: '60px', height: '60px', borderRadius: '20px', background: 'linear-gradient(45deg, var(--primary), var(--secondary))', opacity: 0.1 }} />
-                   <h2 style={{ fontSize: '4rem', fontWeight: 800, lineHeight: 1 }}>Deep Clarity.<br /><span style={{ color: 'var(--primary)' }}>Pure vision.</span></h2>
+                   <div style={{ position: 'absolute', top: '2rem', left: '2rem', width: '60px', height: '60px', borderRadius: '20px', background: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))', opacity: 0.1 }} />
+                   <h2 style={{ fontSize: '4rem', fontWeight: 800, lineHeight: 1 }}>Deep Clarity.<br /><span style={{ color: 'var(--primary-color)' }}>Pure vision.</span></h2>
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.6, whiteSpace: 'pre-wrap' }}
@@ -175,7 +162,7 @@ export default function GlassTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem', background: 'rgba(255,255,255,0.3)', backdropFilter: 'blur(40px)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '4rem', overflow: 'hidden' }}>
                 <div style={{ padding: '6rem' }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem', marginBottom: '2rem' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary-color)', fontWeight: 800, fontSize: '0.85rem', marginBottom: '2rem' }}>
                       <Waves size={20} /> FLUID_SIGNAL_ACQUIRED
                    </div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2rem' }}>{pageData.title}</h1>
@@ -186,7 +173,7 @@ export default function GlassTemplate({
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '6rem' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: 800 }}>Crystal Stream</h2>
-                <div style={{ height: '2px', flex: 1, background: 'linear-gradient(to right, rgba(255,255,255,0), var(--primary)44, rgba(255,255,255,0))' }} />
+                <div style={{ height: '2px', flex: 1, background: 'linear-gradient(to right, rgba(255,255,255,0), var(--primary-color)44, rgba(255,255,255,0))' }} />
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '3rem' }}>
@@ -197,12 +184,12 @@ export default function GlassTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }} className="group-hover:scale-105" />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', items: 'center', marginBottom: '1.5rem' }}>
-                           <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.8rem' }}>{post.category}</span>
+                           <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '0.8rem' }}>{post.category}</span>
                            <span style={{ fontSize: '0.75rem', opacity: 0.3, fontWeight: 700 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
                         <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary-color)' }}>
                            READ JOURNAL <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
                      </article>
@@ -223,7 +210,7 @@ export default function GlassTemplate({
                       {content.email && (
                         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Mail size={28} color="var(--primary)" />
+                              <Mail size={28} color="var(--primary-color)" />
                            </div>
                            <div>
                               <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, opacity: 0.3, textTransform: 'uppercase' }}>Fluid Relay</span>
@@ -234,7 +221,7 @@ export default function GlassTemplate({
                       {content.phone && (
                         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Phone size={28} color="var(--secondary)" />
+                              <Phone size={28} color="var(--secondary-color)" />
                            </div>
                            <div>
                               <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, opacity: 0.3, textTransform: 'uppercase' }}>Waves Connection</span>
@@ -245,7 +232,7 @@ export default function GlassTemplate({
                    </div>
                 </div>
                 <div style={{ position: 'relative' }}>
-                   <div style={{ position: 'absolute', inset: '-2rem', background: 'var(--primary)', filter: 'blur(60px)', opacity: 0.1, borderRadius: '4rem', zIndex: -1 }} />
+                   <div style={{ position: 'absolute', inset: '-2rem', background: 'var(--primary-color)', filter: 'blur(60px)', opacity: 0.1, borderRadius: '4rem', zIndex: -1 }} />
                    {mapsUrl && (
                      <div style={{ width: '100%', height: '650px', borderRadius: '4rem', border: '8px solid rgba(255,255,255,0.5)', overflow: 'hidden', padding: '1rem', background: 'rgba(255,255,255,0.2)' }}>
                         <iframe src={mapsUrl} width="100%" height="100%" style={{ border: 0, borderRadius: '3rem', filter: 'contrast(1.1) brightness(1.1)' }} allowFullScreen loading="lazy"></iframe>
@@ -266,21 +253,21 @@ export default function GlassTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
-      <GlassNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif", position: 'relative' }}>
+      <GlassNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <GlassFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <GlassFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function GlassNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function GlassNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '110px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.4)', borderBottom: '1px solid rgba(255,255,255,0.6)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(30px)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'linear-gradient(45deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
+        <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'linear-gradient(45deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}>
           <Layers size={24} color="#FFF" />
         </div>
         <span style={{ fontWeight: 800, fontSize: '1.8rem', letterSpacing: '-0.04em' }}>{siteName}</span>
@@ -315,7 +302,7 @@ function GlassNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }
   );
 }
 
-function GlassFooter({ settings, siteName, footerCfg, p }: any) {
+function GlassFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(50px)', borderTop: '1px solid rgba(255,255,255,0.6)', padding: '12rem 4vw 4vw' }}>
@@ -356,8 +343,8 @@ function GlassFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '3rem', opacity: 0.3 }}>Prism Hub</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '1.1rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Waves size={20} color="var(--primary)" /> <b>{contact.phone}</b></div>}
-              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><MessageCircle size={20} color="var(--secondary)" /> <b>{contact.whatsapp}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Waves size={20} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
+              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><MessageCircle size={20} color="var(--secondary-color)" /> <b>{contact.whatsapp}</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Mail size={20} style={{ opacity: 0.3 }} /> <b>{contact.email}</b></div>}
               {contact.service_hours && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', opacity: 0.2 }}><Sparkles size={20} /> <span>{contact.service_hours}</span></div>}
               

@@ -76,31 +76,18 @@ export default function IndustrialTemplate({
   const siteName = settings?.site_name || 'Industrial Foundry';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#F97316', 
-    secondary: '#18181B', 
-    surface: '#F4F4F5', 
-    text: '#09090B', 
-    name: 'Industrial' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace" }}>
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace" }}>
         <IndustrialHeader settings={settings} siteName={siteName} />
-        <IndustrialNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+        <IndustrialNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <IndustrialFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <IndustrialFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -110,9 +97,9 @@ export default function IndustrialTemplate({
       case 'home':
         return (
           <div className="animate-in fade-in duration-1000">
-             <section style={{ padding: '10rem 4vw', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8rem', alignItems: 'center', borderBottom: '8px solid var(--text-main)' }}>
+             <section style={{ padding: '10rem 4vw', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8rem', alignItems: 'center', borderBottom: '8px solid var(--text-color)' }}>
                 <div style={{ position: 'relative' }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 2rem', background: 'var(--text-main)', color: '#FFF', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', fontSize: '0.75rem', marginBottom: '4rem', boxShadow: '8px 8px 0 var(--primary)' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', padding: '0.6rem 2rem', background: 'var(--text-color)', color: '#FFF', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', fontSize: '0.75rem', marginBottom: '4rem', boxShadow: '8px 8px 0 var(--primary-color)' }}>
                       <Zap size={16} /> Engineered for precision
                    </div>
                    {content.headline && (
@@ -121,21 +108,21 @@ export default function IndustrialTemplate({
                      </h1>
                    )}
                    {content.sub_headline && (
-                     <p style={{ fontSize: '1.25rem', opacity: 0.6, maxWidth: '600px', lineHeight: 1.6, textTransform: 'uppercase', letterSpacing: '-0.02em', borderLeft: '8px solid var(--text-main)', paddingLeft: '3rem' }}>
+                     <p style={{ fontSize: '1.25rem', opacity: 0.6, maxWidth: '600px', lineHeight: 1.6, textTransform: 'uppercase', letterSpacing: '-0.02em', borderLeft: '8px solid var(--text-color)', paddingLeft: '3rem' }}>
                         {content.sub_headline}
                      </p>
                    )}
                 </div>
                 {content.hero_image && (
-                  <div style={{ position: 'relative', padding: '1rem', border: '4px solid var(--text-main)', background: '#FFF', boxShadow: '20px 20px 0 var(--primary)' }}>
+                  <div style={{ position: 'relative', padding: '1rem', border: '4px solid var(--text-color)', background: '#FFF', boxShadow: '20px 20px 0 var(--primary-color)' }}>
                      <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '600px', objectFit: 'cover', filter: 'grayscale(1)' }} />
-                     <div style={{ position: 'absolute', top: '-2rem', right: '-2rem', width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary)', border: '4px solid var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                     <div style={{ position: 'absolute', top: '-2rem', right: '-2rem', width: '80px', height: '80px', borderRadius: '50%', background: 'var(--primary-color)', border: '4px solid var(--text-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ShieldCheck size={40} color="#FFF" />
                      </div>
                   </div>
                 )}
              </section>
-             <div style={{ background: 'var(--text-main)', padding: '6rem 4vw', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px' }}>
+             <div style={{ background: 'var(--text-color)', padding: '6rem 4vw', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px' }}>
                 {[
                   { l: 'Precision Rate', v: '99.98%' },
                   { l: 'Active Patents', v: '142+' },
@@ -143,7 +130,7 @@ export default function IndustrialTemplate({
                   { l: 'Efficiency', v: '94.2%' }
                 ].map((s, i) => (
                   <div key={i} style={{ padding: '3rem', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                     <h4 style={{ color: 'var(--primary)', fontSize: '3rem', fontWeight: 900, marginBottom: '1rem' }}>{s.v}</h4>
+                     <h4 style={{ color: 'var(--primary-color)', fontSize: '3rem', fontWeight: 900, marginBottom: '1rem' }}>{s.v}</h4>
                      <label style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>{s.l}</label>
                   </div>
                 ))}
@@ -155,7 +142,7 @@ export default function IndustrialTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '8rem', alignItems: 'center' }}>
-                <div style={{ padding: '6rem', background: 'var(--text-main)', color: '#FFF', borderLeft: '12px solid var(--primary)' }}>
+                <div style={{ padding: '6rem', background: 'var(--text-color)', color: '#FFF', borderLeft: '12px solid var(--primary-color)' }}>
                    <Hammer size={64} style={{ marginBottom: '3rem', opacity: 0.2 }} />
                    <h2 style={{ fontSize: '3.5rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1, fontStyle: 'italic' }}>Industrial<br />Foundry.</h2>
                 </div>
@@ -171,13 +158,13 @@ export default function IndustrialTemplate({
         const galleryImages = Array.isArray(content.images) ? content.images : [];
         return (
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
-             <div style={{ borderLeft: '12px solid var(--primary)', paddingLeft: '4vw', marginBottom: '8rem' }}>
+             <div style={{ borderLeft: '12px solid var(--primary-color)', paddingLeft: '4vw', marginBottom: '8rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '5rem', fontWeight: 900, textTransform: 'uppercase', fontStyle: 'italic' }}>{content.gallery_title}</h1>}
                 {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.5, textTransform: 'uppercase', maxWidth: '600px', marginTop: '1.5rem' }}>{content.description}</p>}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
                 {galleryImages.map((img: string, i: number) => (
-                  <div key={i} style={{ borderRadius: '4px', overflow: 'hidden', height: '450px', border: '5px solid var(--text-main)', padding: '10px', background: '#FFF' }} className="group">
+                  <div key={i} style={{ borderRadius: '4px', overflow: 'hidden', height: '450px', border: '5px solid var(--text-color)', padding: '10px', background: '#FFF' }} className="group">
                      <img src={fixImg(img)} alt={`Unit ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1)', transition: 'all 0.6s' }} className="group-hover:grayscale-0 group-hover:scale-105" />
                   </div>
                 ))}
@@ -188,9 +175,9 @@ export default function IndustrialTemplate({
       case 'news':
         return (
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
-             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem', border: '8px solid var(--text-main)', background: '#FFF' }}>
+             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem', border: '8px solid var(--text-color)', background: '#FFF' }}>
                 <div style={{ padding: '6rem' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '2.5rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>OPERATIONAL_LOG</div>
+                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', marginBottom: '2.5rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>OPERATIONAL_LOG</div>
                    <h1 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, textTransform: 'uppercase', marginBottom: '2.5rem', fontStyle: 'italic' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8, textTransform: 'uppercase' }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -199,24 +186,24 @@ export default function IndustrialTemplate({
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '6rem' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase' }}>Technical Archive</h2>
-                <div style={{ height: '4px', flex: 1, background: 'var(--text-main)' }} />
+                <div style={{ height: '4px', flex: 1, background: 'var(--text-color)' }} />
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '4rem' }}>
                 {posts.map((post) => (
                   <Link key={post.id} to={`/preview/${subdomain}/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                     <article style={{ background: '#FFF', border: '4px solid var(--text-main)', boxShadow: '12px 12px 0 var(--text-main)' }} className="group hover:shadow-[12px_12px_0_var(--primary)] transition-all">
-                        <div style={{ height: '280px', overflow: 'hidden', borderBottom: '4px solid var(--text-main)' }}>
+                     <article style={{ background: '#FFF', border: '4px solid var(--text-color)', boxShadow: '12px 12px 0 var(--text-color)' }} className="group hover:shadow-[12px_12px_0_var(--primary-color)] transition-all">
+                        <div style={{ height: '280px', overflow: 'hidden', borderBottom: '4px solid var(--text-color)' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1)', transition: 'all 0.5s' }} className="group-hover:grayscale-0" />
                         </div>
                         <div style={{ padding: '2.5rem' }}>
                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                              <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>{post.category}</span>
+                              <span style={{ fontWeight: 900, color: 'var(--primary-color)', fontSize: '0.75rem', textTransform: 'uppercase' }}>{post.category}</span>
                               <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 900 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                            </div>
                            <h3 style={{ fontSize: '1.8rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: '1.5rem', lineHeight: 1.1 }}>{post.title}</h3>
                            <p style={{ opacity: 0.5, fontSize: '0.9rem', lineHeight: 1.6, textTransform: 'uppercase', marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                               OPEN_LOG <ArrowRight size={18} className="group-hover:translate-x-4 transition-transform" />
                            </div>
                         </div>
@@ -236,13 +223,13 @@ export default function IndustrialTemplate({
                    <h1 style={{ fontSize: '6rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.85, marginBottom: '6rem', fontStyle: 'italic' }}>Request<br />Brief.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                       {content.email && (
-                        <div style={{ padding: '3rem', border: '5px solid var(--text-main)', background: '#FFF', boxShadow: '12px 12px 0 var(--text-main)' }}>
+                        <div style={{ padding: '3rem', border: '5px solid var(--text-color)', background: '#FFF', boxShadow: '12px 12px 0 var(--text-color)' }}>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Transmission Hub</span>
                            <b style={{ fontSize: '1.8rem' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
-                        <div style={{ padding: '3rem', border: '5px solid var(--text-main)', background: '#FFF', boxShadow: '12px 12px 0 var(--primary)' }}>
+                        <div style={{ padding: '3rem', border: '5px solid var(--text-color)', background: '#FFF', boxShadow: '12px 12px 0 var(--primary-color)' }}>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Voice Protocol</span>
                            <b style={{ fontSize: '2.2rem' }}>{content.phone}</b>
                         </div>
@@ -251,7 +238,7 @@ export default function IndustrialTemplate({
                 </div>
                 <div>
                    {mapsSrc && (
-                     <div style={{ width: '100%', height: '700px', border: '8px solid var(--text-main)', padding: '1rem', background: '#FFF', boxShadow: '20px 20px 0 var(--text-main)' }}>
+                     <div style={{ width: '100%', height: '700px', border: '8px solid var(--text-color)', padding: '1rem', background: '#FFF', boxShadow: '20px 20px 0 var(--text-color)' }}>
                         <iframe src={mapsSrc} width="100%" height="100%" style={{ border: 0, filter: 'grayscale(1)' }} allowFullScreen loading="lazy"></iframe>
                      </div>
                    )}
@@ -270,22 +257,22 @@ export default function IndustrialTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace" }}>
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace" }}>
       <IndustrialHeader settings={settings} siteName={siteName} />
-      <IndustrialNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <IndustrialNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <IndustrialFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <IndustrialFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
 function IndustrialHeader({ settings, siteName }: any) {
   return (
-    <div style={{ background: 'var(--text-main)', color: '#FFF', padding: '0.8rem 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
+    <div style={{ background: 'var(--text-color)', color: '#FFF', padding: '0.8rem 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
        <div style={{ display: 'flex', gap: '3rem' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Settings size={14} color="var(--primary)" /> System_Operational</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Settings size={14} color="var(--primary-color)" /> System_Operational</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><ShieldCheck size={14} color="#22C55E" /> ISO_9001:2015</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><HardHat size={14} color="#FBBF24" /> Safety_Active</span>
        </div>
@@ -294,16 +281,16 @@ function IndustrialHeader({ settings, siteName }: any) {
   );
 }
 
-function IndustrialNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function IndustrialNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
-    <nav style={{ height: '90px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.85)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(20px)', borderBottom: '5px solid var(--text-main)' }}>
+    <nav style={{ height: '90px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.85)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(20px)', borderBottom: '5px solid var(--text-color)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ width: '48px', height: '48px', background: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF' }}>
+        <div style={{ width: '48px', height: '48px', background: 'var(--text-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF' }}>
           <Factory size={28} />
         </div>
-        <span style={{ fontWeight: 900, fontSize: '1.8rem', textTransform: 'uppercase', fontStyle: 'italic', color: 'var(--text-main)' }}>{siteName}</span>
+        <span style={{ fontWeight: 900, fontSize: '1.8rem', textTransform: 'uppercase', fontStyle: 'italic', color: 'var(--text-color)' }}>{siteName}</span>
       </Link>
-      <div style={{ display: 'flex', background: 'var(--text-main)', padding: '4px' }}>
+      <div style={{ display: 'flex', background: 'var(--text-color)', padding: '4px' }}>
         {navPages.map((nav: any) => {
           const isActive = currentSlug === nav.slug?.replace(/^\/+/, '');
           return (
@@ -318,7 +305,7 @@ function IndustrialNavbar({ settings, siteName, navPages, currentSlug, p, subdom
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
-                background: isActive ? 'var(--primary)' : 'transparent',
+                background: isActive ? 'var(--primary-color)' : 'transparent',
                 boxShadow: isActive ? '4px 4px 0px rgba(255,255,255,0.2)' : 'none',
                 transition: 'all 0.3s'
               }}>
@@ -331,10 +318,10 @@ function IndustrialNavbar({ settings, siteName, navPages, currentSlug, p, subdom
   );
 }
 
-function IndustrialFooter({ settings, siteName, footerCfg, p }: any) {
+function IndustrialFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'black', color: '#52525B', padding: '12rem 4vw 4vw', borderTop: '12px solid var(--primary)' }}>
+    <footer style={{ background: 'black', color: '#52525B', padding: '12rem 4vw 4vw', borderTop: '12px solid var(--primary-color)' }}>
       <div style={{ maxWidth: '1600px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '8rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -343,7 +330,7 @@ function IndustrialFooter({ settings, siteName, footerCfg, p }: any) {
           <p style={{ opacity: 0.4, lineHeight: 1.8, fontSize: '0.85rem', marginBottom: '4rem', maxWidth: '400px', textTransform: 'uppercase' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-5px) skewX(-12deg)'; }} onMouseOut={e => { e.currentTarget.style.color = 'inherit'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(-5px) skewX(-12deg)'; }} onMouseOut={e => { e.currentTarget.style.color = 'inherit'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
              ))}
@@ -371,7 +358,7 @@ function IndustrialFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '3.5rem', opacity: 0.2 }}>Factory_Map</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', fontSize: '1rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Phone size={18} color="var(--primary)" /> <b>VOICE: {contact.phone}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Phone size={18} color="var(--primary-color)" /> <b>VOICE: {contact.phone}</b></div>}
               {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><MessageCircle size={18} color="#22C55E" /> <b>CHANNEL: {contact.whatsapp}</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}><Mail size={18} /> <b style={{ fontSize: '0.85rem' }}>{contact.email}</b></div>}
               

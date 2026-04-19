@@ -24,7 +24,6 @@ import {
   Layout
 } from 'lucide-react';
 import UnifiedPostLayout from '../components/UnifiedPostLayout';
-import { getThemeVariables } from '../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith("/uploads") ? `${BASE_URL}${url}` : url;
@@ -72,25 +71,17 @@ export default function ArchitectTemplate({
   const siteName = settings?.site_name || 'Architect Studio';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#000000', 
-    secondary: '#52525B', 
-    surface: '#FFFFFF', 
-    text: '#09090B', 
-    name: 'Architecture' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = getThemeVariables(p);
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <ArchitectNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <ArchitectNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <ArchitectFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <ArchitectFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -119,7 +110,7 @@ export default function ArchitectTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4rem' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr', gap: '8vw' }}>
-                <div style={{ borderTop: '4px solid var(--text-main)', paddingTop: '2rem' }}>
+                <div style={{ borderTop: '4px solid var(--text-color)', paddingTop: '2rem' }}>
                    <h2 style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em' }}>Principles_Report</h2>
                 </div>
                 <div 
@@ -141,11 +132,11 @@ export default function ArchitectTemplate({
                 </div>
                 <div style={{ fontSize: '4rem', fontWeight: 100, opacity: 0.1 }}>{galleryImages.length < 10 ? `0${galleryImages.length}` : galleryImages.length}</div>
              </header>
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '2px', background: 'var(--text-main)11' }}>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '2px', background: 'var(--text-color)11' }}>
                 {galleryImages.map((img: string, i: number) => (
                   <div key={i} style={{ aspectRatio: '4/3', overflow: 'hidden', position: 'relative' }} className="group">
                      <img src={fixImg(img)} alt={`Gallery ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'filter 0.6s' }} />
-                     <div style={{ position: 'absolute', inset: 0, background: `${p.primary}88`, opacity: 0, transition: 'opacity 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="group-hover:opacity-100">
+                     <div style={{ position: 'absolute', inset: 0, background: 'var(--primary-color)88', opacity: 0, transition: 'opacity 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="group-hover:opacity-100">
                         <Maximize color="#FFF" size={40} strokeWidth={1} />
                      </div>
                   </div>
@@ -230,17 +221,17 @@ export default function ArchitectTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <ArchitectNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <ArchitectNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <ArchitectFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <ArchitectFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function ArchitectNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function ArchitectNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid #E5E5E5' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -268,7 +259,7 @@ function ArchitectNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
                 textTransform: 'uppercase',
                 letterSpacing: '0.4em',
                 opacity: isActive ? 1 : 0.3,
-                borderBottom: isActive ? '2px solid var(--text-main)' : 'none',
+                borderBottom: isActive ? '2px solid var(--text-color)' : 'none',
                 paddingBottom: '0.5rem',
                 transition: 'all 0.3s'
               }}>
@@ -281,7 +272,7 @@ function ArchitectNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
   );
 }
 
-function ArchitectFooter({ settings, siteName, footerCfg, p }: any) {
+function ArchitectFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: 'var(--bg-color)', borderTop: '4px solid #000', padding: '10rem 4rem 4rem' }}>

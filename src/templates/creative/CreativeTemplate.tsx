@@ -65,30 +65,17 @@ export default function CreativeTemplate({
   const siteName = settings?.site_name || 'Creative Studio';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#FF3E00', 
-    secondary: '#000000', 
-    surface: '#0A0A0A', 
-    text: '#FFFFFF', 
-    name: 'Creative' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Outfit', sans-serif" }}>
-        <CreativeNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Outfit', sans-serif" }}>
+        <CreativeNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <CreativeFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <CreativeFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -106,8 +93,8 @@ export default function CreativeTemplate({
                      </h1>
                    )}
                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 2fr', gap: '4rem', alignItems: 'end' }}>
-                      <div style={{ width: '100px', height: '100px', borderRadius: '50%', border: '1px solid var(--text-main)22', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'spin 10s linear infinite' }}>
-                         <Zap size={40} color="var(--primary)" />
+                      <div style={{ width: '100px', height: '100px', borderRadius: '50%', border: '1px solid var(--text-color)22', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'spin 10s linear infinite' }}>
+                         <Zap size={40} color="var(--primary-color)" />
                          <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
                       </div>
                       {content.sub_headline && (
@@ -130,7 +117,7 @@ export default function CreativeTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12rem 4rem' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '8rem' }}>
-                <h1 style={{ fontSize: '6rem', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.05em' }}>The <span style={{ color: 'var(--primary)' }}>DNA</span> of our Works.</h1>
+                <h1 style={{ fontSize: '6rem', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.05em' }}>The <span style={{ color: 'var(--primary-color)' }}>DNA</span> of our Works.</h1>
                 <div 
                   style={{ fontSize: '1.5rem', lineHeight: 1.6, opacity: 0.8, whiteSpace: 'pre-wrap', fontWeight: 300 }}
                   dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
@@ -166,9 +153,9 @@ export default function CreativeTemplate({
              </div>
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '5rem' }}>
-                <div style={{ height: '2px', flex: 1, background: 'var(--text-main)11' }} />
+                <div style={{ height: '2px', flex: 1, background: 'var(--text-color)11' }} />
                 <h2 style={{ fontSize: '4rem', fontWeight: 900, letterSpacing: '-0.04em' }}>Case Studies</h2>
-                <div style={{ height: '2px', flex: 1, background: 'var(--text-main)11' }} />
+                <div style={{ height: '2px', flex: 1, background: 'var(--text-color)11' }} />
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))', gap: '6rem' }}>
@@ -178,7 +165,7 @@ export default function CreativeTemplate({
                         <div style={{ aspectRatio: '1', borderRadius: '4rem', overflow: 'hidden', marginBottom: '3rem', background: '#111' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s' }} className="group-hover:scale-110" />
                         </div>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.3em' }}>{post.category}</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'var(--primary-color)', textTransform: 'uppercase', letterSpacing: '0.3em' }}>{post.category}</span>
                         <h3 style={{ fontSize: '2.5rem', fontWeight: 900, marginTop: '1rem', letterSpacing: '-0.03em' }}>{post.title}</h3>
                         <p style={{ opacity: 0.4, fontSize: '1.1rem', marginTop: '1.5rem', maxWidth: '450px' }}>{post.excerpt || post.content?.summary}</p>
                      </article>
@@ -199,7 +186,7 @@ export default function CreativeTemplate({
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', opacity: 0.3, marginBottom: '1rem' }}>Electronic Mail</span>
-                           <a href={`mailto:${content.email}`} style={{ fontSize: '2.5rem', fontWeight: 300, color: 'inherit', textDecoration: 'none', borderBottom: '2px solid var(--primary)' }}>{content.email}</a>
+                           <a href={`mailto:${content.email}`} style={{ fontSize: '2.5rem', fontWeight: 300, color: 'inherit', textDecoration: 'none', borderBottom: '2px solid var(--primary-color)' }}>{content.email}</a>
                         </div>
                       )}
                       {content.phone && (
@@ -231,17 +218,17 @@ export default function CreativeTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Outfit', sans-serif" }}>
-      <CreativeNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Outfit', sans-serif" }}>
+      <CreativeNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <CreativeFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <CreativeFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function CreativeNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function CreativeNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'transparent', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -257,7 +244,7 @@ function CreativeNavbar({ settings, siteName, navPages, currentSlug, p, subdomai
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'var(--text-main)', 
+                color: isActive ? 'var(--primary-color)' : 'var(--text-color)', 
                 fontSize: '0.8rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -274,11 +261,11 @@ function CreativeNavbar({ settings, siteName, navPages, currentSlug, p, subdomai
   );
 }
 
-function CreativeFooter({ settings, siteName, footerCfg, p }: any) {
+function CreativeFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#050505', color: '#FFFFFF', padding: '12rem 4rem 4rem', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', width: '1000px', height: '1000px', background: 'var(--primary)', filter: 'blur(200px)', opacity: 0.1, top: '-500px', right: '-500px', borderRadius: '50%' }} />
+      <div style={{ position: 'absolute', width: '1000px', height: '1000px', background: 'var(--primary-color)', filter: 'blur(200px)', opacity: 0.1, top: '-500px', right: '-500px', borderRadius: '50%' }} />
       <div style={{ maxWidth: '1600px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: '8rem', position: 'relative', zIndex: 1 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '3rem' }}>
@@ -288,7 +275,7 @@ function CreativeFooter({ settings, siteName, footerCfg, p }: any) {
           <p style={{ opacity: 0.4, lineHeight: 1.6, fontSize: '1.2rem', marginBottom: '4rem', maxWidth: '450px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s ease' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s ease' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary-color)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
                    <SocialIcon type={social.icon} size={30} />
                 </a>
              ))}

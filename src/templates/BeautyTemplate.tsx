@@ -72,30 +72,17 @@ export default function BeautyTemplate({
   const siteName = settings?.site_name || 'Beauty Wellness';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#FCE7F3', 
-    secondary: '#FBCFE8', 
-    surface: '#FFFFFF', 
-    text: '#500724', 
-    name: 'Spa & Wellness' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <BeautyNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <BeautyNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <BeautyFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <BeautyFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -105,7 +92,7 @@ export default function BeautyTemplate({
       case 'home':
         return (
           <div className="animate-in fade-in duration-1000">
-             <section style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--primary)', color: 'var(--text-main)', borderRadius: '0 0 5rem 5rem' }}>
+             <section style={{ padding: '8rem 2rem', textAlign: 'center', background: 'var(--primary-color)', color: 'var(--text-color)', borderRadius: '0 0 5rem 5rem' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
                       <Sparkles size={24} style={{ opacity: 0.4 }} />
@@ -126,7 +113,7 @@ export default function BeautyTemplate({
         return (
           <div style={{ maxWidth: '900px', margin: '0 auto', padding: '10rem 2rem' }} className="animate-in fade-in duration-700">
              <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                <Flower2 size={40} style={{ color: 'var(--secondary)', marginBottom: '1.5rem' }} />
+                <Flower2 size={40} style={{ color: 'var(--secondary-color)', marginBottom: '1.5rem' }} />
                 <h2 style={{ fontSize: '3rem', fontStyle: 'italic', fontWeight: 300 }}>The Essence of Purity</h2>
              </div>
              <div 
@@ -162,7 +149,7 @@ export default function BeautyTemplate({
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div>
-                   <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: 'var(--secondary)', marginBottom: '1.5rem', display: 'block' }}>Wellness Journal</span>
+                   <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: 'var(--secondary-color)', marginBottom: '1.5rem', display: 'block' }}>Wellness Journal</span>
                    <h1 style={{ fontSize: '3.5rem', fontStyle: 'italic', fontWeight: 300, lineHeight: 1.1, marginBottom: '2rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -170,9 +157,9 @@ export default function BeautyTemplate({
 
              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                   <div style={{ height: '1px', width: '100px', background: 'var(--text-main)11' }} />
+                   <div style={{ height: '1px', width: '100px', background: 'var(--text-color)11' }} />
                    <h2 style={{ fontSize: '2rem', fontStyle: 'italic', fontWeight: 300 }}>Recent Articles</h2>
-                   <div style={{ height: '1px', width: '100px', background: 'var(--text-main)11' }} />
+                   <div style={{ height: '1px', width: '100px', background: 'var(--text-color)11' }} />
                 </div>
              </div>
 
@@ -180,12 +167,12 @@ export default function BeautyTemplate({
                 {posts.map((post) => (
                   <Link key={post.id} to={`/preview/${subdomain}/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                      <article style={{ textAlign: 'center' }}>
-                        <div style={{ aspectRatio: '1', borderRadius: '50%', overflow: 'hidden', marginBottom: '2.5rem', border: '8px solid var(--primary)' }}>
+                        <div style={{ aspectRatio: '1', borderRadius: '50%', overflow: 'hidden', marginBottom: '2.5rem', border: '8px solid var(--primary-color)' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <h3 style={{ fontSize: '1.6rem', fontStyle: 'italic', fontWeight: 300, marginBottom: '1rem' }}>{post.title}</h3>
                         <p style={{ opacity: 0.5, fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--secondary)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--secondary-color)', fontWeight: 800, fontSize: '0.75rem', letterSpacing: '0.1em' }}>
                            DISCOVER <ArrowRight size={16} />
                         </div>
                      </article>
@@ -207,8 +194,8 @@ export default function BeautyTemplate({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                    {content.email && (
                      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <Mail size={24} color="var(--text-main)" />
+                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <Mail size={24} color="var(--text-color)" />
                         </div>
                         <div>
                            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Digital Ether</span>
@@ -218,8 +205,8 @@ export default function BeautyTemplate({
                    )}
                    {content.phone && (
                      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <Phone size={24} color="var(--text-main)" />
+                        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <Phone size={24} color="var(--text-color)" />
                         </div>
                         <div>
                            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: 900, opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Voice Signal</span>
@@ -249,25 +236,25 @@ export default function BeautyTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <BeautyNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <BeautyNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <BeautyFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <BeautyFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function BeautyNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function BeautyNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
-    <nav style={{ height: '100px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--primary)' }}>
+    <nav style={{ height: '100px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--primary-color)' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {settings?.logo_url ? (
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '40px', width: 'auto' }} />
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-             <Flower2 size={28} color="var(--secondary)" />
+             <Flower2 size={28} color="var(--secondary-color)" />
              <span style={{ fontWeight: 300, fontSize: '1.6rem', fontStyle: 'italic', letterSpacing: '-0.02em' }}>{siteName}</span>
           </div>
         )}
@@ -298,10 +285,10 @@ function BeautyNavbar({ settings, siteName, navPages, currentSlug, p, subdomain 
   );
 }
 
-function BeautyFooter({ settings, siteName, footerCfg, p }: any) {
+function BeautyFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--primary)', padding: '10rem 4rem 4rem' }}>
+    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--primary-color)', padding: '10rem 4rem 4rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '6rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
@@ -324,7 +311,7 @@ function BeautyFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '2.5rem', opacity: 0.3 }}>Presence</h4>
            <div style={{ display: 'flex', gap: '1.5rem' }}>
               {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--secondary)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--secondary-color)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
                    <SocialIcon type={social.icon} size={26} />
                 </a>
               ))}
@@ -340,14 +327,14 @@ function BeautyFooter({ settings, siteName, footerCfg, p }: any) {
               {contact.service_hours && <div style={{ display: 'flex', gap: '1rem', opacity: 0.3 }}><Clock size={18} /> <span>{contact.service_hours}</span></div>}
               
               {footerCfg.location_embed_link && (
-                <div style={{ width: '100%', height: '160px', borderRadius: '8rem 8rem 1rem 1rem', overflow: 'hidden', marginTop: '1.5rem', border: '1px solid var(--primary)' }}>
+                <div style={{ width: '100%', height: '160px', borderRadius: '8rem 8rem 1rem 1rem', overflow: 'hidden', marginTop: '1.5rem', border: '1px solid var(--primary-color)' }}>
                    <iframe src={footerCfg.location_embed_link.includes('<iframe') ? footerCfg.location_embed_link.match(/src="([^"]+)"/)?.[1] : footerCfg.location_embed_link} width="100%" height="100%" style={{ border: 0 }} loading="lazy"></iframe>
                 </div>
               )}
            </div>
         </div>
       </div>
-      <div style={{ maxWidth: '1400px', margin: '8rem auto 0', paddingTop: '3rem', borderTop: '1px solid var(--primary)', fontSize: '0.8rem', opacity: 0.3, textAlign: 'center', fontStyle: 'italic' }}>
+      <div style={{ maxWidth: '1400px', margin: '8rem auto 0', paddingTop: '3rem', borderTop: '1px solid var(--primary-color)', fontSize: '0.8rem', opacity: 0.3, textAlign: 'center', fontStyle: 'italic' }}>
          © {new Date().getFullYear()} {siteName}. Pure Essence Preservation.
       </div>
     </footer>

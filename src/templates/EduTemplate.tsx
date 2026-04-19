@@ -72,30 +72,17 @@ export default function EduTemplate({
   const siteName = settings?.site_name || 'Academic Institution';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#1E3A8A', 
-    secondary: '#B91C1C', 
-    surface: '#FFFFFF', 
-    text: '#0F172A', 
-    name: 'Education' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
-        <EduNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
+        <EduNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <EduFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <EduFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -105,9 +92,9 @@ export default function EduTemplate({
       case 'home':
         return (
           <div className="animate-in fade-in duration-1000">
-             <section style={{ padding: '0', position: 'relative', height: '80vh', borderBottom: '10px solid var(--primary)' }}>
+             <section style={{ padding: '0', position: 'relative', height: '80vh', borderBottom: '10px solid var(--primary-color)' }}>
                 {content.hero_image && <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, var(--primary)CC, transparent)', display: 'flex', alignItems: 'center', padding: '0 8vw' }}>
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, var(--primary-color)CC, transparent)', display: 'flex', alignItems: 'center', padding: '0 8vw' }}>
                    <div style={{ maxWidth: '800px', color: '#FFF' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 1rem', border: '1px solid #FFFFFF44', background: '#FFFFFF11', fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '2rem' }}>
                          <GraduationCap size={18} /> Accredited Institution
@@ -117,7 +104,7 @@ export default function EduTemplate({
                    </div>
                 </div>
              </section>
-             <div style={{ background: 'var(--primary)', color: '#FFF', padding: '2rem 8vw', display: 'flex', gap: '4rem', overflowX: 'auto' }}>
+             <div style={{ background: 'var(--primary-color)', color: '#FFF', padding: '2rem 8vw', display: 'flex', gap: '4rem', overflowX: 'auto' }}>
                 <div style={{ flexShrink: 0, display: 'flex', gap: '1rem', alignItems: 'center' }}><Users size={20} /> <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Alumni</span></div>
                 <div style={{ flexShrink: 0, display: 'flex', gap: '1rem', alignItems: 'center' }}><Library size={20} /> <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Research Hub</span></div>
                 <div style={{ flexShrink: 0, display: 'flex', gap: '1rem', alignItems: 'center' }}><Globe size={20} /> <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>World Recognized</span></div>
@@ -129,8 +116,8 @@ export default function EduTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '8rem', alignItems: 'start' }}>
-                <div style={{ borderLeft: '10px solid var(--secondary)', paddingLeft: '3rem' }}>
-                   <h2 style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary)' }}>Academic Legacy.</h2>
+                <div style={{ borderLeft: '10px solid var(--secondary-color)', paddingLeft: '3rem' }}>
+                   <h2 style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary-color)' }}>Academic Legacy.</h2>
                 </div>
                 <div 
                   style={{ fontSize: '1.25rem', lineHeight: 2, opacity: 0.8, whiteSpace: 'pre-wrap' }}
@@ -145,7 +132,7 @@ export default function EduTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <header style={{ marginBottom: '6rem', borderBottom: '2px solid #EEE', paddingBottom: '3rem' }}>
-                {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--primary)' }}>{content.gallery_title}</h1>}
+                {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--primary-color)' }}>{content.gallery_title}</h1>}
                 {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.5, marginTop: '1rem' }}>{content.description}</p>}
              </header>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -166,14 +153,14 @@ export default function EduTemplate({
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                   <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'var(--secondary)', marginBottom: '1.5rem' }}>Collegiate Broadcast</span>
-                   <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2rem', color: 'var(--primary)' }}>{pageData.title}</h1>
+                   <span style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: 'var(--secondary-color)', marginBottom: '1.5rem' }}>Collegiate Broadcast</span>
+                   <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '2rem', color: 'var(--primary-color)' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
              </div>
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '5rem' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary)' }}>Faculty Highlights</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--primary-color)' }}>Faculty Highlights</h2>
                 <div style={{ height: '2px', flex: 1, background: '#EEE' }} />
              </div>
 
@@ -183,12 +170,12 @@ export default function EduTemplate({
                      <article style={{ border: '1px solid #EEE', borderRadius: '0.5rem', overflow: 'hidden' }} className="group">
                         <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', background: 'var(--primary)', color: '#FFF', padding: '4px 12px', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>{post.category}</div>
+                           <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', background: 'var(--primary-color)', color: '#FFF', padding: '4px 12px', fontWeight: 900, fontSize: '0.7rem', textTransform: 'uppercase' }}>{post.category}</div>
                         </div>
                         <div style={{ padding: '2rem' }}>
-                           <h3 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--primary)' }}>{post.title}</h3>
+                           <h3 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--primary-color)' }}>{post.title}</h3>
                            <p style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.75rem', color: 'var(--secondary)' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.75rem', color: 'var(--secondary-color)' }}>
                               VIEW DETAILS <ChevronRight size={16} />
                            </div>
                         </div>
@@ -205,12 +192,12 @@ export default function EduTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8rem', alignItems: 'center' }}>
                 <div>
-                   <h1 style={{ fontSize: '5rem', fontWeight: 800, color: 'var(--primary)', lineHeight: 1, marginBottom: '4rem' }}>Campus<br />Inquiries.</h1>
+                   <h1 style={{ fontSize: '5rem', fontWeight: 800, color: 'var(--primary-color)', lineHeight: 1, marginBottom: '4rem' }}>Campus<br />Inquiries.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.3, marginBottom: '1rem' }}>Admissions Hub</span>
-                           <b style={{ fontSize: '1.8rem', color: 'var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '1.8rem', color: 'var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -242,17 +229,17 @@ export default function EduTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
-      <EduNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Charter', 'Georgia', serif" }}>
+      <EduNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <EduFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <EduFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function EduNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function EduNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid #EEE' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -260,9 +247,9 @@ function EduNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: 
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '44px', width: 'auto' }} />
         ) : (
           <div style={{ display: 'flex', items: 'center', gap: '1rem' }}>
-             <Library size={32} color="var(--primary)" />
+             <Library size={32} color="var(--primary-color)" />
              <div style={{ lineHeight: 1, display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: 800, fontSize: '1.4rem', textTransform: 'uppercase', color: 'var(--primary)' }}>{siteName}</span>
+                <span style={{ fontWeight: 800, fontSize: '1.4rem', textTransform: 'uppercase', color: 'var(--primary-color)' }}>{siteName}</span>
                 <span style={{ fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', opacity: 0.3 }}>Center of Excellence</span>
              </div>
           </div>
@@ -283,7 +270,7 @@ function EduNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: 
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
                 opacity: isActive ? 1 : 0.4,
-                borderBottom: isActive ? '3px solid var(--secondary)' : 'none',
+                borderBottom: isActive ? '3px solid var(--secondary-color)' : 'none',
                 paddingBottom: '0.5rem',
                 transition: 'all 0.3s'
               }}>
@@ -296,7 +283,7 @@ function EduNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: 
   );
 }
 
-function EduFooter({ settings, siteName, footerCfg, p }: any) {
+function EduFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#FDFDFD', borderTop: '1px solid #EEE', padding: '10rem 4vw 4vw' }}>
@@ -304,7 +291,7 @@ function EduFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
             {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '44px', width: 'auto' }} />}
-            <span style={{ fontWeight: 800, fontSize: '1.8rem', textTransform: 'uppercase', color: 'var(--primary)' }}>{siteName}</span>
+            <span style={{ fontWeight: 800, fontSize: '1.8rem', textTransform: 'uppercase', color: 'var(--primary-color)' }}>{siteName}</span>
           </div>
           <p style={{ opacity: 0.5, lineHeight: 1.8, fontSize: '1rem', fontStyle: 'italic', marginBottom: '3rem', maxWidth: '400px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
         </div>
@@ -322,7 +309,7 @@ function EduFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '2.5rem', opacity: 0.3 }}>Academic Net</h4>
            <div style={{ display: 'flex', gap: '1.5rem' }}>
               {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.3, transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--primary-color)'; }} onMouseOut={e => { e.currentTarget.style.opacity = '0.3'; e.currentTarget.style.color = 'inherit'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
               ))}

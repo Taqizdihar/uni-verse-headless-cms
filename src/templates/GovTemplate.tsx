@@ -70,31 +70,18 @@ export default function GovTemplate({
   const siteName = settings?.site_name || 'Portal Instansi';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#1E3A8A', 
-    secondary: '#991B1B', 
-    surface: '#FFFFFF', 
-    text: '#1E293B', 
-    name: 'Government' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
         <GovHeader settings={settings} siteName={siteName} footerCfg={footerCfg} />
-        <GovNavbar navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+        <GovNavbar navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <GovFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <GovFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -120,7 +107,7 @@ export default function GovTemplate({
                   { i: FileText, t: 'Transparansi Data' },
                   { i: Info, t: 'Pusat Informasi' }
                 ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--primary)' }}>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--primary-color)' }}>
                      <item.i size={32} />
                      <span style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.85rem' }}>{item.t}</span>
                   </div>
@@ -133,8 +120,8 @@ export default function GovTemplate({
         return (
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '8rem', alignItems: 'start' }}>
-                <div style={{ borderLeft: '10px solid var(--secondary)', paddingLeft: '3rem' }}>
-                   <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary)' }}>PROFIL LENGKAP INSTANSI.</h2>
+                <div style={{ borderLeft: '10px solid var(--secondary-color)', paddingLeft: '3rem' }}>
+                   <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--primary-color)' }}>PROFIL LENGKAP INSTANSI.</h2>
                 </div>
                 <div 
                   style={{ fontSize: '1.15rem', lineHeight: 2, opacity: 0.8 }}
@@ -148,7 +135,7 @@ export default function GovTemplate({
         const galleryImages = Array.isArray(content.images) ? content.images : [];
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
-             <div style={{ borderBottom: '8px solid var(--primary)', paddingBottom: '3rem', marginBottom: '6rem' }}>
+             <div style={{ borderBottom: '8px solid var(--primary-color)', paddingBottom: '3rem', marginBottom: '6rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '4rem', fontWeight: 900 }}>{content.gallery_title}</h1>}
                 {content.description && <p style={{ fontSize: '1.25rem', opacity: 0.5, marginTop: '1.5rem' }}>{content.description}</p>}
              </div>
@@ -167,7 +154,7 @@ export default function GovTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '6rem', marginBottom: '10rem', background: '#FFF', border: '1px solid #EEE' }}>
                 <div style={{ padding: '6rem' }}>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', color: 'var(--secondary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '2.5rem' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', color: 'var(--secondary-color)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', marginBottom: '2.5rem' }}>
                       <Bell size={20} className="animate-bounce" /> BERITA UTAMA
                    </div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '2.5rem' }}>{pageData.title}</h1>
@@ -178,7 +165,7 @@ export default function GovTemplate({
 
              <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem', marginBottom: '6rem' }}>
                 <h2 style={{ fontSize: '1.8rem', fontWeight: 900, textTransform: 'uppercase' }}>Kumpulan Warta Resmi</h2>
-                <div style={{ height: '4px', flex: 1, background: 'var(--primary)' }} />
+                <div style={{ height: '4px', flex: 1, background: 'var(--primary-color)' }} />
              </div>
 
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '4rem' }}>
@@ -187,12 +174,12 @@ export default function GovTemplate({
                      <article style={{ background: '#FFF', border: '1px solid #EEE' }} className="group">
                         <div style={{ height: '240px', overflow: 'hidden', position: 'relative' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           <div style={{ position: 'absolute', bottom: 0, left: 0, background: 'var(--secondary)', color: '#FFF', padding: '8px 20px', fontWeight: 900, fontSize: '0.75rem' }}>{post.category}</div>
+                           <div style={{ position: 'absolute', bottom: 0, left: 0, background: 'var(--secondary-color)', color: '#FFF', padding: '8px 20px', fontWeight: 900, fontSize: '0.75rem' }}>{post.category}</div>
                         </div>
                         <div style={{ padding: '2.5rem' }}>
-                           <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem' }}>{post.title}</h3>
+                           <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary-color)', marginBottom: '1.5rem' }}>{post.title}</h3>
                            <p style={{ fontSize: '0.95rem', opacity: 0.5, lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--secondary)' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 900, fontSize: '0.8rem', color: 'var(--secondary-color)' }}>
                               BACA SELENGKAPNYA <ChevronRight size={18} />
                            </div>
                         </div>
@@ -209,7 +196,7 @@ export default function GovTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10rem', alignItems: 'center' }}>
                 <div>
-                   <h1 style={{ fontSize: '5rem', fontWeight: 900, color: 'var(--primary)', lineHeight: 1, marginBottom: '5rem' }}>Layanan Hubung Daring.</h1>
+                   <h1 style={{ fontSize: '5rem', fontWeight: 900, color: 'var(--primary-color)', lineHeight: 1, marginBottom: '5rem' }}>Layanan Hubung Daring.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5rem' }}>
                       {content.email && (
                         <div>
@@ -220,7 +207,7 @@ export default function GovTemplate({
                       {content.phone && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', opacity: 0.4, letterSpacing: '0.2em', marginBottom: '1rem' }}>Layanan Panggilan</span>
-                           <b style={{ fontSize: '2.5rem', color: 'var(--secondary)' }}>{content.phone}</b>
+                           <b style={{ fontSize: '2.5rem', color: 'var(--secondary-color)' }}>{content.phone}</b>
                         </div>
                       )}
                    </div>
@@ -246,13 +233,13 @@ export default function GovTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
       <GovHeader settings={settings} siteName={siteName} footerCfg={footerCfg} />
-      <GovNavbar navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <GovNavbar navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <GovFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <GovFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
@@ -301,7 +288,7 @@ function GovHeader({ settings, siteName, footerCfg }: any) {
   );
 }
 
-function GovNavbar({ navPages, currentSlug, p, subdomain }: any) {
+function GovNavbar({ navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ background: '#FFF', borderBottom: '6px solid #1E3A8A', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
       <div style={{ display: 'flex', height: '64px', padding: '0 4vw' }}>
@@ -335,7 +322,7 @@ function GovNavbar({ navPages, currentSlug, p, subdomain }: any) {
   );
 }
 
-function GovFooter({ settings, siteName, footerCfg, p }: any) {
+function GovFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#0F172A', color: '#FFF', padding: '10rem 4vw 4vw' }}>

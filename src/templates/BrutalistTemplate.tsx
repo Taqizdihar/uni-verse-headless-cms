@@ -73,30 +73,17 @@ export default function BrutalistTemplate({
   const siteName = settings?.site_name || 'RAW_SYSTEM';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#00FF00', 
-    secondary: '#FFFF00', 
-    surface: '#FFFFFF', 
-    text: '#000000', 
-    name: 'Brutalist' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace", border: '20px solid #000' }}>
-        <BrutalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace", border: '20px solid #000' }}>
+        <BrutalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <BrutalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <BrutalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -114,7 +101,7 @@ export default function BrutalistTemplate({
                      </h1>
                    )}
                    <div style={{ display: 'flex', gap: '4rem', alignItems: 'start' }}>
-                      <div style={{ width: '100px', height: '100px', background: 'var(--primary)', border: '10px solid #000' }} />
+                      <div style={{ width: '100px', height: '100px', background: 'var(--primary-color)', border: '10px solid #000' }} />
                       {content.sub_headline && (
                         <p style={{ fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', maxWidth: '800px', background: '#000', color: '#FFF', padding: '1rem' }}>
                            {content.sub_headline}
@@ -124,7 +111,7 @@ export default function BrutalistTemplate({
                 </div>
              </section>
              {content.hero_image && (
-               <div style={{ width: '100%', height: '80vh', borderBottom: '20px solid #000', padding: '40px', background: 'var(--secondary)' }}>
+               <div style={{ width: '100%', height: '80vh', borderBottom: '20px solid #000', padding: '40px', background: 'var(--secondary-color)' }}>
                   <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover', border: '10px solid #000', filter: 'contrast(1.5) grayscale(1)' }} />
                </div>
              )}
@@ -135,7 +122,7 @@ export default function BrutalistTemplate({
         return (
           <div style={{ padding: '10rem 4rem' }} className="animate-in fade-in duration-500">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'start' }}>
-                <div style={{ background: '#000', color: 'var(--primary)', padding: '2rem', borderLeft: '20px solid var(--secondary)' }}>
+                <div style={{ background: '#000', color: 'var(--primary-color)', padding: '2rem', borderLeft: '20px solid var(--secondary-color)' }}>
                    <h2 style={{ fontSize: '3rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.05em' }}>_MANIFESTO</h2>
                 </div>
                 <div 
@@ -150,13 +137,13 @@ export default function BrutalistTemplate({
         const galleryImages = Array.isArray(content.images) ? content.images : [];
         return (
           <div style={{ padding: '8rem 4rem' }} className="animate-in fade-in duration-500">
-             <div style={{ background: '#000', color: '#FFF', padding: '4rem', marginBottom: '4rem', borderBottom: '20px solid var(--primary)' }}>
+             <div style={{ background: '#000', color: '#FFF', padding: '4rem', marginBottom: '4rem', borderBottom: '20px solid var(--primary-color)' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '8rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.8 }}>{content.gallery_title}</h1>}
                 {content.description && <p style={{ fontSize: '1.5rem', marginTop: '2rem', fontWeight: 900 }}>// {content.description}</p>}
              </div>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '40px' }}>
                 {galleryImages.map((img: string, i: number) => (
-                  <div key={i} style={{ border: '10px solid #000', background: 'var(--primary)', padding: '20px', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'translate(-10px, -10px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
+                  <div key={i} style={{ border: '10px solid #000', background: 'var(--primary-color)', padding: '20px', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'translate(-10px, -10px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
                      <img src={fixImg(img)} alt={`Gallery ${i}`} style={{ width: '100%', height: '400px', objectFit: 'cover', border: '5px solid #000' }} />
                   </div>
                 ))}
@@ -167,7 +154,7 @@ export default function BrutalistTemplate({
       case 'news':
         return (
           <div style={{ padding: '6rem 4rem' }} className="animate-in fade-in duration-500">
-             <div style={{ border: '15px solid #000', background: 'var(--secondary)', marginBottom: '8rem', display: 'flex' }}>
+             <div style={{ border: '15px solid #000', background: 'var(--secondary-color)', marginBottom: '8rem', display: 'flex' }}>
                 <div style={{ flex: 1, padding: '4rem' }}>
                    <span style={{ background: '#000', color: '#FFF', padding: '0.5rem 1rem', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', display: 'inline-block', marginBottom: '2rem' }}>TOP_SECURE_FEED</span>
                    <h1 style={{ fontSize: '6rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.9, marginBottom: '2rem' }}>{pageData.title}</h1>
@@ -186,10 +173,10 @@ export default function BrutalistTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         <div style={{ padding: '2rem' }}>
-                           <span style={{ fontWeight: 900, color: 'var(--primary)', background: '#000', padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>{post.category}</span>
+                           <span style={{ fontWeight: 900, color: 'var(--primary-color)', background: '#000', padding: '0.25rem 0.75rem', fontSize: '0.8rem' }}>{post.category}</span>
                            <h3 style={{ fontSize: '2.5rem', fontWeight: 900, textTransform: 'uppercase', margin: '1rem 0', lineHeight: 1 }}>{post.title}</h3>
                            <p style={{ fontWeight: 900, opacity: 0.7, marginBottom: '2rem' }}>{post.excerpt || post.content?.summary}</p>
-                           <div style={{ border: '5px solid #000', padding: '0.75rem', textAlign: 'center', fontWeight: 900, background: 'var(--primary)' }}>EXTRACT_DATA_NODE.exe</div>
+                           <div style={{ border: '5px solid #000', padding: '0.75rem', textAlign: 'center', fontWeight: 900, background: 'var(--primary-color)' }}>EXTRACT_DATA_NODE.exe</div>
                         </div>
                      </article>
                   </Link>
@@ -207,13 +194,13 @@ export default function BrutalistTemplate({
                    <h1 style={{ fontSize: '10rem', fontWeight: 900, textTransform: 'uppercase', lineHeight: 0.8, marginBottom: '6rem', letterSpacing: '-0.05em' }}>TARGET<br />SIGNAL.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                       {content.email && (
-                        <div style={{ border: '10px solid #000', padding: '2rem', background: 'var(--primary)' }}>
+                        <div style={{ border: '10px solid #000', padding: '2rem', background: 'var(--primary-color)' }}>
                            <span style={{ fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', borderBottom: '5px solid #000', marginBottom: '1rem', display: 'inline-block' }}>COMMS_RELAY</span>
                            <b style={{ display: 'block', fontSize: '2.5rem', wordBreak: 'break-all' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
-                        <div style={{ border: '10px solid #000', padding: '2rem', background: 'var(--secondary)' }}>
+                        <div style={{ border: '10px solid #000', padding: '2rem', background: 'var(--secondary-color)' }}>
                            <span style={{ fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', borderBottom: '5px solid #000', marginBottom: '1rem', display: 'inline-block' }}>VOICE_SIGNAL</span>
                            <b style={{ display: 'block', fontSize: '3rem' }}>{content.phone}</b>
                         </div>
@@ -241,21 +228,21 @@ export default function BrutalistTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace", border: '20px solid #000' }}>
-      <BrutalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Space Mono', monospace", border: '20px solid #000' }}>
+      <BrutalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <BrutalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <BrutalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function BrutalistNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function BrutalistNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '120px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-color)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '20px solid #000' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <div style={{ width: '60px', height: '60px', background: '#000', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '5px solid #000' }}>
+        <div style={{ width: '60px', height: '60px', background: '#000', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '5px solid #000' }}>
           <Activity size={40} />
         </div>
         <span style={{ fontWeight: 900, fontSize: '2.5rem', textTransform: 'uppercase', letterSpacing: '-0.1em' }}>{siteName}</span>
@@ -278,7 +265,7 @@ function BrutalistNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
                 fontWeight: 900,
                 textTransform: 'uppercase',
                 borderLeft: '10px solid #000',
-                background: isActive ? 'var(--primary)' : 'transparent',
+                background: isActive ? 'var(--primary-color)' : 'transparent',
                 transition: 'all 0.2s'
               }}>
               {nav.title}
@@ -290,7 +277,7 @@ function BrutalistNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
   );
 }
 
-function BrutalistFooter({ settings, siteName, footerCfg, p }: any) {
+function BrutalistFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
     <footer style={{ background: '#FFF', borderTop: '40px solid #000', padding: '12rem 4rem 4rem', position: 'relative' }}>
@@ -301,10 +288,10 @@ function BrutalistFooter({ settings, siteName, footerCfg, p }: any) {
             {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '60px', width: 'auto', border: '5px solid #000' }} />}
             <span style={{ fontWeight: 900, fontSize: '4rem', letterSpacing: '-0.1em' }}>{siteName}</span>
           </div>
-          <p style={{ background: 'var(--primary)', border: '5px solid #000', padding: '2rem', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', marginBottom: '4rem' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
+          <p style={{ background: 'var(--primary-color)', border: '5px solid #000', padding: '2rem', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', marginBottom: '4rem' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '80px', height: '80px', background: 'var(--secondary)', border: '8px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-10px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '80px', height: '80px', background: 'var(--secondary-color)', border: '8px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-10px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
                    <SocialIcon type={social.icon} size={40} />
                 </a>
              ))}
@@ -315,7 +302,7 @@ function BrutalistFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', background: '#000', color: '#FFF', padding: '0.5rem 1rem', display: 'inline-block', marginBottom: '4rem' }}>MAP_LINKS_ARRAY</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {(footerCfg.quick_links || []).slice(0, 5).map((ln: any, i: number) => (
-                 <a key={i} href={ln.url} style={{ textDecoration: 'none', color: '#000', fontSize: '1.5rem', fontWeight: 900, textTransform: 'uppercase', borderBottom: '8px solid var(--primary)', paddingBottom: '0.5rem' }}>{ln.label}</a>
+                 <a key={i} href={ln.url} style={{ textDecoration: 'none', color: '#000', fontSize: '1.5rem', fontWeight: 900, textTransform: 'uppercase', borderBottom: '8px solid var(--primary-color)', paddingBottom: '0.5rem' }}>{ln.label}</a>
               ))}
            </div>
         </div>

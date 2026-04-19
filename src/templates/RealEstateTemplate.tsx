@@ -76,30 +76,17 @@ export default function RealEstateTemplate({
   const siteName = settings?.site_name || 'Prime Real Estate';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#1D4ED8', 
-    secondary: '#1E293B', 
-    surface: '#FFFFFF', 
-    text: '#0F172A', 
-    name: 'Real Estate' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <RealEstateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <RealEstateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <RealEstateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <RealEstateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -128,10 +115,10 @@ export default function RealEstateTemplate({
                    )}
                    <div style={{ background: '#FFF', padding: '1rem', borderRadius: '2rem', display: 'flex', gap: '1rem', maxWidth: '800px', margin: '0 auto', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
                       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem', padding: '0 2rem', borderRight: '1px solid #F1F5F9' }}>
-                         <Search size={22} color="var(--primary)" />
-                         <input type="text" placeholder="Search by Neighborhood..." style={{ border: 'none', outline: 'none', fontWeight: 700, fontSize: '1rem', color: 'var(--text-main)', width: '100%' }} />
+                         <Search size={22} color="var(--primary-color)" />
+                         <input type="text" placeholder="Search by Neighborhood..." style={{ border: 'none', outline: 'none', fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', width: '100%' }} />
                       </div>
-                      <Link to={`/preview/${subdomain}/contact`} style={{ background: 'var(--primary)', color: '#FFF', padding: '1.2rem 3rem', borderRadius: '1.5rem', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', fontSize: '0.85rem' }}>
+                      <Link to={`/preview/${subdomain}/contact`} style={{ background: 'var(--primary-color)', color: '#FFF', padding: '1.2rem 3rem', borderRadius: '1.5rem', fontWeight: 900, textTransform: 'uppercase', textDecoration: 'none', fontSize: '0.85rem' }}>
                          BOOK VIEWING
                       </Link>
                    </div>
@@ -145,7 +132,7 @@ export default function RealEstateTemplate({
                   { i: Key, t: 'Full Access', d: 'Sovereign Ownership' }
                 ].map((item: any, i) => (
                   <div key={i} style={{ padding: '2.5rem', borderRadius: '2rem', background: '#F8FAFC', border: '1px solid #F1F5F9' }}>
-                     {item.i && <item.i size={32} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />}
+                     {item.i && <item.i size={32} color="var(--primary-color)" style={{ marginBottom: '1.5rem' }} />}
                      <h4 style={{ fontWeight: 900, textTransform: 'uppercase', fontSize: '0.9rem', marginBottom: '0.5rem' }}>{item.t}</h4>
                      <p style={{ fontSize: '0.8rem', opacity: 0.4, fontWeight: 700 }}>{item.d}</p>
                   </div>
@@ -159,8 +146,8 @@ export default function RealEstateTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '10rem', alignItems: 'center' }}>
                 <div style={{ position: 'relative' }}>
-                   <div style={{ position: 'absolute', top: '-4rem', left: '-4rem', width: '200px', height: '200px', background: 'var(--primary)11', borderRadius: '50%' }} />
-                   <h2 style={{ fontSize: '5rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 0.9, position: 'relative', zIndex: 1 }}>Defining<br />Luxury.</h2>
+                   <div style={{ position: 'absolute', top: '-4rem', left: '-4rem', width: '200px', height: '200px', background: 'var(--primary-color)11', borderRadius: '50%' }} />
+                   <h2 style={{ fontSize: '5rem', fontWeight: 900, color: 'var(--text-color)', lineHeight: 0.9, position: 'relative', zIndex: 1 }}>Defining<br />Luxury.</h2>
                 </div>
                 <div 
                   style={{ fontSize: '1.3rem', lineHeight: 1.8, opacity: 0.7, whiteSpace: 'pre-wrap' }}
@@ -194,7 +181,7 @@ export default function RealEstateTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '8rem', marginBottom: '12rem', background: '#F8FAFC', borderRadius: '4rem', overflow: 'hidden', border: '1px solid #F1F5F9' }}>
                 <div style={{ padding: '8rem' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--primary)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>EXCLUSIVE LISTINGS</div>
+                   <div style={{ display: 'inline-flex', padding: '0.5rem 1.5rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 900, fontSize: '0.75rem', borderRadius: '100px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>EXCLUSIVE LISTINGS</div>
                    <h1 style={{ fontSize: '5rem', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-0.04em', marginBottom: '3rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.3rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -212,19 +199,19 @@ export default function RealEstateTemplate({
                      <article style={{ background: '#FFF', borderRadius: '3rem', border: '1px solid #F1F5F9', overflow: 'hidden', transition: 'all 0.4s' }} className="group hover:shadow-3xl hover:-translate-y-4">
                         <div style={{ height: '350px', position: 'relative' }}>
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                           <div style={{ position: 'absolute', top: '2rem', right: '2rem', background: '#FFF', padding: '0.6rem 1.5rem', borderRadius: '100px', fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary)', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>FOR_SALE</div>
+                           <div style={{ position: 'absolute', top: '2rem', right: '2rem', background: '#FFF', padding: '0.6rem 1.5rem', borderRadius: '100px', fontWeight: 900, fontSize: '0.85rem', color: 'var(--primary-color)', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>FOR_SALE</div>
                         </div>
                         <div style={{ padding: '3.5rem' }}>
-                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>
+                           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary-color)', marginBottom: '1.5rem', textTransform: 'uppercase' }}>
                               <MapPin size={14} /> {post.category || 'Prime Location'}
                            </div>
                            <h3 style={{ fontSize: '2rem', fontWeight: 950, marginBottom: '2.5rem', lineHeight: 1.1 }}>{post.title}</h3>
                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2rem 0', borderTop: '1px solid #F1F5F9', borderBottom: '1px solid #F1F5F9', marginBottom: '3rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Bed size={20} color="var(--primary)" /> <b>3</b></div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Bath size={20} color="var(--primary)" /> <b>2</b></div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Square size={20} color="var(--primary)" /> <b>2.5k SF</b></div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Bed size={20} color="var(--primary-color)" /> <b>3</b></div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Bath size={20} color="var(--primary-color)" /> <b>2</b></div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}><Square size={20} color="var(--primary-color)" /> <b>2.5k SF</b></div>
                            </div>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                               VIEW FULL SPECS <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                            </div>
                         </div>
@@ -241,12 +228,12 @@ export default function RealEstateTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '12rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12rem', alignItems: 'center' }}>
                 <div>
-                   <h1 style={{ fontSize: '6rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 0.9, letterSpacing: '-0.04em', marginBottom: '8rem' }}>The Keys to<br />Legacy.</h1>
+                   <h1 style={{ fontSize: '6rem', fontWeight: 900, color: 'var(--text-color)', lineHeight: 0.9, letterSpacing: '-0.04em', marginBottom: '8rem' }}>The Keys to<br />Legacy.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6rem' }}>
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, opacity: 0.3, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '2rem' }}>Digital Concierge</span>
-                           <b style={{ fontSize: '2.2rem', paddingBottom: '1rem', borderBottom: '4px solid var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '2.2rem', paddingBottom: '1rem', borderBottom: '4px solid var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -278,27 +265,27 @@ export default function RealEstateTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <RealEstateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <RealEstateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <RealEstateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <RealEstateFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function RealEstateNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function RealEstateNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '110px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.85)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(20px)', borderBottom: '1px solid #F1F5F9' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ width: '52px', height: '52px', background: 'var(--primary)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px -5px var(--primary)55' }}>
+        <div style={{ width: '52px', height: '52px', background: 'var(--primary-color)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 10px 20px -5px var(--primary-color)55' }}>
            <Home size={28} color="#FFF" />
         </div>
         {settings?.logo_url ? (
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '40px', width: 'auto' }} />
         ) : (
-          <span style={{ fontWeight: 950, fontSize: '1.8rem', color: 'var(--text-main)', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>{siteName}</span>
+          <span style={{ fontWeight: 950, fontSize: '1.8rem', color: 'var(--text-color)', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>{siteName}</span>
         )}
       </Link>
       <div style={{ display: 'flex', gap: '3vw', alignItems: 'center' }}>
@@ -310,7 +297,7 @@ function RealEstateNavbar({ settings, siteName, navPages, currentSlug, p, subdom
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'inherit', 
+                color: isActive ? 'var(--primary-color)' : 'inherit', 
                 fontSize: '0.85rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -322,7 +309,7 @@ function RealEstateNavbar({ settings, siteName, navPages, currentSlug, p, subdom
             </Link>
           );
         })}
-        <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1rem 2.5rem', background: 'var(--secondary)', color: '#FFF', borderRadius: '1.25rem', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}>
+        <Link to={`/preview/${subdomain}/contact`} style={{ padding: '1rem 2.5rem', background: 'var(--secondary-color)', color: '#FFF', borderRadius: '1.25rem', fontWeight: 900, fontSize: '0.8rem', textTransform: 'uppercase', textDecoration: 'none', boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}>
            ENQUIRE
         </Link>
       </div>
@@ -330,20 +317,20 @@ function RealEstateNavbar({ settings, siteName, navPages, currentSlug, p, subdom
   );
 }
 
-function RealEstateFooter({ settings, siteName, footerCfg, p }: any) {
+function RealEstateFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--secondary)', color: '#FFF', padding: '15rem 4vw 6rem' }}>
+    <footer style={{ background: 'var(--secondary-color)', color: '#FFF', padding: '15rem 4vw 6rem' }}>
       <div style={{ maxWidth: '1800px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr', gap: '10rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '4rem' }}>
-            <div style={{ width: '40px', height: '40px', background: 'var(--primary)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Home size={22} color="#FFF" /></div>
+            <div style={{ width: '40px', height: '40px', background: 'var(--primary-color)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Home size={22} color="#FFF" /></div>
             <span style={{ fontWeight: 950, fontSize: '1.8rem', color: '#FFF', letterSpacing: '-0.04em', textTransform: 'uppercase' }}>{siteName}</span>
           </div>
           <p style={{ opacity: 0.4, lineHeight: 2, fontSize: '1rem', marginBottom: '5rem', maxWidth: '450px', fontWeight: 500 }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={24} />
                 </a>
              ))}
@@ -371,7 +358,7 @@ function RealEstateFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5em', marginBottom: '4rem', opacity: 0.2 }}>Concierge Relay</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', fontSize: '1.2rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}><Phone size={22} color="var(--primary)" /> <b>{contact.phone}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}><Phone size={22} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
               {contact.whatsapp && <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}><MessageCircle size={22} color="#22C55E" /> <b>CHANNEL</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}><Mail size={22} style={{ opacity: 0.2 }} /> <b style={{ fontSize: '1rem', opacity: 0.5 }}>{contact.email}</b></div>}
               

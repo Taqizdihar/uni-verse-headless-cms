@@ -70,30 +70,17 @@ export default function PortfolioTemplate({
   const siteName = settings?.site_name || 'Creative Portfolio';
   const content = pageData?.content || {};
   const pageType = pageData?.page_type || 'home';
-  const p = palette || { 
-    primary: themeColor || '#6366F1', 
-    secondary: '#18181B', 
-    surface: '#FFFFFF', 
-    text: '#09090B', 
-    name: 'Portfolio' 
-  };
-  const footerCfg = settings?.global_options?.footer_config || {};
+    const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
-
+  
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-        <PortfolioNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+      <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+        <PortfolioNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
         </main>
-        <PortfolioFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+        <PortfolioFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
     );
   }
@@ -105,11 +92,11 @@ export default function PortfolioTemplate({
           <div className="animate-in fade-in duration-1000">
              <section style={{ padding: '10rem 4vw', display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8rem', alignItems: 'center' }}>
                 <div>
-                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.5rem', background: 'var(--primary)11', color: 'var(--primary)', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '0.2em', borderRadius: '10px', marginBottom: '3rem' }}>
+                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 1.5rem', background: 'var(--primary-color)11', color: 'var(--primary-color)', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '0.2em', borderRadius: '10px', marginBottom: '3rem' }}>
                       <Sparkles size={16} /> Open for Collaboration
                    </div>
                    {content.headline && (
-                     <h1 style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 900, color: 'var(--text-main)', lineHeight: 1, marginBottom: '3rem' }}>
+                     <h1 style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 900, color: 'var(--text-color)', lineHeight: 1, marginBottom: '3rem' }}>
                         {content.headline}
                      </h1>
                    )}
@@ -131,7 +118,7 @@ export default function PortfolioTemplate({
                 </div>
                 {content.hero_image && (
                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', inset: '-2rem', border: '1px solid var(--primary)33', borderRadius: '2rem', transform: 'rotate(4deg)' }} />
+                      <div style={{ position: 'absolute', inset: '-2rem', border: '1px solid var(--primary-color)33', borderRadius: '2rem', transform: 'rotate(4deg)' }} />
                       <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '650px', objectFit: 'cover', borderRadius: '2rem', position: 'relative', zIndex: 1 }} />
                    </div>
                 )}
@@ -144,7 +131,7 @@ export default function PortfolioTemplate({
                   { i: Cpu, t: 'Integration' }
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                     <div style={{ width: '56px', height: '56px', borderRadius: '15px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF' }}><item.i size={24} /></div>
+                     <div style={{ width: '56px', height: '56px', borderRadius: '15px', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF' }}><item.i size={24} /></div>
                      <h4 style={{ fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase' }}>{item.t}</h4>
                   </div>
                 ))}
@@ -156,7 +143,7 @@ export default function PortfolioTemplate({
         return (
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '10rem', alignItems: 'center' }}>
-                <div style={{ padding: '5rem', background: 'var(--primary)', color: '#FFF', borderRadius: '3rem', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ padding: '5rem', background: 'var(--primary-color)', color: '#FFF', borderRadius: '3rem', position: 'relative', overflow: 'hidden' }}>
                    <div style={{ fontSize: '6rem', fontWeight: 900, opacity: 0.1, position: 'absolute', top: -10, left: -20 }}>WHO_AM_I</div>
                    <h2 style={{ fontSize: '4.5rem', fontWeight: 900, lineHeight: 1, position: 'relative', zIndex: 1 }}>Crafting<br />Legacy.</h2>
                 </div>
@@ -195,7 +182,7 @@ export default function PortfolioTemplate({
           <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '8rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8rem', marginBottom: '10rem', background: '#F9FAFB', borderRadius: '3rem', overflow: 'hidden', border: '1px solid #F1F5F9' }}>
                 <div style={{ padding: '6rem' }}>
-                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary)', color: '#FFF', fontWeight: 800, fontSize: '0.7rem', borderRadius: '5px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>CREATOR_LOGS</div>
+                   <div style={{ display: 'inline-flex', padding: '0.4rem 1.2rem', background: 'var(--primary-color)', color: '#FFF', fontWeight: 800, fontSize: '0.7rem', borderRadius: '5px', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>CREATOR_LOGS</div>
                    <h1 style={{ fontSize: '4rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '3rem' }}>{pageData.title}</h1>
                    <div style={{ fontSize: '1.2rem', opacity: 0.6, lineHeight: 1.8 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
@@ -215,12 +202,12 @@ export default function PortfolioTemplate({
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.5s' }} className="group-hover:scale-110" />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                           <span style={{ fontWeight: 900, color: 'var(--primary)', fontSize: '0.75rem', textTransform: 'uppercase' }}>{post.category}</span>
+                           <span style={{ fontWeight: 900, color: 'var(--primary-color)', fontSize: '0.75rem', textTransform: 'uppercase' }}>{post.category}</span>
                            <span style={{ fontSize: '0.7rem', opacity: 0.3, fontWeight: 800 }}>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                         <h3 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '1.5rem', lineHeight: 1.2 }}>{post.title}</h3>
                         <p style={{ opacity: 0.5, fontSize: '1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-main)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontWeight: 900, fontSize: '0.85rem', color: 'var(--text-color)' }}>
                            DIVE DEEPER <ChevronRight size={18} className="group-hover:translate-x-4 transition-transform" />
                         </div>
                      </article>
@@ -236,12 +223,12 @@ export default function PortfolioTemplate({
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '10rem 4vw' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10rem', alignItems: 'center' }}>
                 <div>
-                   <h1 style={{ fontSize: '6rem', fontWeight: 900, color: 'var(--text-main)', lineHeight: 0.9, marginBottom: '6rem' }}>Let's Build.<br />Legacy.</h1>
+                   <h1 style={{ fontSize: '6rem', fontWeight: 900, color: 'var(--text-color)', lineHeight: 0.9, marginBottom: '6rem' }}>Let's Build.<br />Legacy.</h1>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5rem' }}>
                       {content.email && (
                         <div>
                            <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, opacity: 0.2, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Transmission</span>
-                           <b style={{ fontSize: '2rem', borderBottom: '3px solid var(--primary)' }}>{content.email}</b>
+                           <b style={{ fontSize: '2rem', borderBottom: '3px solid var(--primary-color)' }}>{content.email}</b>
                         </div>
                       )}
                       {content.phone && (
@@ -273,24 +260,24 @@ export default function PortfolioTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
-      <PortfolioNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
+    <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <PortfolioNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
       </main>
-      <PortfolioFooter settings={settings} siteName={siteName} footerCfg={footerCfg} p={p} />
+      <PortfolioFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
     </div>
   );
 }
 
-function PortfolioNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
+function PortfolioNavbar({ settings, siteName, navPages, currentSlug, subdomain }: any) {
   return (
     <nav style={{ height: '100px', padding: '0 4vw', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.8)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(20px)', borderBottom: '1px solid #F1F5F9' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
         {settings?.logo_url ? (
           <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '44px', width: 'auto' }} />
         ) : (
-          <span style={{ fontWeight: 950, fontSize: '1.8rem', textTransform: 'uppercase', color: 'var(--text-main)', letterSpacing: '-0.04em' }}>{siteName}</span>
+          <span style={{ fontWeight: 950, fontSize: '1.8rem', textTransform: 'uppercase', color: 'var(--text-color)', letterSpacing: '-0.04em' }}>{siteName}</span>
         )}
       </Link>
       <div style={{ display: 'flex', gap: '3vw' }}>
@@ -302,7 +289,7 @@ function PortfolioNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'inherit', 
+                color: isActive ? 'var(--primary-color)' : 'inherit', 
                 fontSize: '0.8rem', 
                 fontWeight: 900,
                 textTransform: 'uppercase',
@@ -319,10 +306,10 @@ function PortfolioNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
   );
 }
 
-function PortfolioFooter({ settings, siteName, footerCfg, p }: any) {
+function PortfolioFooter({ settings, siteName, footerCfg }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--text-main)', color: '#FFF', padding: '12rem 4vw 4vw' }}>
+    <footer style={{ background: 'var(--text-color)', color: '#FFF', padding: '12rem 4vw 4vw' }}>
       <div style={{ maxWidth: '1600px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr', gap: '10rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '3.5rem' }}>
@@ -331,7 +318,7 @@ function PortfolioFooter({ settings, siteName, footerCfg, p }: any) {
           <p style={{ opacity: 0.4, lineHeight: 1.8, fontSize: '1rem', marginBottom: '4rem', maxWidth: '400px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '2rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-5px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFF', transition: 'all 0.4s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.transform = 'translateY(-5px)'; }} onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}>
                    <SocialIcon type={social.icon} size={22} />
                 </a>
              ))}
@@ -359,7 +346,7 @@ function PortfolioFooter({ settings, siteName, footerCfg, p }: any) {
         <div>
            <h4 style={{ fontSize: '0.75rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '3.5rem', opacity: 0.2 }}>Signal Relay</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', fontSize: '1.1rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}><Phone size={20} color="var(--primary)" /> <b>{contact.phone}</b></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}><Phone size={20} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
               {contact.whatsapp && <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}><MessageCircle size={20} color="#22C55E" /> <b>CHANNEL</b></div>}
               {contact.email && <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}><Mail size={20} style={{ opacity: 0.3 }} /> <b style={{ fontSize: '0.9rem' }}>{contact.email}</b></div>}
               

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useCMS } from '../context/CMSContext';
 import { Save, Globe, Palette, Mail, CheckCircle2, Monitor, Sparkles, Eye, X, Image, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Download } from 'lucide-react';
-import { getThemeVariables } from '../utils/theme';
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -173,22 +172,26 @@ export function Settings() {
       });
       // Restore palette from saved settings
       const savedPalette = settings.global_options?.branding_palette;
-      if (savedPalette) {
-        // Compare savedPalette with PRESET_PALETTES
-        const matchedPreset = PRESET_PALETTES.find(p => 
-          p.primary.toLowerCase() === savedPalette.primary.toLowerCase() && 
-          p.secondary.toLowerCase() === savedPalette.secondary.toLowerCase() &&
-          p.surface.toLowerCase() === (savedPalette.surface || '#FFFFFF').toLowerCase() &&
-          p.text.toLowerCase() === (savedPalette.text || '#27272A').toLowerCase()
-        );
+      const legacyColor = settings.global_options?.theme_color;
+      let pToMatch = savedPalette;
+      
+      if (!pToMatch && legacyColor) {
+        pToMatch = { primary: legacyColor, secondary: '#18181B', surface: '#FFFFFF', text: '#27272A', name: 'Custom' };
+      }
 
+      if (pToMatch) {
+        setActivePalette(pToMatch);
+        // Check if it matches a preset case-insensitively
+        const matchedPreset = PRESET_PALETTES.find(p => 
+            p.primary.toLowerCase() === pToMatch.primary.toLowerCase() && 
+            p.secondary.toLowerCase() === pToMatch.secondary.toLowerCase()
+        );
         if (matchedPreset) {
             setPaletteMode('preset');
             setActivePalette(matchedPreset);
         } else {
             setPaletteMode('custom');
-            setActivePalette(savedPalette);
-            setCustomPalette({ ...savedPalette, name: 'Custom' });
+            setCustomPalette({ ...pToMatch, name: 'Custom' });
         }
       }
     }
@@ -586,7 +589,10 @@ export function Settings() {
                         >
                             <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%' }}>
                                 <div style={{
-                                    ...getThemeVariables(activePalette),
+                                    '--primary-color': activePalette.primary,
+                                    '--secondary-color': activePalette.secondary,
+                                    '--bg-color': activePalette.surface,
+                                    '--text-color': activePalette.text,
                                     minHeight: '100%',
                             background: 'var(--bg-color)', 
                             color: 'var(--text-color)',
