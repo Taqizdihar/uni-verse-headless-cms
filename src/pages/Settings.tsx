@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useCMS } from '../context/CMSContext';
 import { Save, Globe, Palette, Mail, CheckCircle2, Monitor, Sparkles, Eye, X, Image, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Download } from 'lucide-react';
+import { getThemeVariables } from '../utils/theme';
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -173,13 +174,20 @@ export function Settings() {
       // Restore palette from saved settings
       const savedPalette = settings.global_options?.branding_palette;
       if (savedPalette) {
-        setActivePalette(savedPalette);
-        // Check if it matches a preset
-        const matchedPreset = PRESET_PALETTES.find(p => p.primary === savedPalette.primary && p.secondary === savedPalette.secondary);
+        // Compare savedPalette with PRESET_PALETTES
+        const matchedPreset = PRESET_PALETTES.find(p => 
+          p.primary.toLowerCase() === savedPalette.primary.toLowerCase() && 
+          p.secondary.toLowerCase() === savedPalette.secondary.toLowerCase() &&
+          p.surface.toLowerCase() === (savedPalette.surface || '#FFFFFF').toLowerCase() &&
+          p.text.toLowerCase() === (savedPalette.text || '#27272A').toLowerCase()
+        );
+
         if (matchedPreset) {
             setPaletteMode('preset');
+            setActivePalette(matchedPreset);
         } else {
             setPaletteMode('custom');
+            setActivePalette(savedPalette);
             setCustomPalette({ ...savedPalette, name: 'Custom' });
         }
       }
@@ -578,14 +586,10 @@ export function Settings() {
                         >
                             <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%', height: '200%' }}>
                                 <div style={{
-                                    '--primary': activePalette.primary,
-                                    '--secondary': activePalette.secondary,
-                                    '--bg-color': activePalette.surface,
-                                    '--text-main': activePalette.text,
-                                    '--primary-accent': activePalette.primary,
+                                    ...getThemeVariables(activePalette),
                                     minHeight: '100%',
                             background: 'var(--bg-color)', 
-                            color: 'var(--text-main)',
+                            color: 'var(--text-color)',
                                 } as React.CSSProperties}>
                                     <ErrorBoundary fallback={
                                         <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px] bg-red-50 text-red-500 rounded-lg">

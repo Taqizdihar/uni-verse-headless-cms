@@ -24,6 +24,7 @@ import {
   Layout
 } from 'lucide-react';
 import UnifiedPostLayout from '../components/UnifiedPostLayout';
+import { getThemeVariables } from '../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith("/uploads") ? `${BASE_URL}${url}` : url;
@@ -80,12 +81,7 @@ export default function ArchitectTemplate({
   };
   const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
+  const vars = getThemeVariables(p);
 
   if (postData) {
     return (
@@ -149,7 +145,7 @@ export default function ArchitectTemplate({
                 {galleryImages.map((img: string, i: number) => (
                   <div key={i} style={{ aspectRatio: '4/3', overflow: 'hidden', position: 'relative' }} className="group">
                      <img src={fixImg(img)} alt={`Gallery ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'filter 0.6s' }} />
-                     <div style={{ position: 'absolute', inset: 0, background: 'var(--primary)88', opacity: 0, transition: 'opacity 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="group-hover:opacity-100">
+                     <div style={{ position: 'absolute', inset: 0, background: `${p.primary}88`, opacity: 0, transition: 'opacity 0.4s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="group-hover:opacity-100">
                         <Maximize color="#FFF" size={40} strokeWidth={1} />
                      </div>
                   </div>

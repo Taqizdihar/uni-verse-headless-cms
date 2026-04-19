@@ -18,6 +18,7 @@ import {
   Users
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
+import { getThemeVariables } from '../../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith("/uploads") ? `${BASE_URL}${url}` : url;
@@ -74,16 +75,11 @@ export default function CorporateTemplate({
   };
   const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
+  const vars = getThemeVariables(p);
 
   if (postData) {
     return (
-      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
         <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
           <UnifiedPostLayout postData={postData} palette={p} currentSlug={currentSlug} />
@@ -100,12 +96,12 @@ export default function CorporateTemplate({
           <div className="animate-in fade-in duration-1000">
              <section style={{ 
                padding: '10rem 4rem', 
-               background: `linear-gradient(135deg, var(--secondary) 0%, #000 100%)`, 
+               background: `linear-gradient(135deg, var(--secondary-color) 0%, #000 100%)`, 
                color: '#FFFFFF',
                position: 'relative',
                overflow: 'hidden'
              }}>
-                <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: '40%', height: '80%', background: 'var(--primary)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
+                <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: '40%', height: '80%', background: 'var(--primary-color)', filter: 'blur(150px)', opacity: 0.15, borderRadius: '50%' }} />
                 <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
                    {content.headline && (
                      <h1 style={{ fontSize: 'clamp(3rem, 7vw, 6rem)', fontWeight: 900, lineHeight: 1, letterSpacing: '-0.05em', marginBottom: '2rem' }}>
@@ -132,7 +128,7 @@ export default function CorporateTemplate({
           <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '10rem 2rem' }} className="animate-in fade-in duration-700">
              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem', alignItems: 'start' }}>
                 <div>
-                   <div style={{ width: '80px', height: '4px', background: 'var(--primary)', marginBottom: '2rem' }} />
+                   <div style={{ width: '80px', height: '4px', background: 'var(--primary-color)', marginBottom: '2rem' }} />
                    <h2 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.03em' }}>Our Legacy & Vision</h2>
                 </div>
                 <div 
@@ -147,7 +143,7 @@ export default function CorporateTemplate({
         const galleryImages = Array.isArray(content.images) ? content.images : [];
         return (
           <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
-             <header style={{ marginBottom: '5rem', borderLeft: '8px solid var(--primary)', paddingLeft: '2rem' }}>
+             <header style={{ marginBottom: '5rem', borderLeft: '8px solid var(--primary-color)', paddingLeft: '2rem' }}>
                 {content.gallery_title && <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.04em' }}>{content.gallery_title}</h1>}
                 {content.description && <p style={{ fontSize: '1.2rem', opacity: 0.6, marginTop: '1rem' }}>{content.description}</p>}
              </header>
@@ -169,14 +165,14 @@ export default function CorporateTemplate({
                    <img src={fixImg(content.featured_image)} alt="Featured" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                   <span style={{ color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Top Highlight</span>
+                   <span style={{ color: 'var(--primary-color)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>Top Highlight</span>
                    <h1 style={{ fontSize: '3rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '2rem', letterSpacing: '-0.03em' }}>{pageData.title}</h1>
                    <p style={{ fontSize: '1.1rem', opacity: 0.6, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: content.summary || '' }} />
                 </div>
              </div>
 
              <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '4rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Briefcase size={32} color="var(--primary)" /> Corporate Insights
+                <Briefcase size={32} color="var(--primary-color)" /> Corporate Insights
              </h2>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2.5rem' }}>
                 {posts.map((post) => (
@@ -188,7 +184,7 @@ export default function CorporateTemplate({
                         <div style={{ padding: '0.5rem 1rem 1rem' }}>
                            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1rem', lineHeight: 1.25 }}>{post.title}</h3>
                            <p style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem' }}>{post.excerpt || post.content?.summary}</p>
-                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 800, fontSize: '0.85rem' }}>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', fontWeight: 800, fontSize: '0.85rem' }}>
                               DETAIL REPORT <ArrowRight size={16} />
                            </div>
                         </div>
@@ -209,7 +205,7 @@ export default function CorporateTemplate({
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                       {content.email && (
                         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)' }} />
+                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary-color)' }} />
                            <div>
                               <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Corporate Liaison</span>
                               <b style={{ fontSize: '1.5rem' }}>{content.email}</b>
@@ -218,7 +214,7 @@ export default function CorporateTemplate({
                       )}
                       {content.phone && (
                         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)' }} />
+                           <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary-color)' }} />
                            <div>
                               <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>International Line</span>
                               <b style={{ fontSize: '1.5rem' }}>{content.phone}</b>
@@ -248,7 +244,7 @@ export default function CorporateTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
       <CorporateNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
@@ -260,10 +256,10 @@ export default function CorporateTemplate({
 
 function CorporateNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
   return (
-    <nav style={{ height: '80px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--secondary)', color: '#FFFFFF', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid #FFFFFF15' }}>
+    <nav style={{ height: '80px', padding: '0 4rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--secondary-color)', color: '#FFFFFF', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid #FFFFFF15' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '36px', width: 'auto' }} />}
-        <span style={{ fontWeight: 900, fontSize: '1.4rem', color: 'var(--primary)', letterSpacing: '-0.04em' }}>{siteName}</span>
+        <span style={{ fontWeight: 900, fontSize: '1.4rem', color: 'var(--primary-color)', letterSpacing: '-0.04em' }}>{siteName}</span>
       </Link>
       <div style={{ display: 'flex', gap: '2.5rem' }}>
         {navPages.map((nav: any) => {
@@ -274,7 +270,7 @@ function CorporateNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : '#FFFFFF88', 
+                color: isActive ? 'var(--primary-color)' : '#FFFFFF88', 
                 fontSize: '0.85rem', 
                 fontWeight: isActive ? 800 : 500,
                 textTransform: 'uppercase',
@@ -293,17 +289,17 @@ function CorporateNavbar({ settings, siteName, navPages, currentSlug, p, subdoma
 function CorporateFooter({ settings, siteName, footerCfg, p }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--secondary)', color: '#FFFFFF', padding: '8rem 4rem 4rem' }}>
+    <footer style={{ background: 'var(--secondary-color)', color: '#FFFFFF', padding: '8rem 4rem 4rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: '5rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginBottom: '2rem' }}>
             {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '48px', width: 'auto' }} />}
-            <span style={{ fontWeight: 900, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '-0.04em' }}>{siteName}</span>
+            <span style={{ fontWeight: 900, fontSize: '2rem', color: 'var(--primary-color)', letterSpacing: '-0.04em' }}>{siteName}</span>
           </div>
           <p style={{ opacity: 0.5, lineHeight: 1.8, fontSize: '1rem', marginBottom: '3rem', maxWidth: '400px' }}>{footerCfg.short_description || footerCfg.footer_description}</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
              {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '45px', height: '45px', borderRadius: '12px', background: '#FFFFFF10', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', transition: 'all 0.3s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = 'var(--secondary)'; }} onMouseOut={e => { e.currentTarget.style.background = '#FFFFFF10'; e.currentTarget.style.color = '#FFFFFF'; }}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ width: '45px', height: '45px', borderRadius: '12px', background: '#FFFFFF10', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', transition: 'all 0.3s' }} onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-color)'; e.currentTarget.style.color = 'var(--secondary-color)'; }} onMouseOut={e => { e.currentTarget.style.background = '#FFFFFF10'; e.currentTarget.style.color = '#FFFFFF'; }}>
                    <SocialIcon type={social.icon} size={22} />
                 </a>
              ))}
@@ -311,7 +307,7 @@ function CorporateFooter({ settings, siteName, footerCfg, p }: any) {
         </div>
 
         <div>
-           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', marginBottom: '2.5rem' }}>Navigation</h4>
+           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '2.5rem' }}>Navigation</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {(footerCfg.quick_links || []).slice(0, 5).map((ln: any, i: number) => (
                  <a key={i} href={ln.url} style={{ textDecoration: 'none', color: '#FFFFFFCC', fontSize: '0.95rem' }}>{ln.label}</a>
@@ -320,7 +316,7 @@ function CorporateFooter({ settings, siteName, footerCfg, p }: any) {
         </div>
 
         <div>
-           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', marginBottom: '2.5rem' }}>Legal</h4>
+           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '2.5rem' }}>Legal</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', opacity: 0.7 }}>
               <span>Privacy Policy</span>
               <span>Terms of Service</span>
@@ -329,12 +325,12 @@ function CorporateFooter({ settings, siteName, footerCfg, p }: any) {
         </div>
 
         <div>
-           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', marginBottom: '2.5rem' }}>Connect Directly</h4>
+           <h4 style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '2.5rem' }}>Connect Directly</h4>
            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontSize: '0.95rem' }}>
-              {contact.phone && <div style={{ display: 'flex', gap: '1rem' }}><Phone size={18} color="var(--primary)" /> <b>{contact.phone}</b></div>}
-              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem' }}><MessageCircle size={18} color="var(--primary)" /> <b>{contact.whatsapp}</b></div>}
-              {contact.email && <div style={{ display: 'flex', gap: '1rem' }}><Mail size={18} color="var(--primary)" /> <b>{contact.email}</b></div>}
-              {contact.service_hours && <div style={{ display: 'flex', gap: '1rem' }}><Clock size={18} color="var(--primary)" /> <span style={{ opacity: 0.6 }}>{contact.service_hours}</span></div>}
+              {contact.phone && <div style={{ display: 'flex', gap: '1rem' }}><Phone size={18} color="var(--primary-color)" /> <b>{contact.phone}</b></div>}
+              {contact.whatsapp && <div style={{ display: 'flex', gap: '1rem' }}><MessageCircle size={18} color="var(--primary-color)" /> <b>{contact.whatsapp}</b></div>}
+              {contact.email && <div style={{ display: 'flex', gap: '1rem' }}><Mail size={18} color="var(--primary-color)" /> <b>{contact.email}</b></div>}
+              {contact.service_hours && <div style={{ display: 'flex', gap: '1rem' }}><Clock size={18} color="var(--primary-color)" /> <span style={{ opacity: 0.6 }}>{contact.service_hours}</span></div>}
               
               {footerCfg.location_embed_link && (
                 <div style={{ width: '100%', height: '140px', borderRadius: '1.5rem', overflow: 'hidden', marginTop: '1rem', filter: 'grayscale(100%) brightness(0.8)' }}>

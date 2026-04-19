@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
+import { getThemeVariables } from '../../utils/theme';
 
 const BASE_URL = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_URL}`;
 const fixImg = (url: string) => url && url.startsWith('/uploads') ? `${BASE_URL}${url}` : url;
@@ -77,12 +78,7 @@ export default function MinimalistTemplate({
   };
   const footerCfg = settings?.global_options?.footer_config || {};
 
-  const vars = {
-    '--primary': p.primary,
-    '--secondary': p.secondary,
-    '--bg-color': p.surface,
-    '--text-main': p.text,
-  } as React.CSSProperties;
+  const vars = getThemeVariables(p);
 
   // Render Post Detail if postData exists
   if (postData) {
@@ -125,7 +121,7 @@ export default function MinimalistTemplate({
       case 'profile':
         return (
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '8rem 2rem' }} className="animate-in fade-in duration-700">
-            <h2 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)', marginBottom: '1.5rem' }}>About Us</h2>
+            <h2 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)', marginBottom: '1.5rem' }}>About Us</h2>
             <div 
               style={{ fontSize: '1.25rem', lineHeight: 1.8, opacity: 0.9, whiteSpace: 'pre-wrap' }}
               dangerouslySetInnerHTML={{ __html: content.about_us || '' }}
@@ -141,7 +137,7 @@ export default function MinimalistTemplate({
             {content.description && <p style={{ fontSize: '1.1rem', opacity: 0.6, marginBottom: '4rem', maxWidth: '700px' }}>{content.description}</p>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {galleryImages.map((img: string, i: number) => (
-                <div key={i} style={{ borderRadius: '1.5rem', overflow: 'hidden', aspectRatio: '1', background: 'var(--text-main)08' }}>
+                <div key={i} style={{ borderRadius: '1.5rem', overflow: 'hidden', aspectRatio: '1', background: 'var(--text-color)08' }}>
                   <img src={fixImg(img)} alt={`Gallery ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
                 </div>
               ))}
@@ -162,16 +158,16 @@ export default function MinimalistTemplate({
                 <div style={{ fontSize: '1.2rem', lineHeight: 1.7, opacity: 0.8 }} dangerouslySetInnerHTML={{ __html: content.body || content.main_content || '' }} />
              </div>
 
-             <div style={{ borderTop: '1px solid var(--text-main)11', paddingTop: '6rem' }}>
+             <div style={{ borderTop: '1px solid var(--text-color)11', paddingTop: '6rem' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '3rem' }}>Latest Updates</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '3rem' }}>
                    {posts.map((post) => (
                       <Link key={post.id} to={`/preview/${subdomain}/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
                          <article className="group">
-                            <div style={{ aspectRatio: '16/9', borderRadius: '1.5rem', overflow: 'hidden', marginBottom: '1.5rem', background: 'var(--text-main)08' }}>
+                            <div style={{ aspectRatio: '16/9', borderRadius: '1.5rem', overflow: 'hidden', marginBottom: '1.5rem', background: 'var(--text-color)08' }}>
                                <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s' }} className="group-hover:scale-105" />
                             </div>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary)' }}>{post.category}</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--primary-color)' }}>{post.category}</span>
                             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0.5rem 0 1rem', lineHeight: 1.2 }}>{post.title}</h3>
                             <p style={{ opacity: 0.6, fontSize: '0.95rem', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{post.excerpt || post.content?.summary}</p>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.85rem' }}>
@@ -195,7 +191,7 @@ export default function MinimalistTemplate({
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                       {content.email && (
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
-                           <div style={{ width: '60px', height: '60px', borderRadius: '1.5rem', background: 'var(--primary)', color: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ width: '60px', height: '60px', borderRadius: '1.5rem', background: 'var(--primary-color)', color: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Mail size={24} />
                            </div>
                            <div>
@@ -206,7 +202,7 @@ export default function MinimalistTemplate({
                       )}
                       {content.phone && (
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
-                           <div style={{ width: '60px', height: '60px', borderRadius: '1.5rem', background: 'var(--primary)', color: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <div style={{ width: '60px', height: '60px', borderRadius: '1.5rem', background: 'var(--primary-color)', color: 'var(--bg-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Phone size={24} />
                            </div>
                            <div>
@@ -238,7 +234,7 @@ export default function MinimalistTemplate({
   };
 
   return (
-    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ ...vars, background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
       <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} p={p} subdomain={subdomain} />
       <main style={{ flex: 1 }}>
         {renderContent()}
@@ -250,7 +246,7 @@ export default function MinimalistTemplate({
 
 function MinimalistNavbar({ settings, siteName, navPages, currentSlug, p, subdomain }: any) {
   return (
-    <nav style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4rem', position: 'sticky', top: 0, zIndex: 100, background: `${p.surface}cc`, backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--text-main)0a' }}>
+    <nav style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4rem', position: 'sticky', top: 0, zIndex: 100, background: `${p.surface}cc`, backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--text-color)0a' }}>
       <Link to={`/preview/${subdomain}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {settings?.logo_url && <img src={fixImg(settings.logo_url)} alt="Logo" style={{ height: '32px', width: 'auto' }} />}
         <span style={{ fontWeight: 900, fontSize: '1.25rem', letterSpacing: '-0.03em' }}>{siteName}</span>
@@ -264,7 +260,7 @@ function MinimalistNavbar({ settings, siteName, navPages, currentSlug, p, subdom
               to={`/preview/${subdomain}/${nav.slug?.replace(/^\/+/, '')}`} 
               style={{ 
                 textDecoration: 'none', 
-                color: isActive ? 'var(--primary)' : 'var(--text-main)', 
+                color: isActive ? 'var(--primary-color)' : 'var(--text-color)', 
                 fontSize: '0.85rem', 
                 fontWeight: isActive ? 800 : 500,
                 textTransform: 'uppercase',
@@ -283,7 +279,7 @@ function MinimalistNavbar({ settings, siteName, navPages, currentSlug, p, subdom
 function MinimalistFooter({ settings, siteName, footerCfg, p }: any) {
   const contact = footerCfg.contact_info || {};
   return (
-    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-main)0a', padding: '8rem 4rem 4rem' }}>
+    <footer style={{ background: 'var(--bg-color)', borderTop: '1px solid var(--text-color)0a', padding: '8rem 4rem 4rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1.5fr', gap: '4rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -306,7 +302,7 @@ function MinimalistFooter({ settings, siteName, footerCfg, p }: any) {
            <h4 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '2rem', opacity: 0.4 }}>Social Media</h4>
            <div style={{ display: 'flex', gap: '1.5rem' }}>
               {(footerCfg.social_links || []).map((social: any, i: number) => (
-                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.6 }} onMouseOver={e => e.currentTarget.style.color = 'var(--primary)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
+                <a key={i} href={social.url} target="_blank" rel="noreferrer" style={{ color: 'inherit', opacity: 0.6 }} onMouseOver={e => e.currentTarget.style.color = 'var(--primary-color)'} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
                   <SocialIcon type={social.icon} size={24} />
                 </a>
               ))}
@@ -330,7 +326,7 @@ function MinimalistFooter({ settings, siteName, footerCfg, p }: any) {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1400px', margin: '6rem auto 0', paddingTop: '3rem', borderTop: '1px solid var(--text-main)0a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', opacity: 0.4 }}>
+      <div style={{ maxWidth: '1400px', margin: '6rem auto 0', paddingTop: '3rem', borderTop: '1px solid var(--text-color)0a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', opacity: 0.4 }}>
          <p>© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
          <div style={{ display: 'flex', gap: '2rem' }}>
             <span>Privacy Policy</span>
