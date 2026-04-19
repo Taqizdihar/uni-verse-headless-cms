@@ -119,29 +119,42 @@ export function Posts() {
   };
 
   const renderDynamicInputs = () => {
+    const fixImgLocal = (url: string) => url && url.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${url}` : url;
+
     if (category === 'News') {
       return (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Utama</label>
-            <div className="flex gap-2 items-center">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Gambar Utama</label>
+            <div className="flex gap-2 items-center mb-3">
                 <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih gambar header..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
+            
             {formData.featured_image && (
-              <div className="mt-2 text-xs italic text-zinc-500 flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-green-500"/> Gambar Terpilih
+              <div className="relative group w-full max-w-[320px] aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-sm transition-all hover:shadow-md">
+                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-2">
+                  <button 
+                    type="button" 
+                    onClick={() => handleInputChange('featured_image', null)}
+                    className="p-2 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all"
+                    title="Hapus Gambar"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-1.5 font-black text-zinc-400"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
             <RichTextEditor value={formData.excerpt || ''} onChange={val => handleInputChange('excerpt', val)} placeholder="Ringkasan singkat tentang post ini..." />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Konten Utama</label>
             <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
           </div>
         </div>
@@ -152,69 +165,85 @@ export function Posts() {
       return (
         <div className="space-y-6">
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Sampul Event</label>
-            <div className="flex gap-2 items-center">
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Sampul Event</label>
+            <div className="flex gap-2 items-center mb-3">
                 <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih banner event..." />
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-sm">
+                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 transition-colors shadow-sm">
                     <ImageIcon className="w-5 h-5" />
                 </button>
             </div>
+
+            {formData.featured_image && (
+              <div className="relative group w-full max-w-[320px] aspect-video rounded-2xl overflow-hidden border border-zinc-200 shadow-sm transition-all hover:shadow-md">
+                <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-2">
+                  <button 
+                    type="button" 
+                    onClick={() => handleInputChange('featured_image', null)}
+                    className="p-2 bg-red-500 text-white rounded-xl shadow-lg transform hover:scale-110 active:scale-95 transition-all"
+                    title="Hapus Gambar"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><Calendar className="w-3 h-3"/> Tanggal & Waktu Event</label>
-              <input type="text" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400" placeholder="Misal: 24 Okt 2026, 09:00 AM" />
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><Calendar className="w-3 h-3"/> Tanggal & Waktu Event</label>
+              <input type="text" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: 24 Okt 2026, 09:00 AM" />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><MapPin className="w-3 h-3"/> Lokasi</label>
-              <input type="text" value={formData.location || ''} onChange={e => handleInputChange('location', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400" placeholder="Misal: Grand Ballroom, Tech Valley" />
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><MapPin className="w-3 h-3"/> Lokasi</label>
+              <input type="text" value={formData.location || ''} onChange={e => handleInputChange('location', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: Grand Ballroom, Tech Valley" />
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
+            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 font-black text-zinc-300"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
             <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Deskripsi lengkap mengenai event ini..." />
           </div>
 
           {/* Agenda Section */}
-          <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-xl">
+          <div className="p-6 bg-zinc-50/50 border border-zinc-100 rounded-[2rem]">
             <div className="flex items-center justify-between mb-4">
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5"><Clock className="w-4 h-4 text-emerald-500"/> Agenda Acara</label>
-                <button type="button" onClick={addAgendaItem} className="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest bg-amber-100/50 px-2 py-1.5 rounded-md border border-amber-200 flex items-center gap-1 shadow-sm">
-                    <Plus className="w-3 h-3" /> Tambah Slot
+                <label className="block text-xs font-black text-zinc-400 uppercase tracking-[0.1em] flex items-center gap-2"><Clock className="w-4 h-4 text-emerald-500"/> Agenda Acara</label>
+                <button type="button" onClick={addAgendaItem} className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100 flex items-center gap-1.5 transition-all shadow-sm">
+                    <Plus className="w-3 h-3" /> Tambah Sesi
                 </button>
             </div>
             <div className="space-y-3">
               {(formData.agenda || []).map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-2 rounded-lg border border-zinc-200 shadow-sm">
-                  <input type="text" value={item.time} onChange={(e) => updateAgendaItem(idx, 'time', e.target.value)} placeholder="Misal: 09:00 - 10:00" className="w-full md:w-32 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-medium" />
-                  <input type="text" value={item.activity} onChange={(e) => updateAgendaItem(idx, 'activity', e.target.value)} placeholder="Nama Aktivitas / Sesi" className="w-full flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm" />
-                  <button type="button" onClick={() => removeAgendaItem(idx)} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors self-end md:self-auto"><Trash2 className="w-4 h-4" /></button>
+                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm group">
+                  <input type="text" value={item.time} onChange={(e) => updateAgendaItem(idx, 'time', e.target.value)} placeholder="Waktu" className="w-full md:w-32 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-emerald-400 text-sm font-bold" />
+                  <input type="text" value={item.activity} onChange={(e) => updateAgendaItem(idx, 'activity', e.target.value)} placeholder="Nama Aktivitas" className="w-full flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-emerald-400 text-sm font-medium" />
+                  <button type="button" onClick={() => removeAgendaItem(idx)} className="p-2.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
               {(!formData.agenda || formData.agenda.length === 0) && (
-                  <p className="text-xs text-zinc-400 italic">Belum ada agenda yang ditambahkan.</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider text-center py-4 opacity-50">Belum ada agenda.</p>
               )}
             </div>
           </div>
 
           {/* Speakers Section */}
-          <div className="p-4 bg-zinc-50 border border-zinc-100 rounded-xl">
+          <div className="p-6 bg-zinc-50/50 border border-zinc-100 rounded-[2rem]">
             <div className="flex items-center justify-between mb-4">
-                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5"><Users className="w-4 h-4 text-blue-500"/> Pembicara</label>
-                <button type="button" onClick={addSpeaker} className="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest bg-amber-100/50 px-2 py-1.5 rounded-md border border-amber-200 flex items-center gap-1 shadow-sm">
-                    <Plus className="w-3 h-3" /> Tambah Pembicara
+                <label className="block text-xs font-black text-zinc-400 uppercase tracking-[0.1em] flex items-center gap-2"><Users className="w-4 h-4 text-blue-500"/> Narasumber / Pembicara</label>
+                <button type="button" onClick={addSpeaker} className="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-3 py-2 rounded-xl border border-blue-100 flex items-center gap-1.5 transition-all shadow-sm">
+                    <Plus className="w-3 h-3" /> Tambah Personel
                 </button>
             </div>
             <div className="space-y-3">
               {(formData.speakers || []).map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-2 rounded-lg border border-zinc-200 shadow-sm">
-                  <input type="text" value={item.name} onChange={(e) => updateSpeaker(idx, 'name', e.target.value)} placeholder="Nama Pembicara" className="w-full md:w-48 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-medium" />
-                  <input type="text" value={item.role} onChange={(e) => updateSpeaker(idx, 'role', e.target.value)} placeholder="Peran / Jabatan" className="w-full flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm" />
-                  <button type="button" onClick={() => removeSpeaker(idx)} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors self-end md:self-auto"><Trash2 className="w-4 h-4" /></button>
+                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm group">
+                  <input type="text" value={item.name} onChange={(e) => updateSpeaker(idx, 'name', e.target.value)} placeholder="Nama Lengkap" className="w-full md:w-48 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" />
+                  <input type="text" value={item.role} onChange={(e) => updateSpeaker(idx, 'role', e.target.value)} placeholder="Jabatan / Peran" className="w-full flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-blue-400 text-sm font-medium" />
+                  <button type="button" onClick={() => removeSpeaker(idx)} className="p-2.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
               {(!formData.speakers || formData.speakers.length === 0) && (
-                  <p className="text-xs text-zinc-400 italic">Belum ada pembicara yang ditambahkan.</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider text-center py-4 opacity-50">Belum ada pembicara.</p>
               )}
             </div>
           </div>
@@ -340,33 +369,38 @@ export function Posts() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-3xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <div className="p-10">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-zinc-900">{editingId ? 'Edit Post' : 'Buat Post Baru'}</h2>
-                <button onClick={() => setIsModalOpen(false)} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-zinc-900/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-3xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            {/* Sticky Header */}
+            <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-white z-10">
+              <div>
+                <h2 className="text-2xl font-black text-zinc-900 tracking-tight">{editingId ? 'Edit Post' : 'Buat Post Baru'}</h2>
+                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-0.5">{category} Format</p>
               </div>
-
-              <form onSubmit={handleSave} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button onClick={() => setIsModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
+            </div>
+            
+            {/* Scrollable Content Container */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-10">
+              <form onSubmit={handleSave} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Judul Post</label>
-                    <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: Seminar Tahunan" />
+                    <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" placeholder="Misal: Seminar Tahunan" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Slug (URL)</label>
-                    <input type="text" value={slug} onChange={e => setSlug(e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold text-xs text-amber-600" placeholder="seminar-tahunan" />
+                    <input type="text" value={slug} onChange={e => setSlug(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold text-xs text-amber-600 transition-all" placeholder="seminar-tahunan" />
                   </div>
                 </div>
 
                 <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Format Konten</label>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Format Konten</label>
                     <div className="flex gap-4">
                         {['News', 'Event'].map(type => (
-                            <label key={type} className="flex-1">
+                            <label key={type} className="flex-1 group">
                                 <input type="radio" value={type} checked={category === type} onChange={e => setCategory(e.target.value)} className="peer sr-only" />
-                                <div className="p-4 rounded-xl border border-zinc-200 cursor-pointer text-center hover:bg-zinc-50 peer-checked:bg-amber-50 peer-checked:border-amber-400 peer-checked:text-amber-900 transition-all font-bold">
+                                <div className="p-4 rounded-2xl border-2 border-zinc-100 cursor-pointer text-center ring-offset-2 peer-checked:ring-2 peer-checked:ring-amber-400/30 bg-zinc-50/50 hover:bg-zinc-50 peer-checked:bg-amber-50 peer-checked:border-amber-400 peer-checked:text-amber-950 transition-all font-black text-sm uppercase tracking-wider">
                                     {type}
                                 </div>
                             </label>
@@ -374,15 +408,15 @@ export function Posts() {
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-zinc-100">
-                    <h3 className="text-sm font-bold text-zinc-900 mb-4 uppercase tracking-wider">Elemen Konten {category}</h3>
+                <div className="pt-6 border-t border-zinc-100">
+                    <h3 className="text-[10px] font-black text-zinc-300 mb-6 uppercase tracking-[0.25em]">Elemen Konten Khusus</h3>
                     {renderDynamicInputs()}
                 </div>
 
-                <div className="flex justify-end pt-8">
-                  <button type="submit" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
-                    <Send className="w-5 h-5" />
-                    Simpan Post
+                <div className="pt-10 flex justify-end sticky bottom-0 bg-gradient-to-t from-white via-white/90 to-transparent -mx-10 px-10 pb-2">
+                  <button type="submit" className="flex items-center gap-3 bg-zinc-950 text-white px-10 py-4 rounded-2xl font-bold hover:shadow-2xl hover:shadow-zinc-900/20 transition-all active:scale-95 group">
+                    <Send className="w-5 h-5 text-amber-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    Simpan Perubahan
                   </button>
                 </div>
               </form>
@@ -393,17 +427,17 @@ export function Posts() {
 
       {/* Media Picker Modal */}
       {isMediaPickerOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-zinc-900/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[80vh]">
-                <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-200">
+            <div className="relative w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[85vh]">
+                <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
                     <div>
-                        <h2 className="text-xl font-bold text-zinc-900">Galeri Media</h2>
-                        <p className="text-xs text-zinc-500 font-medium">Pilih gambar untuk disisipkan.</p>
+                        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Pilih Media</h2>
+                        <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider mt-1 opacity-60">Asset Library</p>
                     </div>
-                    <button onClick={() => { setIsMediaPickerOpen(false); setPickerContext(null); }} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
+                    <button onClick={() => { setIsMediaPickerOpen(false); setPickerContext(null); }} className="p-3 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-900 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
                 </div>
-                <div className="p-6 flex-1 overflow-y-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="p-8 flex-1 overflow-y-auto">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         {media?.map((m: any, idx: number) => (
                             <div 
                                 key={idx} 
@@ -421,23 +455,28 @@ export function Posts() {
                                     setIsMediaPickerOpen(false);
                                     setPickerContext(null);
                                 }}
-                                className="group cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-400 transition-all relative aspect-square bg-zinc-50"
+                                className="group cursor-pointer rounded-2xl overflow-hidden border-4 border-transparent hover:border-amber-400 transition-all relative aspect-square bg-zinc-100 ring-offset-2 hover:ring-2 hover:ring-amber-400/20 shadow-sm"
                             >
                                 {(m.file_type || '').startsWith('image/') ? (
-                                    <img src={m.file_url || m.url} alt={m.filename} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <img src={m.file_url || m.url} alt={m.filename} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">{m.filename}</span>
+                                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                                        <ImageIcon className="w-8 h-8 text-zinc-300 mb-2" />
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase text-center truncate w-full">{m.filename}</span>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="bg-amber-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-bold uppercase">Pilih</span>
+                                <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                    <span className="bg-amber-400 text-zinc-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl">Gunakan</span>
                                 </div>
                             </div>
                         ))}
                         {(!media || media.length === 0) && (
-                            <div className="col-span-full py-12 text-center text-zinc-400 text-sm font-medium italic">
-                                Belum ada aset media. Silakan unggah di halaman Media terlebih dahulu.
+                            <div className="col-span-full py-24 text-center">
+                                <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-zinc-200">
+                                    <ImageIcon className="w-8 h-8 text-zinc-300" />
+                                </div>
+                                <p className="text-zinc-400 font-bold uppercase tracking-[0.2em] text-xs">Library Kosong</p>
+                                <p className="text-zinc-500 text-sm mt-1">Unggah media melalui menu Media terlebih dahulu.</p>
                             </div>
                         )}
                     </div>

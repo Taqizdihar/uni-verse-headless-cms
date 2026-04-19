@@ -6,6 +6,9 @@ interface UnifiedPostLayoutProps {
   postData: any;
   palette?: any;
   currentSlug?: string;
+  settings?: any;
+  navPages?: any[];
+  subdomain?: string;
 }
 
 const fixImg = (url: string) => {
@@ -13,7 +16,7 @@ const fixImg = (url: string) => {
     return url && url.startsWith('/uploads') ? `${BASE_URL}${url}` : url;
 };
 
-export default function UnifiedPostLayout({ postData, palette }: UnifiedPostLayoutProps) {
+export default function UnifiedPostLayout({ postData, palette, settings, navPages, subdomain }: UnifiedPostLayoutProps) {
   const navigate = useNavigate();
   const p = palette || { 
       primary: 'var(--primary, #fbbf24)', 
@@ -27,7 +30,12 @@ export default function UnifiedPostLayout({ postData, palette }: UnifiedPostLayo
 
   const handleBack = (e: React.MouseEvent) => {
       e.preventDefault();
-      navigate(-1);
+      const newsPage = (navPages || []).find((pg: any) => pg.page_type === 'news');
+      if (newsPage && subdomain) {
+          navigate(`/preview/${subdomain}/${newsPage.slug?.replace(/^\/+/, '')}`);
+      } else {
+          navigate(-1);
+      }
   };
   
   if (type === 'event') {
@@ -58,7 +66,7 @@ export default function UnifiedPostLayout({ postData, palette }: UnifiedPostLayo
                   </span>
                   <span style={{ fontSize: '1.1rem', fontWeight: 800, color: p.text, paddingLeft: '1.75rem' }}>{c.event_location || 'Akan diumumkan'}</span>
                </div>
-               <div style={{ display: 'flex', alignItems: 'center' }}>
+               <div style={{ display: 'center', alignItems: 'center' }}>
                   {c.registration_link && (
                      <a href={c.registration_link} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', justifyContent: 'center', width: '100%', padding: '1rem 2.5rem', background: p.primary, color: p.surface, borderRadius: '99px', fontSize: '0.9rem', fontWeight: 800, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: `0 10px 30px ${p.primary}44`, transition: 'transform 0.2s', marginTop: '1rem' }} onMouseOver={(e)=>e.currentTarget.style.transform='translateY(-2px)'} onMouseOut={(e)=>e.currentTarget.style.transform='translateY(0)'}>
                         Daftar Sekarang
@@ -79,19 +87,30 @@ export default function UnifiedPostLayout({ postData, palette }: UnifiedPostLayo
        <a href="#" onClick={handleBack} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 700, color: p.primary, textDecoration: 'none', marginBottom: '3rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           &larr; Kembali
        </a>
-       <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
+       <header style={{ marginBottom: '4rem', textAlign: 'center' }}>
           {postData.category && <span style={{ display: 'inline-block', padding: '0.4rem 1.25rem', border: `2px solid ${p.primary}`, color: p.primary, borderRadius: '99px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2rem' }}>{postData.category}</span>}
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.03em', color: p.text, marginBottom: '2rem', margin: '0 auto', maxWidth: '95%' }}>{postData.title}</h1>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.9rem', color: `${p.text}88`, fontWeight: 600 }}>
              {c.author && <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={16} /> Ditulis oleh {c.author}</span>}
-             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={16} /> {postData.created_at ? new Date(postData.created_at).toLocaleDateString('id-ID', { dateStyle: 'long' }) : new Date().toLocaleDateString('id-ID')}</span>
           </div>
        </header>
+
        {c.featured_image && (
            <img src={fixImg(c.featured_image)} alt={postData.title} style={{ width: '100%', height: 'auto', maxHeight: '550px', objectFit: 'cover', borderRadius: '1.5rem', marginBottom: '4rem', boxShadow: '0 20px 40px rgba(0,0,0,0.08)' }} />
        )}
+
+       {/* Excerpt Section */}
+       {(postData.excerpt || c.excerpt) && (
+         <div 
+           className="rich-text-content"
+           style={{ fontSize: '1.4rem', fontWeight: 600, color: p.text, opacity: 0.8, lineHeight: 1.6, marginBottom: '3rem', borderLeft: `4px solid ${p.primary}`, paddingLeft: '2rem', fontStyle: 'italic' }}
+           dangerouslySetInnerHTML={{ __html: postData.excerpt || c.excerpt }}
+         />
+       )}
+
+       {/* Main Content */}
        <div 
-           className="prose prose-lg max-w-none opacity-90 transition-opacity"
+           className="prose prose-lg max-w-none opacity-90 transition-opacity rich-text-content"
            style={{ color: p.text, lineHeight: 1.9, fontSize: '1.15rem' }}
            dangerouslySetInnerHTML={{ __html: c.body || c.main_content || (typeof c === 'string' ? c : '') }}
        />

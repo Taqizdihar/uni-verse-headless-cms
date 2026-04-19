@@ -78,7 +78,7 @@ export default function MinimalistTemplate({
       <div style={{ background: 'var(--bg-color)', color: 'var(--text-color)', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
         <MinimalistNavbar settings={settings} siteName={siteName} navPages={navPages} currentSlug={currentSlug} subdomain={subdomain} />
         <main style={{ flex: 1 }}>
-          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} />
+          <UnifiedPostLayout postData={postData} currentSlug={currentSlug} settings={settings} navPages={navPages} subdomain={subdomain} />
         </main>
         <MinimalistFooter settings={settings} siteName={siteName} footerCfg={footerCfg} />
       </div>
