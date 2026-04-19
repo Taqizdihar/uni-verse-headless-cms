@@ -271,7 +271,7 @@ app.post('/api/auth/login', async (req, res) => {
         console.log(`[AUTH] Login attempt for email: ${email}`);
 
         // 1. Search for user by email
-        const [users] = await db.execute('SELECT id, name, email, password_hash FROM users WHERE email = ?', [email]);
+        const [users] = await db.execute('SELECT id, name, email, profile_picture, password_hash FROM users WHERE email = ?', [email]);
         
         if (!users || users.length === 0) {
             console.log(`[AUTH] Login failed: User ${email} not found`);
@@ -312,6 +312,7 @@ app.post('/api/auth/login', async (req, res) => {
                 id: user.id, 
                 name: user.name, 
                 email: user.email, 
+                profile_picture: user.profile_picture,
                 tenant_id, 
                 role, 
                 site_name 
@@ -798,7 +799,7 @@ app.delete('/api/users/:user_id', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [rows] = await db.execute('SELECT name, email, profile_picture_url FROM users WHERE id = ?', [userId]);
+        const [rows] = await db.execute('SELECT name, email, profile_picture FROM users WHERE id = ?', [userId]);
         if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
         res.json(rows[0]);
     } catch (error) {
@@ -824,7 +825,7 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
         if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diunggah' });
         const avatarUrl = req.file.path; // Cloudinary secure_url
         const userId = req.user.userId;
-        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
+        await db.execute('UPDATE users SET profile_picture = ? WHERE id = ?', [avatarUrl, userId]);
         res.json({ url: avatarUrl });
     } catch (error) {
         console.error('[PROFILE ERROR] Upload avatar:', error);
@@ -903,8 +904,8 @@ app.get('/api/export/zip', async (req, res) => {
                     }
                 }
                 if (buffer) {
-                    archive.append(buffer, { name: `public/assets/${filename}` });
-                    return `./assets/${filename}`;
+                    archive.append(buffer, { name: `public/assets/media/${filename}` });
+                    return `./assets/media/${filename}`;
                 }
             } catch (e) {
                 console.error(`[EXPORT] Error processing image: ${url}`, e);
@@ -1156,7 +1157,7 @@ export default function App() {
             let templateContent = fs.readFileSync(templatePath, 'utf8');
             // Fix imports if depth changed
             if (templatePath.includes(`${path.sep}${activeTemplate}${path.sep}`)) {
-                templateContent = templateContent.replace(/\\.\\.\\/\\.\\.\\/components\\//g, '../components/');
+                templateContent = templateContent.split('../../../components/').join('../components/');
             }
             archive.append(templateContent, { name: 'src/templates/Template.tsx' });
         } else {
@@ -1222,12 +1223,12 @@ app.listen(PORT, '0.0.0.0', async () => {
     
     // Auto-migration for user profile field
     try {
-        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture_url"');
+        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture"');
         if (columns.length === 0) {
-            console.log('[MIGRATION] Adding profile_picture_url to users table...');
-            await db.execute('ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR(255) DEFAULT NULL');
+            console.log('[MIGRATION] Adding profile_picture to users table...');
+            await db.execute('ALTER TABLE users ADD COLUMN profile_picture VARCHAR(255) DEFAULT NULL');
         }
     } catch (e) {
-        console.warn('[MIGRATION ERROR] Could not verify/add profile_picture_url column:', e.message);
+        console.warn('[MIGRATION ERROR] Could not verify/add profile_picture column:', e.message);
     }
 });

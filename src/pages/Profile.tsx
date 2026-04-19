@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 
 export function Profile() {
   const { user, setUser, token } = useCMS();
-  const [profile, setProfile] = useState({ name: '', email: '', profile_picture_url: '' });
+  const [profile, setProfile] = useState({ name: '', email: '', profile_picture: '' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,10 +70,10 @@ export function Profile() {
         }
       });
       const newUrl = res.data.url;
-      setProfile(prev => ({ ...prev, profile_picture_url: newUrl }));
+      setProfile(prev => ({ ...prev, profile_picture: newUrl }));
       
       // Update local context
-      const updatedUser = { ...user, profile_picture_url: newUrl };
+      const updatedUser = { ...user, profile_picture: newUrl };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
       
@@ -133,8 +133,8 @@ export function Profile() {
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-[2.5rem] bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
-                    {profile.profile_picture_url ? (
-                      <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                    {profile.profile_picture ? (
+                      <img src={profile.profile_picture} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-12 h-12 text-zinc-300" />
                     )}

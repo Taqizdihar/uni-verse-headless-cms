@@ -61,8 +61,8 @@ export function Header() {
             onClick={() => navigate('/profile')}
           >
             <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm">
-                {user?.profile_picture_url ? (
-                    <img src={user.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                {user?.profile_picture ? (
+                    <img src={user.profile_picture} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
                         <UserCircle className="w-8 h-8" />
