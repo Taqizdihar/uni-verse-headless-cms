@@ -8,7 +8,7 @@ export function PublicLanding() {
   useEffect(() => {
     if (localStorage.getItem('token')) {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.tenant_id) {
+      if (user.site_name && user.site_name !== 'My Site') {
         navigate('/dashboard');
       } else {
         navigate('/setup');

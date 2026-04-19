@@ -9,7 +9,6 @@ export function Setup() {
   const { setToken, setUser, fetchAllData } = useCMS();
   const [siteName, setSiteName] = useState('');
   const [tagline, setTagline] = useState('');
-  const [subdomain, setSubdomain] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +20,8 @@ export function Setup() {
      
      if (!token) {
          navigate('/login');
-     } else if (user && user.tenant_id) {
-         // If already has a tenant, go to dashboard
+     } else if (user && user.site_name && user.site_name !== 'My Site') {
+         // If setup is already finished (site_name is not default), go to dashboard
          navigate('/dashboard');
      }
      // If has token but NO tenant_id, stay here to complete setup.
@@ -35,9 +34,9 @@ export function Setup() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      console.log(`[FRONTEND] Provisioning tenant: ${subdomain}`);
+      console.log(`[FRONTEND] Provisioning tenant: ${siteName}`);
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/setup`, 
-        { site_name: siteName, tagline, subdomain },
+        { site_name: siteName, tagline },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -114,23 +113,6 @@ export function Setup() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-black text-zinc-500 uppercase tracking-widest ml-1 mb-2">Subdomain (Tidak Dapat Diubah)</label>
-              <div className="relative group">
-                <input 
-                  required 
-                  type="text" 
-                  value={subdomain} 
-                  onChange={e => setSubdomain(e.target.value)} 
-                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-mono text-sm pl-12" 
-                  placeholder="acme-corp" 
-                />
-                <Globe className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-amber-400 transition-colors" />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 font-bold text-xs pointer-events-none">
-                    .uni-inside.io
-                </div>
-              </div>
-            </div>
 
             <div className="pt-4">
               <button 

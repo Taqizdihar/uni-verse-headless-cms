@@ -16,11 +16,11 @@ export function Login() {
   useEffect(() => {
     if (localStorage.getItem('token')) {
        const user = JSON.parse(localStorage.getItem('user') || '{}');
-       if (user.tenant_id) {
-         navigate('/dashboard');
-       } else {
-         navigate('/setup');
-       }
+        if (user.site_name && user.site_name !== 'My Site') {
+          navigate('/dashboard');
+        } else {
+          navigate('/setup');
+        }
     }
   }, [navigate]);
 
@@ -42,10 +42,10 @@ export function Login() {
       
       console.log(`[FRONTEND] Login success. Tenant ID: ${user.tenant_id || 'NONE'}`);
 
-      if (!user.tenant_id) {
-         navigate('/setup');
-      } else {
+      if (user.site_name && user.site_name !== 'My Site') {
          navigate('/dashboard');
+      } else {
+         navigate('/setup');
       }
     } catch (err: any) {
       console.error('[FRONTEND ERROR] Login failed:', err);

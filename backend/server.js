@@ -252,7 +252,7 @@ app.post('/api/auth/register', async (req, res) => {
             message: 'Success', 
             token,
             tenant_id: tenantId,
-            user: { id: userId, name, email, tenant_id: tenantId, role: 'admin' } 
+            user: { id: userId, name, email, tenant_id: tenantId, role: 'admin', site_name: 'My Site' } 
         });
     } catch (error) {
         console.error('DATABASE ERROR:', error);
@@ -283,8 +283,16 @@ app.post('/api/auth/login', async (req, res) => {
         const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
 
         const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1d' });
+        
+        // Fetch site_name for redirect logic
+        let site_name = 'My Site';
+        if (tenant_id) {
+            const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
+            if (settings.length > 0) site_name = settings[0].site_name;
+        }
+
         console.log(`[AUTH] Login successful for ${email}. Tenant ID: ${tenant_id || 'NONE'}`);
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email, tenant_id, role } });
+        res.json({ token, user: { id: user.id, name: user.name, email: user.email, tenant_id, role, site_name } });
     } catch (error) {
         console.error('[AUTH ERROR] Login Registry Failure:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
@@ -296,18 +304,26 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
     const userId = req.user.userId;
     const tenantId = req.user.tenant_id;
     try {
-        console.log(`[AUTH] Setting up tenant for User ID: ${userId}, Subdomain: ${subdomain}`);
+        console.log(`[AUTH] Setting up tenant for User ID: ${userId}, Site Name: ${site_name}`);
         if (!tenantId) return res.status(400).json({ error: 'Tenant context is missing.' });
 
+        // Generate Subdomain automatically from Site Name
+        const generatedSubdomain = site_name
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_]+/g, '-')
+            .replace(/^-+|-+$/g, '') || `site-${Date.now()}`;
+
         // Validation for uniqueness (excluding self)
-        const [existing] = await db.execute('SELECT * FROM tenants WHERE subdomain = ? AND id != ?', [subdomain, tenantId]);
+        const [existing] = await db.execute('SELECT * FROM tenants WHERE subdomain = ? AND id != ?', [generatedSubdomain, tenantId]);
         if (existing.length > 0) {
-            console.log(`[AUTH] Setup failed: Subdomain ${subdomain} already exists`);
-            return res.status(400).json({ error: 'Subdomain already exists' });
+            console.log(`[AUTH] Setup failed: Generated subdomain ${generatedSubdomain} already exists`);
+            return res.status(400).json({ error: 'Nama website sudah digunakan. Silakan pilih nama lain.' });
         }
 
         // a. Update tenant
-        await db.execute('UPDATE tenants SET name = ?, subdomain = ? WHERE id = ?', [site_name, subdomain, tenantId]);
+        await db.execute('UPDATE tenants SET name = ?, subdomain = ? WHERE id = ?', [site_name, generatedSubdomain, tenantId]);
 
         // b. Update settings
         await db.execute(
@@ -318,8 +334,12 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
         // Sign fresh token
         const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
         
-        console.log(`[AUTH] Setup finalized. Tenant ID: ${tenantId}`);
-        res.status(200).json({ message: 'Setup completed', token, user: { id: userId, email: req.user.email, tenant_id: tenantId, role: 'admin'} });
+        console.log(`[AUTH] Setup finalized. Tenant ID: ${tenantId}, Subdomain: ${generatedSubdomain}`);
+        res.status(200).json({ 
+            message: 'Setup completed', 
+            token, 
+            user: { id: userId, email: req.user.email, tenant_id: tenantId, role: 'admin', site_name: site_name } 
+        });
     } catch (error) {
         console.error('[AUTH ERROR] Setup Transaction Failure:', error);
         res.status(500).json({ error: error.message || 'Internal Server Error' });
