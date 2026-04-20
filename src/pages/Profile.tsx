@@ -126,9 +126,10 @@ export function Profile() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Row 1: Left (Photo) & Right (Identity) */}
         {/* Profile Card */}
-        <Card className="lg:col-span-1 h-fit border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
+        <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem] flex flex-col">
           <div className="h-32 bg-amber-400 relative">
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
@@ -151,7 +152,7 @@ export function Profile() {
                 </div>
              </div>
           </div>
-          <CardContent className="pt-20 pb-8 text-center">
+          <CardContent className="pt-20 pb-8 text-center flex-1 flex flex-col justify-center">
             <h3 className="text-xl font-black text-zinc-900">{profile.name}</h3>
             <p className="text-zinc-500 font-medium text-sm">{profile.email}</p>
             <div className="mt-6 flex justify-center gap-2">
@@ -162,125 +163,123 @@ export function Profile() {
           </CardContent>
         </Card>
 
-        {/* Edit Form */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="border-none shadow-2xl bg-white rounded-[2.5rem]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5 text-amber-500" /> Identitas Dasar
+        {/* Edit Form - Basic Identity */}
+        <Card className="lg:col-span-2 border-none shadow-2xl bg-white rounded-[2.5rem] flex flex-col">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-amber-500" /> Identitas Dasar
+            </CardTitle>
+            <CardDescription>Perbarui informasi publik dan kontak Anda.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-center">
+            <form onSubmit={handleProfileUpdate} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                  <div className="relative group">
+                    <User className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
+                    <input 
+                      type="text" 
+                      value={profile.name}
+                      onChange={e => setProfile({...profile, name: e.target.value})}
+                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      placeholder="Nama Anda"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Alamat Email</label>
+                  <div className="relative group">
+                    <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
+                    <input 
+                      type="email" 
+                      value={profile.email}
+                      onChange={e => setProfile({...profile, email: e.target.value})}
+                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      placeholder="email@contoh.com"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <button 
+                  disabled={isSaving}
+                  type="submit" 
+                  className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Row 2: Account Security (Full Width) */}
+        <Card className="lg:col-span-3 border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
+          <CardHeader className="flex flex-row items-center justify-between pb-6">
+            <div>
+              <CardTitle className="flex items-center gap-2 font-black">
+                <Key className="w-5 h-5 text-zinc-400" /> Keamanan Akun
               </CardTitle>
-              <CardDescription>Perbarui informasi publik dan kontak Anda.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleProfileUpdate} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
-                    <div className="relative group">
-                      <User className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
+              <CardDescription>Kelola otentikasi dan integritas data Anda.</CardDescription>
+            </div>
+            <button 
+              onClick={() => setShowPassForm(!showPassForm)}
+              className={`text-xs font-black uppercase tracking-widest underline underline-offset-4 transition-colors ${showPassForm ? 'text-red-500' : 'text-amber-500'}`}
+            >
+              {showPassForm ? 'Batalkan' : 'Ubah Sandi'}
+            </button>
+          </CardHeader>
+          {showPassForm && (
+            <CardContent className="pt-0 animate-in fade-in slide-in-from-top-4">
+              <form onSubmit={handlePasswordChange} className="p-6 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Sandi Saat Ini</label>
                       <input 
-                        type="text" 
-                        value={profile.name}
-                        onChange={e => setProfile({...profile, name: e.target.value})}
-                        className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
-                        placeholder="Nama Anda"
+                        required
+                        type="password" 
+                        value={passwords.current}
+                        onChange={e => setPasswords({...passwords, current: e.target.value})}
+                        className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Sandi Baru</label>
+                      <input 
+                        required
+                        type="password" 
+                        value={passwords.new}
+                        onChange={e => setPasswords({...passwords, new: e.target.value})}
+                        className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Konfirmasi Sandi</label>
+                      <input 
+                        required
+                        type="password" 
+                        value={passwords.confirm}
+                        onChange={e => setPasswords({...passwords, confirm: e.target.value})}
+                        className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Alamat Email</label>
-                    <div className="relative group">
-                      <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
-                      <input 
-                        type="email" 
-                        value={profile.email}
-                        onChange={e => setProfile({...profile, email: e.target.value})}
-                        className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
-                        placeholder="email@contoh.com"
-                      />
-                    </div>
+                  <div className="flex justify-end">
+                    <button 
+                      disabled={isChangingPass}
+                      type="submit" 
+                      className="flex items-center gap-2 px-8 py-3 bg-amber-400 text-zinc-950 rounded-2xl font-black text-sm hover:bg-amber-300 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                    >
+                      {isChangingPass ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                      Konfirmasi Perubahan Sandi
+                    </button>
                   </div>
-                </div>
-                <div className="flex justify-end">
-                  <button 
-                    disabled={isSaving}
-                    type="submit" 
-                    className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
-                  >
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Simpan Perubahan
-                  </button>
-                </div>
               </form>
             </CardContent>
-          </Card>
-
-          {/* Security Card */}
-          <Card className="border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
-            <CardHeader className="flex flex-row items-center justify-between pb-6">
-              <div>
-                <CardTitle className="flex items-center gap-2 font-black">
-                  <Key className="w-5 h-5 text-zinc-400" /> Keamanan Akun
-                </CardTitle>
-                <CardDescription>Kelola otentikasi dan integritas data Anda.</CardDescription>
-              </div>
-              <button 
-                onClick={() => setShowPassForm(!showPassForm)}
-                className={`text-xs font-black uppercase tracking-widest underline underline-offset-4 transition-colors ${showPassForm ? 'text-red-500' : 'text-amber-500'}`}
-              >
-                {showPassForm ? 'Batalkan' : 'Ubah Sandi'}
-              </button>
-            </CardHeader>
-            {showPassForm && (
-              <CardContent className="pt-0 animate-in fade-in slide-in-from-top-4">
-                <form onSubmit={handlePasswordChange} className="p-6 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 space-y-6">
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Sandi Saat Ini</label>
-                        <input 
-                          required
-                          type="password" 
-                          value={passwords.current}
-                          onChange={e => setPasswords({...passwords, current: e.target.value})}
-                          className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Sandi Baru</label>
-                        <input 
-                          required
-                          type="password" 
-                          value={passwords.new}
-                          onChange={e => setPasswords({...passwords, new: e.target.value})}
-                          className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Konfirmasi Sandi</label>
-                        <input 
-                          required
-                          type="password" 
-                          value={passwords.confirm}
-                          onChange={e => setPasswords({...passwords, confirm: e.target.value})}
-                          className="w-full px-5 py-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
-                        />
-                      </div>
-                   </div>
-                   <div className="flex justify-end">
-                      <button 
-                        disabled={isChangingPass}
-                        type="submit" 
-                        className="flex items-center gap-2 px-8 py-3 bg-amber-400 text-zinc-950 rounded-2xl font-black text-sm hover:bg-amber-300 transition-all shadow-lg active:scale-95 disabled:opacity-50"
-                      >
-                        {isChangingPass ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-                        Konfirmasi Perubahan Sandi
-                      </button>
-                   </div>
-                </form>
-              </CardContent>
-            )}
-          </Card>
-        </div>
+          )}
+        </Card>
       </div>
     </div>
   );

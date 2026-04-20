@@ -211,10 +211,10 @@ export function Media() {
                           disabled={isRenaming}
                           className="p-1 text-green-600 hover:bg-green-50 rounded-lg"
                         >
-                          {isRenaming ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                          {isRenaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                         </button>
                         <button onClick={() => setEditingId(null)} className="p-1 text-zinc-400 hover:bg-zinc-50 rounded-lg">
-                           <X className="w-3 h-3" />
+                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     ) : (
@@ -227,9 +227,9 @@ export function Media() {
                             setEditingId(m.id);
                             setEditingName(m.file_name || m.filename || "");
                           }}
-                          className="p-1 text-zinc-300 hover:text-amber-500 opacity-0 group-hover/name:opacity-100 transition-all"
+                          className="p-1 text-zinc-500 hover:text-amber-500 transition-all flex-shrink-0"
                         >
-                          <Edit2 className="w-3 h-3" />
+                          <Edit2 className="w-5 h-5" />
                         </button>
                       </div>
                     )}
