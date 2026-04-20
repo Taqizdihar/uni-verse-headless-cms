@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Loader2, History, Package } from 'lucide-react';
-import superAdminAvatar from '../assets/logo/Super Admin Profile.jpg';
+import superAdminAvatar from '../assets/logo/super-admin-profile.jpg';
 
 interface UpdateItem {
   id: number;
@@ -23,13 +23,13 @@ export function UpdateHistory() {
         console.log('[DEBUG] Update History Payload:', response.data);
         
         // Defensive Mapping to ensure compatibility with both internal and schema field names
-        const mappedData = response.data.map((item: any) => ({
-          id: item.id,
-          title: item.title || item.update_title,
-          description: item.description || item.update_description,
-          version: item.version || item.update_version,
-          created_at: item.created_at || item.update_date,
-          images: item.images || []
+        const mappedData: UpdateItem[] = (response.data || []).map((item: any): UpdateItem => ({
+          id: item.id ? Number(item.id) : 0,
+          title: String(item.title || item.update_title || ''),
+          description: String(item.description || item.update_description || ''),
+          version: String(item.version || item.update_version || ''),
+          created_at: String(item.created_at || item.update_date || ''),
+          images: Array.isArray(item.images) ? item.images : []
         }));
 
         setUpdates(mappedData);
