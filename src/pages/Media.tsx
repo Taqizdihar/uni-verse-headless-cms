@@ -229,7 +229,7 @@ export function Media() {
                           }}
                           className="p-1 text-zinc-500 hover:text-amber-500 transition-all flex-shrink-0"
                         >
-                          <Edit2 className="w-5 h-5" />
+                          <Edit2 className="w-4 h-4" />
                         </button>
                       </div>
                     )}
@@ -237,9 +237,9 @@ export function Media() {
                     {!editingId && (
                       <button 
                           onClick={() => setConfirmDelete({ isOpen: true, id: m.id })}
-                          className="p-1.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all"
                       >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
