@@ -158,25 +158,59 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
 app.get('/api/public/updates', async (req, res) => {
     try {
-        const [updates] = await db.execute('SELECT * FROM update_history ORDER BY update_date DESC');
+        // Task 1: Identify and Sanitize Parameters (Handle potential undefined/NaN)
+        const tenantIdStr = req.query.tenant_id;
+        const limitStr = req.query.limit;
         
+        const tenantId = tenantIdStr ? parseInt(tenantIdStr) : null;
+        const limit = limitStr ? parseInt(limitStr) : 50;
+
+        // Defensive check to avoid NaN or undefined in bind parameters
+        const safeTenantId = isNaN(tenantId) ? null : tenantId;
+        const safeLimit = isNaN(limit) ? 50 : limit;
+
+        // Task 2: Defensive Query Construction
+        // We support optional tenant filtering if the column exists, but fallback to global for Uni-Verse updates
+        let query = 'SELECT * FROM update_history';
+        const params = [];
+
+        // Note: For now we default to global update history as per schema, 
+        // but we prepare the pattern for future tenant-specific filtering.
+        query += ' ORDER BY update_date DESC LIMIT ?';
+        params.push(safeLimit);
+
+        const [updates] = await db.execute(query, params);
+        
+        // Task 3: Response Integrity (Ensure [] if empty)
+        if (!updates || updates.length === 0) {
+            return res.json([]);
+        }
+
         // Fetch images for each update
         const updatesWithImages = await Promise.all(updates.map(async (update) => {
-            const [images] = await db.execute('SELECT image_url FROM update_images WHERE update_id = ?', [update.id]);
+            // DEFENSIVE FIX: Ensure update_id is never undefined
+            // We check both 'id' and 'update_id' column possibilities
+            const currentId = update.id || update.id_update || 0;
+            
+            const [images] = await db.execute(
+                'SELECT image_url FROM update_images WHERE update_id = ?', 
+                [currentId || null]
+            );
+
             return {
-                id: update.id,
-                title: update.update_title,
-                description: update.update_description,
-                version: update.update_version,
-                created_at: update.update_date,
-                images: images.map(img => img.image_url)
+                id: currentId,
+                title: update.update_title || '',
+                description: update.update_description || '',
+                version: update.update_version || '',
+                created_at: update.update_date || null,
+                images: Array.isArray(images) ? images.map(img => img.image_url) : []
             };
         }));
 
         res.json(updatesWithImages);
     } catch (error) {
         console.error('[API ERROR] Get public updates:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
     }
 });
 
@@ -184,10 +218,12 @@ app.get('/api/public/posts', async (req, res) => {
     try {
         // ✅ SECURITY FIX: Scope posts to a specific tenant via ?tenant_id query param
         // Also supports fetching all published posts for single-tenant use (no param)
-        const tenantId = req.query.tenant_id ? parseInt(req.query.tenant_id) : null;
+        const tenantIdRaw = req.query.tenant_id ? parseInt(req.query.tenant_id) : null;
+        const tenantId = isNaN(tenantIdRaw) ? null : tenantIdRaw;
+        
         let query = "SELECT id, title, slug, category, excerpt, created_at, content FROM posts WHERE status = 'published'";
         const params = [];
-        if (tenantId) {
+        if (tenantId !== null) {
             query += ' AND tenant_id = ?';
             params.push(tenantId);
         }
