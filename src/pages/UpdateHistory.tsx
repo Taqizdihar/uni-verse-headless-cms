@@ -77,17 +77,17 @@ export function UpdateHistory() {
 
               {/* Chat Bubble Container */}
               <div className="flex-1">
-                <div className="bg-[#f0f7ff] rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow relative">
+                <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <div>
                         <h3 className="text-lg font-black text-zinc-900 leading-tight">
                             {update.title}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
+                            <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm shadow-blue-600/20">
                                 v{update.version}
                             </span>
-                            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">
+                            <span className="text-blue-500/80 text-xs font-bold uppercase tracking-widest">
                                 {new Date(update.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </span>
                         </div>
@@ -96,16 +96,15 @@ export function UpdateHistory() {
 
                   {/* Description (Rich Text) */}
                   <div 
-                    className="rich-text-content text-zinc-700 leading-relaxed text-sm prose prose-zinc prose-sm max-w-none 
-                    prose-p:mb-3 prose-ul:list-disc prose-ul:ml-4 prose-ol:list-decimal prose-ol:ml-4 prose-strong:text-zinc-900"
+                    className="rich-text-content text-zinc-700 leading-relaxed text-sm"
                     dangerouslySetInnerHTML={{ __html: update.description }}
                   />
 
                   {/* Images Gallery */}
                   {update.images && update.images.length > 0 && (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-6 pt-6 border-t border-zinc-50">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-6 pt-6 border-t border-blue-200/50">
                       {update.images.map((img, i) => (
-                        <div key={i} className="aspect-video rounded-xl overflow-hidden border border-zinc-100 group/img cursor-pointer bg-zinc-50">
+                        <div key={i} className="aspect-video rounded-xl overflow-hidden border border-blue-100 group/img cursor-pointer bg-blue-100/50">
                             <img 
                                 src={img} 
                                 alt={`Update Screenshot ${i+1}`} 
@@ -118,7 +117,7 @@ export function UpdateHistory() {
                 </div>
                 
                 {/* Visual Connector Line for chat bubble tail feel */}
-                <div className="absolute left-[3.5rem] top-4 w-4 h-4 bg-[#f0f7ff] border-l border-t border-blue-100 -rotate-45 -z-10" />
+                <div className="absolute left-[3.5rem] top-4 w-4 h-4 bg-blue-50/80 backdrop-blur-sm border-l border-t border-blue-100 -rotate-45 -z-10" />
               </div>
             </div>
           ))}
