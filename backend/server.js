@@ -158,23 +158,27 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
 app.get('/api/public/updates', async (req, res) => {
     try {
-        // 1. Fix the Data Type: Ensure limit is a strictly validated integer
-        // The LIMIT placeholder (?) in MySQL must receive a numeric integer, not a string. (SQL Error 1210 Fix)
-        const rawLimit = req.query.limit;
-        let limit = parseInt(rawLimit, 10);
-
-        // 2. Validation: check if positive number, else default to 10
-        if (isNaN(limit) || limit <= 0) {
-            limit = 10;
+        // Task 1: Identify and Sanitize Parameters
+        const tenantIdVal = req.query.tenant_id;
+        let safeTenantId = parseInt(tenantIdVal, 10);
+        if (isNaN(safeTenantId)) {
+            safeTenantId = null;
         }
 
-        console.log(`[UPDATES] Fetching update history with limit: ${limit}`);
+        const limitVal = req.query.limit;
+        let safeLimit = parseInt(limitVal, 10);
+        if (isNaN(safeLimit) || safeLimit <= 0) {
+            safeLimit = 10;
+        }
 
-        // 3. Query execution
-        const [updates] = await db.execute(
-            'SELECT * FROM update_history ORDER BY update_date DESC LIMIT ?',
-            [limit]
-        );
+        // Task 2: Defensive Query Construction
+        let query = 'SELECT * FROM update_history';
+        const params = [];
+
+        query += ' ORDER BY update_date DESC LIMIT ?';
+        params.push(safeLimit);
+
+        const [updates] = await db.execute(query, params);
         
         // Task 3: Response Integrity (Ensure [] if empty)
         if (!updates || updates.length === 0) {
