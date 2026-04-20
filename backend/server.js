@@ -257,36 +257,46 @@ app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (re
 app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
     const { title, description, version, update_date, images } = req.body;
     
+    // Step 1: Strict Validation of Mandatory Fields
     if (!title || !description || !version || !update_date) {
         return res.status(400).json({ error: 'Title, description, version, and update_date are required.' });
     }
 
+    const connection = await db.getConnection();
     try {
-        // 1. Insert into update_history
-        const [result] = await db.execute(
+        await connection.beginTransaction();
+
+        // Step 2: Main Data Insertion into update_history
+        // Ensure NO connection to update_images here
+        const [historyResult] = await connection.execute(
             'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, ?)',
             [title, description, version, update_date]
         );
-        const updateId = result.insertId;
+        
+        const updateId = historyResult.insertId;
 
-        // 2. Insert multiple images if provided
+        // Step 3: Conditional Images Data Insertion
         if (images && Array.isArray(images) && images.length > 0) {
-            const imageValues = images.map(url => [updateId, url]);
-            // Constructing manual bulk insert for better speed
             const placeholders = images.map(() => '(?, ?)').join(', ');
-            const flattened = [];
-            images.forEach(url => flattened.push(updateId, url));
-            
-            await db.execute(
+            const flattenedParameters = [];
+            images.forEach(url => {
+                flattenedParameters.push(updateId, url);
+            });
+
+            await connection.execute(
                 `INSERT INTO update_images (update_id, image_url) VALUES ${placeholders}`,
-                flattened
+                flattenedParameters
             );
         }
 
-        res.status(201).json({ message: 'Update history recorded successfully', updateId });
+        await connection.commit();
+        res.status(201).json({ message: 'Update history and images recorded successfully', updateId });
     } catch (error) {
-        console.error('[SUPER ADMIN ERROR] History write failed:', error);
+        await connection.rollback();
+        console.error('[SUPER ADMIN ERROR] Transactional history write failed:', error);
         res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    } finally {
+        connection.release();
     }
 });
 
