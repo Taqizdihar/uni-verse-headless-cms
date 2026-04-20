@@ -52,7 +52,7 @@ export function UpdateHistory() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-4xl mx-auto py-8 px-4">
+    <div className="animate-in fade-in duration-500 w-full max-w-[1200px] py-8 px-4 md:px-12">
       <div className="flex items-center gap-4 mb-12">
           <div className="p-3 bg-white rounded-2xl shadow-sm border border-zinc-200">
             <HistoryIcon className="w-6 h-6 text-zinc-900" />
@@ -77,7 +77,7 @@ export function UpdateHistory() {
           {updates.map((update, index) => {
             console.log('[DEBUG] Rendering Update Item:', update);
             return (
-              <div key={update.id} className="flex gap-6 relative group animate-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+              <div key={update.id} className="flex gap-6 relative group animate-in slide-in-from-bottom-4 duration-500 w-full" style={{ animationDelay: `${index * 100}ms` }}>
                 {/* Avatar Container */}
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 rounded-full border-4 border-white shadow-md overflow-hidden ring-1 ring-zinc-200 bg-zinc-100">
@@ -90,14 +90,14 @@ export function UpdateHistory() {
                 </div>
 
                 {/* Chat Bubble Container */}
-                <div className="flex-1">
-                  <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex-1 min-w-0">
+                  <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-8 shadow-sm hover:shadow-md transition-shadow w-full">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                      <div>
-                          <h3 className="text-lg font-black text-zinc-900 leading-tight">
+                      <div className="min-w-0">
+                          <h3 className="text-lg font-black text-zinc-900 leading-tight break-words">
                               {update.title}
                           </h3>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
                               <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm shadow-blue-600/20">
                                   v{update.version}
                               </span>
@@ -111,7 +111,7 @@ export function UpdateHistory() {
                     {/* Description (Rich Text) */}
                     {update.description && (
                       <div 
-                        className="rich-text-content text-zinc-700 leading-relaxed text-sm"
+                        className="rich-text-content text-zinc-700 leading-relaxed text-sm break-words overflow-hidden"
                         dangerouslySetInnerHTML={{ __html: update.description }}
                       />
                     )}

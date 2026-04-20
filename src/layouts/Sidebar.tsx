@@ -11,7 +11,8 @@ import {
   Users, 
   Blocks, 
   Settings,
-  History
+  History,
+  X
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
@@ -29,15 +30,27 @@ const navItems = [
   { name: 'Histori Update', path: '/dashboard/updates', icon: History },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const { settings } = useCMS();
   
   return (
-    <aside className="w-64 bg-zinc-900 text-white h-screen flex flex-col fixed left-0 top-0 overflow-y-auto z-50 shadow-xl">
+    <aside className="w-64 bg-zinc-900 text-white h-screen flex flex-col relative shadow-xl">
       <div className="p-8">
-        <h1 className="text-2xl font-black text-amber-400 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
-            {settings?.site_name || 'Uni-Inside'}
-        </h1>
+        <div className="flex items-center justify-between mb-2 md:block">
+          <h1 className="text-2xl font-black text-amber-400 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
+              {settings?.site_name || 'Uni-Inside'}
+          </h1>
+          <button 
+            onClick={onClose}
+            className="p-2 md:hidden text-zinc-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
         <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em] mt-1 ml-0.5 opacity-60">Konsol Admin</p>
       </div>
 
@@ -48,6 +61,7 @@ export function Sidebar() {
             <NavLink
               key={item.name}
               to={item.path}
+              onClick={onClose}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm pointer-events-auto",

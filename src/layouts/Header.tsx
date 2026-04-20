@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { Bell, Search, UserCircle, LogOut } from 'lucide-react';
+import { Bell, Search, UserCircle, LogOut, Menu } from 'lucide-react';
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V2.png';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { searchQuery, setSearchQuery } = useSearch();
   const { user, setUser, setToken } = useCMS();
   const navigate = useNavigate();
@@ -21,8 +24,16 @@ export function Header() {
   };
 
   return (
-    <header className="h-20 bg-white border-b border-zinc-200 flex items-center justify-between px-8 sticky top-0 z-10 w-full">
-      <div className="flex items-center gap-6">
+    <header className="h-20 bg-white border-b border-zinc-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 w-full">
+      <div className="flex items-center gap-3 md:gap-6">
+        {/* Mobile Menu Toggle */}
+        <button 
+          onClick={onMenuClick}
+          className="p-2 -ml-2 text-zinc-500 md:hidden hover:bg-zinc-50 rounded-xl transition-colors"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
         <div className="flex flex-col items-start leading-tight">
           <img src={universeLogo} alt="UNI-VERSE" className="h-7 w-auto mb-0.5" />
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
