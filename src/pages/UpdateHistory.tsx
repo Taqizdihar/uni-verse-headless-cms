@@ -109,10 +109,12 @@ export function UpdateHistory() {
                     </div>
 
                     {/* Description (Rich Text) */}
-                    <div 
-                      className="rich-text-content text-zinc-700 leading-relaxed text-sm"
-                      dangerouslySetInnerHTML={{ __html: update.description || '' }}
-                    />
+                    {update.description && (
+                      <div 
+                        className="rich-text-content text-zinc-700 leading-relaxed text-sm"
+                        dangerouslySetInnerHTML={{ __html: update.description }}
+                      />
+                    )}
 
                   {/* Images Gallery */}
                   {update.images && update.images.length > 0 && (
