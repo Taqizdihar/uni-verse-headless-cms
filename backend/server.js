@@ -255,31 +255,45 @@ app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (re
 });
 
 app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
-    const { title, description, version, update_date, images } = req.body;
+    // 1. Explicit destructuring
+    const { title, description, version, update_date, update_images, images } = req.body;
     
+    // Support both 'images' and 'update_images' from frontend just in case
+    const imageArray = update_images || images || [];
+
     // Step 1: Strict Validation of Mandatory Fields
     if (!title || !description || !version || !update_date) {
         return res.status(400).json({ error: 'Title, description, version, and update_date are required.' });
     }
 
+    // The Filter: Create a New Object specifically for the first query containing ONLY the 4 fields
+    const filteredUpdateData = {
+        title: title,
+        description: description,
+        version: version,
+        created_at: update_date
+    };
+
+    // Verification: Log the filtered object
+    console.log('[SUPER ADMIN] Filtered Data for update_history insert:', filteredUpdateData);
+
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        // Step 2: Main Data Insertion into update_history
-        // Ensure NO connection to update_images here
+        // Step 2: Main Data Insertion into update_history (using the explicit mapped values from our filtered object)
         const [historyResult] = await connection.execute(
             'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, ?)',
-            [title, description, version, update_date]
+            [filteredUpdateData.title, filteredUpdateData.description, filteredUpdateData.version, filteredUpdateData.created_at]
         );
         
         const updateId = historyResult.insertId;
 
         // Step 3: Conditional Images Data Insertion
-        if (images && Array.isArray(images) && images.length > 0) {
-            const placeholders = images.map(() => '(?, ?)').join(', ');
+        if (imageArray && Array.isArray(imageArray) && imageArray.length > 0) {
+            const placeholders = imageArray.map(() => '(?, ?)').join(', ');
             const flattenedParameters = [];
-            images.forEach(url => {
+            imageArray.forEach(url => {
                 flattenedParameters.push(updateId, url);
             });
 
