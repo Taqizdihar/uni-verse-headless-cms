@@ -77,17 +77,17 @@ export function UpdateHistory() {
 
               {/* Chat Bubble Container */}
               <div className="flex-1">
-                <div className="bg-white rounded-[2rem] rounded-tl-none border border-zinc-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-[#f0f7ff] rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow relative">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <div>
                         <h3 className="text-lg font-black text-zinc-900 leading-tight">
                             {update.title}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-zinc-900 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
+                            <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap">
                                 v{update.version}
                             </span>
-                            <span className="text-zinc-400 text-xs font-bold uppercase tracking-widest">
+                            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">
                                 {new Date(update.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </span>
                         </div>
@@ -96,7 +96,8 @@ export function UpdateHistory() {
 
                   {/* Description (Rich Text) */}
                   <div 
-                    className="rich-text-content text-zinc-600 leading-relaxed text-sm"
+                    className="rich-text-content text-zinc-700 leading-relaxed text-sm prose prose-zinc prose-sm max-w-none 
+                    prose-p:mb-3 prose-ul:list-disc prose-ul:ml-4 prose-ol:list-decimal prose-ol:ml-4 prose-strong:text-zinc-900"
                     dangerouslySetInnerHTML={{ __html: update.description }}
                   />
 
@@ -117,7 +118,7 @@ export function UpdateHistory() {
                 </div>
                 
                 {/* Visual Connector Line for chat bubble tail feel */}
-                <div className="absolute left-[3.5rem] top-4 w-4 h-4 bg-white border-l border-t border-zinc-200 -rotate-45 -z-10" />
+                <div className="absolute left-[3.5rem] top-4 w-4 h-4 bg-[#f0f7ff] border-l border-t border-blue-100 -rotate-45 -z-10" />
               </div>
             </div>
           ))}
