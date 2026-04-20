@@ -158,28 +158,23 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
 app.get('/api/public/updates', async (req, res) => {
     try {
-        // Task 1: Identify and Sanitize Parameters (Handle potential undefined/NaN)
-        const tenantIdStr = req.query.tenant_id;
-        const limitStr = req.query.limit;
-        
-        const tenantId = tenantIdStr ? parseInt(tenantIdStr) : null;
-        const limit = limitStr ? parseInt(limitStr) : 50;
+        // 1. Fix the Data Type: Ensure limit is a strictly validated integer
+        // The LIMIT placeholder (?) in MySQL must receive a numeric integer, not a string. (SQL Error 1210 Fix)
+        const rawLimit = req.query.limit;
+        let limit = parseInt(rawLimit, 10);
 
-        // Defensive check to avoid NaN or undefined in bind parameters
-        const safeTenantId = isNaN(tenantId) ? null : tenantId;
-        const safeLimit = isNaN(limit) ? 50 : limit;
+        // 2. Validation: check if positive number, else default to 10
+        if (isNaN(limit) || limit <= 0) {
+            limit = 10;
+        }
 
-        // Task 2: Defensive Query Construction
-        // We support optional tenant filtering if the column exists, but fallback to global for Uni-Verse updates
-        let query = 'SELECT * FROM update_history';
-        const params = [];
+        console.log(`[UPDATES] Fetching update history with limit: ${limit}`);
 
-        // Note: For now we default to global update history as per schema, 
-        // but we prepare the pattern for future tenant-specific filtering.
-        query += ' ORDER BY update_date DESC LIMIT ?';
-        params.push(safeLimit);
-
-        const [updates] = await db.execute(query, params);
+        // 3. Query execution
+        const [updates] = await db.execute(
+            'SELECT * FROM update_history ORDER BY update_date DESC LIMIT ?',
+            [limit]
+        );
         
         // Task 3: Response Integrity (Ensure [] if empty)
         if (!updates || updates.length === 0) {
