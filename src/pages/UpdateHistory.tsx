@@ -134,9 +134,10 @@ export function UpdateHistory() {
                 
                 {/* Visual Connector Line for chat bubble tail feel */}
                 <div className="absolute left-[3.5rem] top-4 w-4 h-4 bg-blue-50/80 backdrop-blur-sm border-l border-t border-blue-100 -rotate-45 -z-10" />
-              </div>
-            </div>
-          ))}
+                  </div>
+                </div>
+              );
+            })}
         </div>
       )}
     </div>
