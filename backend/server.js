@@ -1426,10 +1426,10 @@ app.listen(PORT, '0.0.0.0', async () => {
     
     // Auto-migration for user profile field
     try {
-        const [columns] = await db.execute('SHOW COLUMNS FROM users LIKE "profile_picture_url"');
+        const [columns] = await db.execute("SHOW COLUMNS FROM users LIKE 'profile_picture_url'");
         if (columns.length === 0) {
             console.log('[MIGRATION] Adding profile_picture_url to users table...');
-            await db.execute('ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR(255) DEFAULT NULL');
+            await db.execute('ALTER TABLE users ADD COLUMN `profile_picture_url` VARCHAR(255) DEFAULT NULL');
         }
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not verify/add profile_picture_url column:', e.message);
