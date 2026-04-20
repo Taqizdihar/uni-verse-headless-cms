@@ -158,13 +158,17 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
 app.get('/api/public/updates', async (req, res) => {
     try {
-        const [updates] = await db.execute('SELECT * FROM update_history ORDER BY created_at DESC');
+        const [updates] = await db.execute('SELECT * FROM update_history ORDER BY update_date DESC');
         
         // Fetch images for each update
         const updatesWithImages = await Promise.all(updates.map(async (update) => {
             const [images] = await db.execute('SELECT image_url FROM update_images WHERE update_id = ?', [update.id]);
             return {
-                ...update,
+                id: update.id,
+                title: update.update_title,
+                description: update.update_description,
+                version: update.update_version,
+                created_at: update.update_date,
                 images: images.map(img => img.image_url)
             };
         }));
@@ -283,7 +287,7 @@ app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async 
 
         // Step 2: Main Data Insertion into update_history (using the explicit mapped values from our filtered object)
         const [historyResult] = await connection.execute(
-            'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, ?)',
+            'INSERT INTO update_history (update_title, update_description, update_version, update_date) VALUES (?, ?, ?, ?)',
             [filteredUpdateData.title, filteredUpdateData.description, filteredUpdateData.version, filteredUpdateData.created_at]
         );
         
