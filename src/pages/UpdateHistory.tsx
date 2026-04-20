@@ -20,9 +20,21 @@ export function UpdateHistory() {
     const fetchUpdates = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/public/updates`);
-        setUpdates(response.data);
+        console.log('[DEBUG] Update History Payload:', response.data);
+        
+        // Defensive Mapping to ensure compatibility with both internal and schema field names
+        const mappedData = response.data.map((item: any) => ({
+          id: item.id,
+          title: item.title || item.update_title,
+          description: item.description || item.update_description,
+          version: item.version || item.update_version,
+          created_at: item.created_at || item.update_date,
+          images: item.images || []
+        }));
+
+        setUpdates(mappedData);
       } catch (err) {
-        console.error('Failed to fetch update history:', err);
+        console.error('[ERROR] Failed to synchronize update history:', err);
       } finally {
         setIsLoading(false);
       }
@@ -62,43 +74,45 @@ export function UpdateHistory() {
           {/* Vertical Line Connecting Avatars */}
           <div className="absolute left-6 top-4 bottom-4 w-0.5 bg-zinc-200 -z-10" />
 
-          {updates.map((update, index) => (
-            <div key={update.id} className="flex gap-6 relative group animate-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
-              {/* Avatar Container */}
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full border-4 border-white shadow-md overflow-hidden ring-1 ring-zinc-200 bg-zinc-100">
-                  <img 
-                    src={superAdminAvatar} 
-                    alt="Super Admin" 
-                    className="w-full h-full object-cover" 
-                  />
-                </div>
-              </div>
-
-              {/* Chat Bubble Container */}
-              <div className="flex-1">
-                <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h3 className="text-lg font-black text-zinc-900 leading-tight">
-                            {update.title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm shadow-blue-600/20">
-                                v{update.version}
-                            </span>
-                            <span className="text-blue-500/80 text-xs font-bold uppercase tracking-widest">
-                                {new Date(update.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                            </span>
-                        </div>
-                    </div>
+          {updates.map((update, index) => {
+            console.log('[DEBUG] Rendering Update Item:', update);
+            return (
+              <div key={update.id} className="flex gap-6 relative group animate-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+                {/* Avatar Container */}
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full border-4 border-white shadow-md overflow-hidden ring-1 ring-zinc-200 bg-zinc-100">
+                    <img 
+                      src={superAdminAvatar} 
+                      alt="Super Admin" 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
+                </div>
 
-                  {/* Description (Rich Text) */}
-                  <div 
-                    className="rich-text-content text-zinc-700 leading-relaxed text-sm"
-                    dangerouslySetInnerHTML={{ __html: update.description }}
-                  />
+                {/* Chat Bubble Container */}
+                <div className="flex-1">
+                  <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                      <div>
+                          <h3 className="text-lg font-black text-zinc-900 leading-tight">
+                              {update.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                              <span className="bg-blue-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest whitespace-nowrap shadow-sm shadow-blue-600/20">
+                                  v{update.version}
+                              </span>
+                              <span className="text-blue-500/80 text-xs font-bold uppercase tracking-widest">
+                                  {update.created_at ? new Date(update.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tanggal tidak tersedia'}
+                              </span>
+                          </div>
+                      </div>
+                    </div>
+
+                    {/* Description (Rich Text) */}
+                    <div 
+                      className="rich-text-content text-zinc-700 leading-relaxed text-sm"
+                      dangerouslySetInnerHTML={{ __html: update.description || '' }}
+                    />
 
                   {/* Images Gallery */}
                   {update.images && update.images.length > 0 && (
