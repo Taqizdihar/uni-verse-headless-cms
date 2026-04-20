@@ -9,22 +9,31 @@ import {
   Loader2, 
   LayoutDashboard,
   ShieldAlert,
-  Server
+  Server,
+  LogOut,
+  Github,
+  Copy,
+  Check,
+  Calendar
 } from 'lucide-react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import RichTextEditor from '../components/RichTextEditor';
 
 export function SuperAdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ totalUsers: 0, totalTenants: 0 });
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     version: '',
+    update_date: new Date().toISOString().split('T')[0],
     images: [] as string[]
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -44,6 +53,18 @@ export function SuperAdminDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText('https://github.com/Taqizdihar/uni-verse.git');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     setUploading(true);
@@ -57,7 +78,6 @@ export function SuperAdminDashboard() {
         const data = new FormData();
         data.append('file', file);
         
-        // Use existing media upload endpoint
         const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/media`, data, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -81,6 +101,13 @@ export function SuperAdminDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Strict Validation
+    if (!formData.title || !formData.description || !formData.version || !formData.update_date) {
+        alert('Mohon lengkapi semua field mandatory: Judul, Deskripsi, Versi, dan Tanggal.');
+        return;
+    }
+
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
@@ -88,7 +115,13 @@ export function SuperAdminDashboard() {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Update history berhasil disimpan!');
-      setFormData({ title: '', description: '', version: '', images: [] });
+      setFormData({ 
+        title: '', 
+        description: '', 
+        version: '', 
+        update_date: new Date().toISOString().split('T')[0], 
+        images: [] 
+      });
     } catch (err) {
       console.error('Submit failed:', err);
       alert('Gagal menyimpan update history.');
@@ -107,16 +140,41 @@ export function SuperAdminDashboard() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-8 pb-20 p-8">
-      {/* Header */}
-      <div className="flex items-center gap-4 p-6 bg-zinc-900 rounded-[2.5rem] text-white">
-        <div className="p-4 bg-emerald-500/20 rounded-2xl">
-          <ShieldAlert className="w-8 h-8 text-emerald-500" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-black tracking-tight">Super Admin Hub</h2>
-          <p className="text-zinc-400 text-sm font-medium tracking-wide">Pusat kendali pertumbuhan platform Uni-Verse.</p>
-        </div>
+    <div className="animate-in fade-in duration-500 space-y-8 pb-20 p-8 max-w-7xl mx-auto">
+      {/* Header & Logout */}
+      <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-1 flex items-center gap-4 p-6 bg-zinc-900 rounded-[2.5rem] text-white">
+            <div className="p-4 bg-emerald-500/20 rounded-2xl">
+              <ShieldAlert className="w-8 h-8 text-emerald-500" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-black tracking-tight">Super Admin Hub</h2>
+              <p className="text-zinc-400 text-sm font-medium tracking-wide">Pusat kendali pertumbuhan platform Uni-Verse.</p>
+              
+              <div className="mt-4 pt-4 border-t border-zinc-800 flex items-center gap-4">
+                  <div className="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-xl text-xs font-bold font-mono text-emerald-400 border border-zinc-700">
+                      <Github className="w-4 h-4" />
+                      https://github.com/Taqizdihar/uni-verse.git
+                      <button 
+                        onClick={copyToClipboard}
+                        className="ml-2 p-1 hover:bg-zinc-700 rounded-md transition-colors"
+                        title="Copy Repo link"
+                      >
+                        {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                  </div>
+                  {copied && <span className="text-[10px] uppercase font-black text-white animate-in fade-in slide-in-from-left-1">Copied!</span>}
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-8 py-6 rounded-[2.5rem] border border-red-500/20 transition-all font-black uppercase text-xs tracking-widest group"
+          >
+            <LogOut className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            Keluar Sistem
+          </button>
       </div>
 
       {/* Stats Cards */}
@@ -163,7 +221,7 @@ export function SuperAdminDashboard() {
         </div>
 
         <form onSubmit={handleSubmit} className="p-10 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2">
               <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Judul Update</label>
               <input 
@@ -185,6 +243,18 @@ export function SuperAdminDashboard() {
                 className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:border-emerald-500 font-bold transition-all" 
                 placeholder="1.0.4"
               />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Tanggal Update</label>
+              <div className="relative group">
+                <input 
+                  required
+                  type="date" 
+                  value={formData.update_date}
+                  onChange={e => setFormData(p => ({ ...p, update_date: e.target.value }))}
+                  className="w-full px-6 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl outline-none focus:border-emerald-500 font-bold transition-all cursor-pointer" 
+                />
+              </div>
             </div>
           </div>
 

@@ -235,17 +235,17 @@ app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (re
 });
 
 app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
-    const { title, description, version, images } = req.body;
+    const { title, description, version, update_date, images } = req.body;
     
-    if (!title || !description || !version) {
-        return res.status(400).json({ error: 'Title, description, and version are required.' });
+    if (!title || !description || !version || !update_date) {
+        return res.status(400).json({ error: 'Title, description, version, and update_date are required.' });
     }
 
     try {
         // 1. Insert into update_history
         const [result] = await db.execute(
-            'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, NOW())',
-            [title, description, version]
+            'INSERT INTO update_history (title, description, version, created_at) VALUES (?, ?, ?, ?)',
+            [title, description, version, update_date]
         );
         const updateId = result.insertId;
 
