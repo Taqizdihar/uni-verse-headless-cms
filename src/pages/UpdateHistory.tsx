@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, History, Package } from 'lucide-react';
+import { Loader2, History as HistoryIcon, Package } from 'lucide-react';
 import superAdminAvatar from '../assets/logo/super-admin-profile.jpg';
 
 interface UpdateItem {
@@ -55,7 +55,7 @@ export function UpdateHistory() {
     <div className="animate-in fade-in duration-500 max-w-4xl mx-auto py-8 px-4">
       <div className="flex items-center gap-4 mb-12">
           <div className="p-3 bg-white rounded-2xl shadow-sm border border-zinc-200">
-            <History className="w-6 h-6 text-zinc-900" />
+            <HistoryIcon className="w-6 h-6 text-zinc-900" />
           </div>
           <div>
             <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Histori Update</h2>
