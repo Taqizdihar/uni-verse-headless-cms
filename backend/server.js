@@ -175,8 +175,7 @@ app.get('/api/public/updates', async (req, res) => {
         let query = 'SELECT * FROM update_history';
         const params = [];
 
-        query += ' ORDER BY update_date DESC LIMIT ?';
-        params.push(safeLimit);
+        query += ` ORDER BY update_date DESC LIMIT ${safeLimit}`;
 
         const [updates] = await db.execute(query, params);
         
