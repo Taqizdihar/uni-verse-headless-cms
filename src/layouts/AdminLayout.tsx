@@ -1,11 +1,11 @@
 // File: src/layouts/AdminLayout.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
 export function AdminLayout() {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-zinc-100 text-zinc-900 font-sans selection:bg-amber-400 selection:text-black uppercase-none overflow-x-hidden">

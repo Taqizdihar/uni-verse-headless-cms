@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Bell, Search, UserCircle, LogOut, Menu } from 'lucide-react';
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
