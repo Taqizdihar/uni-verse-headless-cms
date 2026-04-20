@@ -12,7 +12,9 @@ import {
   List, 
   Search,
   Loader2,
-  Trash2
+  Trash2,
+  Edit2,
+  Check
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -25,9 +27,14 @@ export function Media() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Renaming State
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [isRenaming, setIsRenaming] = useState(false);
+
   // Confirmation State
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: number | null }>({ isOpen: false, id: null });
-
+  
   // Real Data Fetching
   useEffect(() => {
     const fetchMedia = async () => {
@@ -72,6 +79,28 @@ export function Media() {
     }
   };
 
+  const handleRename = async (id: number) => {
+    if (!editingName.trim()) return;
+    setIsRenaming(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/media/${id}`, 
+        { file_name: editingName },
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+      
+      // Update Local State
+      setMedia(media.map((m: any) => m.id === id ? { ...m, file_name: editingName } : m));
+      setEditingId(null);
+      setEditingName("");
+    } catch (err) {
+      console.error('Rename failed:', err);
+      alert('Gagal mengubah nama file.');
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -82,7 +111,7 @@ export function Media() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-8">
+    <div className="animate-in fade-in duration-500 space-y-8 max-w-[1200px]">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -144,12 +173,12 @@ export function Media() {
             : "flex flex-col gap-2"
         }>
             {media.map((m: any, idx) => (
-              <div key={idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+              <div key={m.id || idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
                 <div className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0`}>
                   {(m.file_type || '').startsWith('image/') ? (
                     <img 
                       src={m.file_url || m.url} 
-                      alt={m.filename} 
+                      alt={m.file_name || m.filename} 
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Corrupt+Asset';
@@ -164,13 +193,55 @@ export function Media() {
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-bold text-zinc-900 truncate tracking-tight" title={m.filename}>{m.filename || 'Aset Media'}</p>
-                    <button 
-                        onClick={() => setConfirmDelete({ isOpen: true, id: m.id })}
-                        className="p-1.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                    >
-                        <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {editingId === m.id ? (
+                      <div className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1">
+                        <input 
+                          autoFocus
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                             if (e.key === 'Enter') handleRename(m.id);
+                             if (e.key === 'Escape') setEditingId(null);
+                          }}
+                          className="flex-1 text-xs font-bold px-2 py-1 border border-amber-400 rounded-lg outline-none bg-amber-50"
+                        />
+                        <button 
+                          onClick={() => handleRename(m.id)}
+                          disabled={isRenaming}
+                          className="p-1 text-green-600 hover:bg-green-50 rounded-lg"
+                        >
+                          {isRenaming ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="p-1 text-zinc-400 hover:bg-zinc-50 rounded-lg">
+                           <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 w-full group/name min-w-0">
+                        <p className="text-sm font-bold text-zinc-900 truncate tracking-tight flex-1" title={m.file_name || m.filename}>
+                          {m.file_name || m.filename || 'Aset Media'}
+                        </p>
+                        <button 
+                          onClick={() => {
+                            setEditingId(m.id);
+                            setEditingName(m.file_name || m.filename || "");
+                          }}
+                          className="p-1 text-zinc-300 hover:text-amber-500 opacity-0 group-hover/name:opacity-100 transition-all"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                    
+                    {!editingId && (
+                      <button 
+                          onClick={() => setConfirmDelete({ isOpen: true, id: m.id })}
+                          className="p-1.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      >
+                          <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">

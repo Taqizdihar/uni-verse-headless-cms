@@ -61,6 +61,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             <NavLink
               key={item.name}
               to={item.path}
+              end={item.path === '/dashboard'}
               onClick={onClose}
               className={({ isActive }) =>
                 cn(

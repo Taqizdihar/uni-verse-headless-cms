@@ -109,7 +109,7 @@ export function Profile() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+    <div className="animate-in fade-in duration-500 w-full max-w-[1200px] space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black text-zinc-900 tracking-tight">Profil Saya</h2>
@@ -126,9 +126,9 @@ export function Profile() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Profile Card */}
-        <Card className="lg:col-span-1 h-fit border-none shadow-xl bg-white overflow-hidden">
+        <Card className="lg:col-span-1 h-fit border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
           <div className="h-32 bg-amber-400 relative">
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
@@ -164,7 +164,7 @@ export function Profile() {
 
         {/* Edit Form */}
         <div className="lg:col-span-2 space-y-8">
-          <Card className="border-none shadow-xl bg-white">
+          <Card className="border-none shadow-2xl bg-white rounded-[2.5rem]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5 text-amber-500" /> Identitas Dasar
@@ -216,7 +216,7 @@ export function Profile() {
           </Card>
 
           {/* Security Card */}
-          <Card className="border-none shadow-xl bg-white overflow-hidden">
+          <Card className="border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
             <CardHeader className="flex flex-row items-center justify-between pb-6">
               <div>
                 <CardTitle className="flex items-center gap-2 font-black">

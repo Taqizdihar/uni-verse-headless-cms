@@ -846,8 +846,8 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const uploaded_by = req.user?.userId || 1;
 
         const [result] = await db.execute(
-            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by) VALUES (?, ?, ?, ?, ?)',
-            [tid, filename, file_url, file_type, uploaded_by]
+            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name) VALUES (?, ?, ?, ?, ?, ?)',
+            [tid, filename, file_url, file_type, uploaded_by, filename]
         );
 
         res.status(201).json({ 
@@ -884,6 +884,30 @@ app.delete('/api/media/:id', async (req, res) => {
     } catch (error) {
         console.error('Purge Error:', error);
         res.status(500).json({ error: 'Internal system purge failure' });
+    }
+});
+
+app.patch('/api/media/:id', async (req, res) => {
+    const { id } = req.params;
+    const { file_name } = req.body;
+    const tid = getTenantId(req);
+
+    if (!file_name) return res.status(400).json({ error: 'file_name is required' });
+
+    try {
+        const [result] = await db.execute(
+            'UPDATE media SET file_name = ? WHERE id = ? AND tenant_id = ?',
+            [file_name, id, tid]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Media not found or unauthorized' });
+        }
+
+        res.json({ message: 'Media renamed successfully' });
+    } catch (error) {
+        console.error('Rename Error:', error);
+        res.status(500).json({ error: 'Internal system rename failure' });
     }
 });
 
@@ -1433,5 +1457,18 @@ app.listen(PORT, '0.0.0.0', async () => {
         }
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not verify/add profile_picture_url column:', e.message);
+    }
+
+    // Auto-migration for media display name field
+    try {
+        const [columns] = await db.execute("SHOW COLUMNS FROM media LIKE 'file_name'");
+        if (columns.length === 0) {
+            console.log('[MIGRATION] Adding file_name to media table...');
+            await db.execute('ALTER TABLE media ADD COLUMN `file_name` VARCHAR(255) DEFAULT NULL');
+            // Backfill: Set file_name equal to filename for all existing entries
+            await db.execute('UPDATE media SET `file_name` = filename WHERE `file_name` IS NULL');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not verify/add file_name column to media:', e.message);
     }
 });
