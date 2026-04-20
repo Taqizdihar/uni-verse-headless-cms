@@ -156,6 +156,26 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
     }
 });
 
+app.get('/api/public/updates', async (req, res) => {
+    try {
+        const [updates] = await db.execute('SELECT * FROM update_history ORDER BY created_at DESC');
+        
+        // Fetch images for each update
+        const updatesWithImages = await Promise.all(updates.map(async (update) => {
+            const [images] = await db.execute('SELECT image_url FROM update_images WHERE update_id = ?', [update.id]);
+            return {
+                ...update,
+                images: images.map(img => img.image_url)
+            };
+        }));
+
+        res.json(updatesWithImages);
+    } catch (error) {
+        console.error('[API ERROR] Get public updates:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.get('/api/public/posts', async (req, res) => {
     try {
         // ✅ SECURITY FIX: Scope posts to a specific tenant via ?tenant_id query param

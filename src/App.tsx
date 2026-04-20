@@ -15,6 +15,7 @@ import { LayoutManager } from './pages/LayoutManager';
 import { PagesEditor } from './pages/PagesEditor';
 import { HeadlessPosts } from './pages/HeadlessPosts';
 import { LandingPagePreview } from './pages/LandingPagePreview';
+import { UpdateHistory } from './pages/UpdateHistory';
 import { Profile } from './pages/Profile';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { SuperAdminRoute } from './components/SuperAdminRoute';
@@ -65,6 +66,7 @@ export default function App() {
                   <Route path="/headless-posts" element={<HeadlessPosts />} />
                   <Route path="/headless-preview" element={<LandingPagePreview />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/dashboard/updates" element={<UpdateHistory />} />
                 </Route>
               </Route>
 

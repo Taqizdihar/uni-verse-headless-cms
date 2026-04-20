@@ -10,7 +10,8 @@ import {
   LayoutTemplate, 
   Users, 
   Blocks, 
-  Settings 
+  Settings,
+  History
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
@@ -25,6 +26,7 @@ const navItems = [
   { name: 'Pengguna', path: '/users', icon: Users },
   { name: 'Plugin', path: '/plugins', icon: Blocks },
   { name: 'Pengaturan', path: '/settings', icon: Settings },
+  { name: 'Histori Update', path: '/dashboard/updates', icon: History },
 ];
 
 export function Sidebar() {
