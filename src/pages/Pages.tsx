@@ -207,25 +207,6 @@ export function Pages() {
                       </td>
                       <td className="px-8 py-6 text-right pr-10">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button 
-                            onClick={() => {
-                              if (!settings) {
-                                console.error("Settings not loaded yet");
-                                alert("Mohon tunggu, pengaturan situs sedang dimuat...");
-                                return;
-                              }
-                              const userStr = localStorage.getItem('user');
-                              const user = userStr ? JSON.parse(userStr) : null;
-                              const subdomain = settings?.subdomain || user?.subdomain || 'site';
-                              const slg = (page.slug || '').replace(/^\/+/, '');
-                              window.open(`/preview/${subdomain}/${slg}`, '_blank');
-                            }}
-                            className={`p-2 rounded-lg transition-all ${!settings ? 'text-zinc-200 cursor-not-allowed' : 'text-zinc-400 hover:text-amber-500 hover:bg-amber-50'}`} 
-                            title="Pratinjau Halaman"
-                            disabled={!settings}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
                           <button onClick={() => openEditor(page)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Halaman">
                             <Pencil className="w-4 h-4" />
                           </button>

@@ -23,6 +23,7 @@ const navItems = [
   { name: 'Postingan', path: '/posts', icon: FileText },
   { name: 'Media', path: '/media', icon: ImageIcon },
   { name: 'Komentar', path: '/comments', icon: MessageSquare },
+
   { name: 'Pengguna', path: '/users', icon: Users },
   { name: 'Plugin', path: '/plugins', icon: Blocks },
   { name: 'Pengaturan', path: '/settings', icon: Settings },

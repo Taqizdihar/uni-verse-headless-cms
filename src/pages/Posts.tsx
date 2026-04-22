@@ -230,19 +230,6 @@ export function Posts() {
                             </td>
                             <td className="px-8 py-6 text-right pr-10">
                                 <div className="flex justify-end gap-1.5">
-                                    <button 
-                                        onClick={() => {
-                                          const userStr = localStorage.getItem('user');
-                                          const user = userStr ? JSON.parse(userStr) : null;
-                                          const subdomain = settings?.subdomain || user?.subdomain || 'site';
-                                          const slg = (post.slug || '').replace(/^\/+/, '');
-                                          window.open(`/preview/${subdomain}/${slg}`, '_blank');
-                                        }}
-                                        className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" 
-                                        title="Pratinjau Post"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                    </button>
                                     <button onClick={() => openEditor(post)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Post">
                                         <Pencil className="w-4 h-4" />
                                     </button>
