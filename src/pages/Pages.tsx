@@ -20,7 +20,6 @@ export function Pages() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [pageType, setPageType] = useState('home');
   const [blocks, setBlocks] = useState<Block[]>([]);
   
   // Media Picker State
@@ -81,7 +80,6 @@ export function Pages() {
       setEditingId(page.id);
       setTitle(page.title);
       setSlug(page.slug);
-      setPageType(page.page_type);
       let parsed = [];
       if (typeof page.content === 'string') {
         try { parsed = JSON.parse(page.content); } catch (e) {}
@@ -93,7 +91,6 @@ export function Pages() {
       setEditingId(null);
       setTitle('');
       setSlug('');
-      setPageType('home');
       setBlocks([]);
     }
     setIsModalOpen(true);
@@ -121,7 +118,7 @@ export function Pages() {
       ...(editingId && { id: editingId }),
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      page_type: pageType,
+      page_type: 'general',
       content: blocks,
       status: status || 'published'
     };
@@ -169,7 +166,6 @@ export function Pages() {
               <thead className="text-[10px] text-zinc-400 uppercase bg-zinc-50/50 font-black tracking-[0.2em] border-b border-zinc-100">
                 <tr>
                   <th scope="col" className="px-8 py-5">Judul Halaman</th>
-                  <th scope="col" className="px-8 py-5">Tipe</th>
                   <th scope="col" className="px-8 py-5">Tanggal</th>
                   <th scope="col" className="px-8 py-5 text-center">Tampilkan</th>
                   <th scope="col" className="px-8 py-5 text-center">Status</th>
@@ -183,9 +179,6 @@ export function Pages() {
                       <td className="px-8 py-6">
                         <p className="font-bold text-zinc-900 text-base leading-tight">{page.title}</p>
                         <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{page.slug}</p>
-                      </td>
-                      <td className="px-8 py-6">
-                        <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-md text-[10px] font-bold uppercase tracking-wider">{page.page_type}</span>
                       </td>
                       <td className="px-8 py-6 text-zinc-400 tabular-nums">
                         {page.updated_at ? new Date(page.updated_at).toLocaleDateString() : 'Hari Ini'}
@@ -249,7 +242,7 @@ export function Pages() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-8 py-20 text-center text-zinc-400 italic">
+                    <td colSpan={5} className="px-8 py-20 text-center text-zinc-400 italic">
                         Tidak ada halaman yang cocok dengan pencarian.
                     </td>
                   </tr>
@@ -287,20 +280,7 @@ export function Pages() {
                   </div>
                 </div>
 
-                <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Skema Halaman</label>
-                    <select 
-                        value={pageType} 
-                        onChange={e => setPageType(e.target.value)}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold text-zinc-900 cursor-pointer"
-                    >
-                        <option value="home">Home</option>
-                        <option value="profile">Profile</option>
-                        <option value="contact">Contact Us</option>
-                        <option value="gallery">Gallery</option>
-                        <option value="news">News</option>
-                    </select>
-                </div>
+
 
                 <div className="pt-4 border-t border-zinc-100">
                     <h3 className="text-sm font-bold text-zinc-900 mb-4 uppercase tracking-wider">Properti Tata Letak</h3>

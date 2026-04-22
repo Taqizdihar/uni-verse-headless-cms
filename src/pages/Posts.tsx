@@ -13,7 +13,7 @@ export function Posts() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [category, setCategory] = useState('News');
+  const [category, setCategory] = useState('Berita');
   const [formData, setFormData] = useState<any>({});
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [settings, setSettings] = useState<any>(null);
@@ -139,7 +139,12 @@ export function Posts() {
       <div className="space-y-6">
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
-            <RichTextEditor value={formData.excerpt || ''} onChange={val => handleInputChange('excerpt', val)} placeholder="Ringkasan singkat tentang post ini..." />
+            <textarea 
+              value={formData.excerpt || ''} 
+              onChange={e => handleInputChange('excerpt', e.target.value)} 
+              placeholder="Ringkasan singkat tentang post ini..." 
+              className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[100px] resize-none transition-all"
+            />
           </div>
           <BlockBuilder blocks={blocks} onChange={setBlocks} onOpenMediaPicker={openMediaPickerForBlock} />
       </div>
@@ -184,12 +189,8 @@ export function Posts() {
                                 <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{post.slug}</p>
                             </td>
                             <td className="px-8 py-6">
-                                <span className={`flex justify-center w-fit px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg border ${
-                                    post.category === 'Event' 
-                                        ? 'bg-purple-50 text-purple-700 border-purple-200' 
-                                        : 'bg-blue-50 text-blue-700 border-blue-200'
-                                }`}>
-                                    {post.category || 'News'}
+                                <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg border bg-zinc-50 text-zinc-600 border-zinc-200 shadow-sm">
+                                    {post.category || 'Berita'}
                                 </span>
                             </td>
                             <td className="px-8 py-6">
@@ -274,7 +275,7 @@ export function Posts() {
             <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0 z-10">
               <div>
                 <h2 className="text-2xl font-black text-zinc-900 tracking-tight">{editingId ? 'Edit Post' : 'Buat Post Baru'}</h2>
-                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-0.5">{category} Format</p>
+                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-0.5">{category || 'News'} Format</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
             </div>
@@ -294,16 +295,16 @@ export function Posts() {
                 </div>
 
                 <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Format Konten</label>
-                    <div className="flex gap-4">
-                        {['News', 'Event'].map(type => (
-                            <label key={type} className="flex-1 group">
-                                <input type="radio" value={type} checked={category === type} onChange={e => setCategory(e.target.value)} className="peer sr-only" />
-                                <div className="p-4 rounded-2xl border-2 border-zinc-100 cursor-pointer text-center ring-offset-2 peer-checked:ring-2 peer-checked:ring-amber-400/30 bg-zinc-50/50 hover:bg-zinc-50 peer-checked:bg-amber-50 peer-checked:border-amber-400 peer-checked:text-amber-950 transition-all font-black text-sm uppercase tracking-wider">
-                                    {type}
-                                </div>
-                            </label>
-                        ))}
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Kategori / Label</label>
+                    <div className="relative group">
+                        <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 group-focus-within:text-amber-500 transition-colors" />
+                        <input 
+                            type="text" 
+                            value={category} 
+                            onChange={e => setCategory(e.target.value)} 
+                            className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" 
+                            placeholder="Misal: Berita, Pengumuman, Kegiatan..." 
+                        />
                     </div>
                 </div>
 

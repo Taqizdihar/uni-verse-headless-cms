@@ -642,7 +642,7 @@ app.post('/api/pages', async (req, res) => {
         // 1. Save or Update the Page
         const [result] = await db.execute(
             'INSERT INTO pages (tenant_id, title, slug, page_type, content, status) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), page_type = VALUES(page_type), content = VALUES(content)',
-            [tid, title.trim(), finalSlug, page_type || 'home', jsonContent, status || 'published']
+            [tid, title.trim(), finalSlug, 'general', jsonContent, status || 'published']
         );
 
         const pageId = result.insertId;
@@ -677,7 +677,7 @@ app.put('/api/pages/:id', async (req, res) => {
         }
         await db.execute(
             'UPDATE pages SET title = ?, slug = ?, page_type = ?, content = ? WHERE id = ? AND tenant_id = ?',
-            [title.trim(), finalSlug, page_type || 'home', jsonContent, id, tid]
+            [title.trim(), finalSlug, 'general', jsonContent, id, tid]
         );
         res.json({ message: 'Page updated successfully' });
     } catch (error) {
@@ -768,7 +768,7 @@ app.post('/api/posts', async (req, res) => {
         const jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         const [result] = await db.execute(
             'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [tid, title, slug, jsonContent, excerpt || '', category || 'News', status || 'published']
+            [tid, title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published']
         );
         res.status(201).json({ message: 'Post created successfully', id: result.insertId });
     } catch (error) {
@@ -784,7 +784,7 @@ app.put('/api/posts/:id', async (req, res) => {
         const jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         await db.execute(
             'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, category = ?, status = ? WHERE id = ? AND tenant_id = ?',
-            [title, slug, jsonContent, excerpt || '', category || 'News', status || 'published', id, tid]
+            [title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published', id, tid]
         );
         res.json({ message: 'Post updated successfully' });
     } catch (error) {
