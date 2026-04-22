@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, UserCircle, LogOut, Menu } from 'lucide-react';
+import { Bell, Search, UserCircle, LogOut, Menu, History } from 'lucide-react';
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const { searchQuery, setSearchQuery } = useSearch();
-  const { user, setUser, setToken } = useCMS();
+  const { user, setUser, setToken, settings } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -54,7 +54,26 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 md:gap-6">
+        <button 
+           onClick={() => {
+              const url = settings?.global_options?.frontend_url;
+              if (url) window.open(url, '_blank');
+              else alert('Frontend URL belum diatur di Pengaturan.');
+           }}
+           className="hidden md:flex px-4 py-2 bg-amber-400 text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-colors shadow-sm items-center gap-2"
+         >
+           Buka Frontend
+        </button>
+
+        <div 
+          onClick={() => navigate('/dashboard/updates')}
+          className="flex items-center gap-2 cursor-pointer hover:bg-zinc-50 p-2 rounded-xl transition-colors border border-transparent hover:border-zinc-200"
+        >
+          <History className="w-5 h-5 text-zinc-500" />
+          <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Histori Update</span>
+        </div>
+
         <button className="relative p-2.5 text-zinc-500 hover:text-amber-400 transition-colors rounded-full hover:bg-zinc-50 border border-transparent">
           <Bell className="w-5 h-5" />
           <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-amber-400 rounded-full border-2 border-white shadow-sm"></span>

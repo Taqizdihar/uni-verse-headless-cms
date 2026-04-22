@@ -26,6 +26,7 @@ export function Settings() {
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
+  const [isKeyConfirmOpen, setIsKeyConfirmOpen] = useState(false);
 
   useEffect(() => {
     // Fetch API Key
@@ -140,9 +141,7 @@ export function Settings() {
   };
 
   const handleRegenerateApiKey = async () => {
-    if (!window.confirm("Peringatan: Regenerasi API Key akan membuat aplikasi frontend lama Anda berhenti berfungsi sampai Key diperbarui. Lanjutkan?")) {
-        return;
-    }
+    setIsKeyConfirmOpen(false);
     setIsKeyLoading(true);
     try {
         const token = localStorage.getItem('token');
@@ -307,7 +306,7 @@ export function Settings() {
                             </button>
                             <button 
                                 type="button"
-                                onClick={handleRegenerateApiKey}
+                                onClick={() => setIsKeyConfirmOpen(true)}
                                 disabled={isKeyLoading}
                                 className="px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center border border-red-100 disabled:opacity-50"
                                 title="Regenerasi Key"
@@ -529,6 +528,17 @@ export function Settings() {
         confirmLabel="Simpan Perubahan"
         onConfirm={handleSave}
         onClose={() => setIsConfirmOpen(false)}
+      />
+      
+      <ConfirmModal 
+        isOpen={isKeyConfirmOpen}
+        title="Regenerasi API Key"
+        message="Peringatan: Regenerasi API Key akan membuat aplikasi frontend lama Anda berhenti berfungsi sampai Key diperbarui. Lanjutkan?"
+        confirmLabel="Ya, Reset Kunci"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={handleRegenerateApiKey}
+        onClose={() => setIsKeyConfirmOpen(false)}
       />
     </div>
   );

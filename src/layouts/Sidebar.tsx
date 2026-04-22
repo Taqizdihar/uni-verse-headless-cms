@@ -26,8 +26,7 @@ const navItems = [
 
   { name: 'Pengguna', path: '/users', icon: Users },
   { name: 'Plugin', path: '/plugins', icon: Blocks },
-  { name: 'Pengaturan', path: '/settings', icon: Settings },
-  { name: 'Histori Update', path: '/dashboard/updates', icon: History },
+  { name: 'Pengaturan', path: '/settings', icon: Settings }
 ];
 
 interface SidebarProps {

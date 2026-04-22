@@ -40,16 +40,6 @@ export function Dashboard() {
           <p className="text-zinc-500 text-sm mt-1">Pantau metrik operasional dan umpan aktivitas tenant.</p>
         </div>
         <div className="flex items-center gap-4">
-           <button 
-             onClick={() => {
-                const url = settings?.global_options?.frontend_url;
-                if (url) window.open(url, '_blank');
-                else alert('Frontend URL belum diatur di Pengaturan.');
-             }}
-             className="px-4 py-2 bg-amber-400 text-zinc-900 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-colors shadow-sm flex items-center gap-2"
-           >
-             Buka Frontend
-           </button>
            <div className="items-center gap-2 hidden md:flex">
              <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Pembaruan Langsung:</span>
              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
