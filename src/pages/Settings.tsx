@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
-import { Save, Globe, Mail, CheckCircle2, Eye, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw } from 'lucide-react';
+import { Save, Globe, Mail, CheckCircle2, Eye, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw, BookOpen } from 'lucide-react';
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
@@ -314,6 +314,37 @@ export function Settings() {
                             >
                                 <RefreshCw className={`w-5 h-5 ${isKeyLoading ? 'animate-spin' : ''}`} />
                             </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-zinc-100">
+                        <h4 className="text-sm font-bold text-zinc-900 mb-4 flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-amber-500" />
+                            Dokumentasi API Publik
+                        </h4>
+                        
+                        <div className="bg-zinc-900 rounded-xl p-5 font-mono text-xs text-zinc-300 space-y-4 shadow-inner">
+                            <div>
+                                <span className="text-amber-400 font-bold block mb-1">Base URL:</span>
+                                <code className="bg-black/50 px-2 py-1 rounded select-all break-all">https://uni-verse-headless-cms.onrender.com/api/v1/public</code>
+                            </div>
+                            
+                            <div>
+                                <span className="text-amber-400 font-bold block mb-1">Endpoints Tersedia:</span>
+                                <ul className="space-y-1 list-disc list-inside">
+                                    <li><code className="bg-black/50 px-1 rounded">GET /posts</code> - Daftar post (terbit).</li>
+                                    <li><code className="bg-black/50 px-1 rounded">GET /pages</code> - Daftar halaman (terbit).</li>
+                                    <li><code className="bg-black/50 px-1 rounded">GET /settings</code> - Metadata situs.</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mt-4">
+                                <span className="text-blue-400 font-bold block mb-1">Penting: Header Autentikasi</span>
+                                <p className="text-zinc-400">Sertakan header berikut di setiap request API:</p>
+                                <code className="block mt-2 bg-black/50 p-2 rounded text-blue-300">
+                                    x-api-key: [API_KEY_ANDA]
+                                </code>
+                            </div>
                         </div>
                     </div>
                 </Card>

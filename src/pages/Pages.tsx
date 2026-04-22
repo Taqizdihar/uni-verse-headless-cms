@@ -118,8 +118,7 @@ export function Pages() {
       ...(editingId && { id: editingId }),
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      page_type: 'general',
-      content: blocks,
+      content: JSON.stringify(blocks),
       status: status || 'published'
     };
     await savePage(payload);

@@ -212,47 +212,6 @@ app.get('/api/public/updates', async (req, res) => {
     }
 });
 
-app.get('/api/public/posts', async (req, res) => {
-    try {
-        // ✅ SECURITY FIX: Scope posts to a specific tenant via ?tenant_id query param
-        // Also supports fetching all published posts for single-tenant use (no param)
-        const tenantIdRaw = req.query.tenant_id ? parseInt(req.query.tenant_id) : null;
-        const tenantId = isNaN(tenantIdRaw) ? null : tenantIdRaw;
-        
-        let query = "SELECT id, title, slug, category, excerpt, created_at, content FROM posts WHERE status = 'published'";
-        const params = [];
-        if (tenantId !== null) {
-            query += ' AND tenant_id = ?';
-            params.push(tenantId);
-        }
-        query += ' ORDER BY created_at DESC';
-        const [posts] = await db.execute(query, params);
-        res.json(posts.map(p => {
-            if (p.content && typeof p.content === 'string') {
-                try { p.content = JSON.parse(p.content); } catch(e) {}
-            }
-            return p;
-        }));
-    } catch (error) {
-        console.error('[API ERROR] Get public posts:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-app.get('/api/public/posts/:slug', async (req, res) => {
-    try {
-        const cleanSlug = (req.params.slug || '').replace(/^\/+/, '');
-        const [posts] = await db.execute("SELECT * FROM posts WHERE slug = ? AND status = 'published' LIMIT 1", [cleanSlug]);
-        if (posts.length === 0) return res.status(404).json({ error: 'Post not found' });
-        const post = posts[0];
-        if (post.content && typeof post.content === 'string') {
-            try { post.content = JSON.parse(post.content); } catch(e) {}
-        }
-        res.json(post);
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
 
 // Auth Middleware
 const authenticateToken = (req, res, next) => {
@@ -672,7 +631,7 @@ app.get('/api/pages/:id', async (req, res) => {
 });
 
 app.post('/api/pages', async (req, res) => {
-    const { title, slug, page_type, content, status } = req.body;
+    const { title, slug, content, status } = req.body;
     const tid = getTenantId(req);
 
     // Validate mandatory fields
@@ -689,8 +648,8 @@ app.post('/api/pages', async (req, res) => {
 
         // 1. Save or Update the Page
         const [result] = await db.execute(
-            'INSERT INTO pages (tenant_id, title, slug, page_type, content, status) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), page_type = VALUES(page_type), content = VALUES(content)',
-            [tid, title.trim(), finalSlug, 'general', jsonContent, status || 'published']
+            'INSERT INTO pages (tenant_id, title, slug, content, status) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content)',
+            [tid, title.trim(), finalSlug, jsonContent, status || 'published']
         );
 
         const pageId = result.insertId;
@@ -698,7 +657,7 @@ app.post('/api/pages', async (req, res) => {
         // 2. Layout Sync
         await db.execute(
             "INSERT IGNORE INTO layouts (tenant_id, page_identifier, blocks_order) VALUES (?, ?, '[]')",
-            [tid, page_type || 'home']
+            [tid, 'index']
         );
 
         res.status(201).json({ message: 'Page saved successfully', id: pageId });
@@ -709,7 +668,7 @@ app.post('/api/pages', async (req, res) => {
 });
 
 app.put('/api/pages/:id', async (req, res) => {
-    const { title, slug, page_type, content } = req.body;
+    const { title, slug, content } = req.body;
     const { id } = req.params;
     const tid = getTenantId(req);
 
@@ -724,8 +683,8 @@ app.put('/api/pages/:id', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
         await db.execute(
-            'UPDATE pages SET title = ?, slug = ?, page_type = ?, content = ? WHERE id = ? AND tenant_id = ?',
-            [title.trim(), finalSlug, 'general', jsonContent, id, tid]
+            'UPDATE pages SET title = ?, slug = ?, content = ? WHERE id = ? AND tenant_id = ?',
+            [title.trim(), finalSlug, jsonContent, id, tid]
         );
         res.json({ message: 'Page updated successfully' });
     } catch (error) {
@@ -752,9 +711,9 @@ app.patch('/api/pages/:id/status', async (req, res) => {
 
     console.log(`[TOGGLE] Attempting to update page ID ${id} to status: ${status} (tenant: ${tid})`);
 
-    // Mandatory Validation: strictly allow only published or hidden
-    if (status !== 'published' && status !== 'hidden') {
-        return res.status(400).json({ error: 'Invalid status. Must be strictly "published" or "hidden".' });
+    // Mandatory Validation: strictly allow only published or draft
+    if (status !== 'published' && status !== 'draft') {
+        return res.status(400).json({ error: 'Invalid status. Must be strictly "published" or "draft".' });
     }
 
     try {
@@ -856,8 +815,8 @@ app.patch('/api/posts/:id/status', async (req, res) => {
     const tid = getTenantId(req);
     // ✅ BUG FIX: Read status from req.body (was referencing undefined `status` variable)
     const { status } = req.body;
-    const validStatuses = ['published', 'hidden'];
-    const finalStatus = validStatuses.includes(status) ? status : 'hidden';
+    const validStatuses = ['published', 'draft'];
+    const finalStatus = validStatuses.includes(status) ? status : 'draft';
 
     try {
         console.log(`[REQUEST] Incoming Status Toggle for Post ID: ${id} -> ${finalStatus} (tenant: ${tid})`);

@@ -369,7 +369,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   const togglePageStatus = async (id: number, currentStatus: string) => {
-    const newStatus = currentStatus === 'hidden' ? 'published' : 'hidden';
+    const newStatus = currentStatus === 'draft' ? 'published' : 'draft';
     const oldPages = [...pages];
     
     // Optimistic update
@@ -405,7 +405,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   const togglePostStatus = async (id: number, currentStatus: string) => {
-    const newStatus = currentStatus === 'hidden' ? 'published' : 'hidden';
+    const newStatus = currentStatus === 'draft' ? 'published' : 'draft';
     const oldPosts = [...posts];
     
     // Optimistic update
