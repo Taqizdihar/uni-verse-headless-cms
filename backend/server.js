@@ -537,6 +537,40 @@ app.use('/api', authenticateToken);
 // Override the hardcoded tenant_id = 1 dynamically based on req.user.tenant_id
 const getTenantId = (req) => req.user.tenant_id;
 
+// --- API Key Management ---
+const crypto = require('crypto');
+
+app.get('/api/api-keys', async (req, res) => {
+    const tid = getTenantId(req);
+    try {
+        const [rows] = await db.execute('SELECT api_key, created_at FROM api_keys WHERE tenant_id = ? LIMIT 1', [tid]);
+        if (rows.length === 0) {
+            // Auto-generate a key if none exists
+            const newKey = 'uk_' + crypto.randomBytes(24).toString('hex');
+            await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tid, newKey]);
+            return res.json({ api_key: newKey, created_at: new Date().toISOString() });
+        }
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('[API ERROR] Get API Key:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/api-keys/regenerate', async (req, res) => {
+    const tid = getTenantId(req);
+    try {
+        const newKey = 'uk_' + crypto.randomBytes(24).toString('hex');
+        // Delete existing keys for this tenant and insert a new one
+        await db.execute('DELETE FROM api_keys WHERE tenant_id = ?', [tid]);
+        await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tid, newKey]);
+        res.json({ api_key: newKey, created_at: new Date().toISOString(), message: 'API Key regenerated successfully' });
+    } catch (error) {
+        console.error('[API ERROR] Regenerate API Key:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // --- Settings ---
 app.get('/api/settings', async (req, res) => {
     try {
