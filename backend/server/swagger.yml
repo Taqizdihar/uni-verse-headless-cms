@@ -1,0 +1,293 @@
+openapi: 3.0.3
+
+info:
+  title: UNI-VERSE Headless CMS — Public API
+  description: |
+    Public content delivery API for the UNI-VERSE Headless CMS.
+    
+    All endpoints require a valid **x-api-key** header. API keys are
+    provisioned per-tenant and can be managed from the admin dashboard
+    under **Settings → API Key**.
+  version: 1.0.0
+  contact:
+    name: UNI-VERSE CMS Team
+
+servers:
+  - url: "{protocol}://{host}"
+    description: Dynamic server URL
+    variables:
+      protocol:
+        default: https
+        enum: [http, https]
+      host:
+        default: localhost:8080
+
+# ─────────────────────────────────────────────────────────────
+# Security: x-api-key header required on every request
+# ─────────────────────────────────────────────────────────────
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Tenant-scoped API key obtained from the CMS admin Settings page.
+
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tenant_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Selamat Datang di Kampus"
+        slug:
+          type: string
+          example: "selamat-datang-di-kampus"
+        content:
+          description: Dynamic Block Builder JSON content (parsed).
+          oneOf:
+            - type: object
+            - type: string
+        excerpt:
+          type: string
+          example: "Ringkasan singkat artikel..."
+        category:
+          type: string
+          example: "Berita"
+        featured_image:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+        status:
+          type: string
+          enum: [published]
+          example: "published"
+        created_at:
+          type: string
+          format: date-time
+
+    Page:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        tenant_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Home"
+        slug:
+          type: string
+          example: "home"
+        content:
+          description: Dynamic Block Builder JSON content (parsed). May contain Hero, Tabs, Slider, Feed, and Rich Text blocks.
+          oneOf:
+            - type: object
+            - type: string
+        featured_image:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [published]
+          example: "published"
+
+    Settings:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Site display name.
+          example: "Universitas Contoh"
+        tagline:
+          type: string
+          example: "Membangun Masa Depan"
+        logo_url:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/demo/image/upload/logo.png"
+        frontend_url:
+          type: string
+          description: Public-facing frontend URL.
+          example: "https://contoh.uni-verse.app"
+        copyright_text:
+          type: string
+          example: "© 2026 Universitas Contoh. All rights reserved."
+        social_links:
+          type: array
+          items:
+            type: object
+            properties:
+              platform:
+                type: string
+                example: "instagram"
+              url:
+                type: string
+                example: "https://instagram.com/unicontoh"
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [OK, DEGRADED]
+          example: "OK"
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: Server uptime in seconds.
+          example: 3600.5
+        service:
+          type: string
+          example: "UNI-VERSE Headless CMS API"
+        database:
+          type: string
+          enum: [CONNECTED, DISCONNECTED, UNKNOWN]
+          example: "CONNECTED"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal Server Error"
+
+# ─────────────────────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────────────────────
+paths:
+  /api/v1/public/posts:
+    get:
+      summary: List published posts
+      description: |
+        Returns all posts with `status = 'published'` for the tenant
+        identified by the provided API key. Results are sorted by
+        `created_at` descending (newest first).
+        
+        All relative media URLs inside `content` and `featured_image`
+        are automatically normalized to absolute URLs.
+      tags: [Content Delivery]
+      responses:
+        "200":
+          description: Array of published posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/public/pages:
+    get:
+      summary: List published pages
+      description: |
+        Returns all pages with `status = 'published'` for the tenant.
+        
+        Each page's `content` field contains the Dynamic Block Builder
+        JSON structure (Hero, Tabs, Slider, Feed, Rich Text blocks).
+        All embedded media URLs are normalized to absolute paths.
+      tags: [Content Delivery]
+      responses:
+        "200":
+          description: Array of published pages.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Page"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/public/settings:
+    get:
+      summary: Get site identity and footer configuration
+      description: |
+        Returns the tenant's public-facing site configuration including
+        the site name (title), tagline, logo, copyright text, and
+        social media links for footer rendering.
+      tags: [Content Delivery]
+      responses:
+        "200":
+          description: Site settings object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: No settings found for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/health:
+    get:
+      summary: Health check
+      description: |
+        Returns the server and database connectivity status.
+        Used by monitoring tools, load balancers, and CI/CD pipelines.
+        
+        **This endpoint does NOT require an API key.**
+      tags: [Infrastructure]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: Service is degraded (database unreachable).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"

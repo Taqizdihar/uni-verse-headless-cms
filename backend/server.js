@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'uni-inside-secret-key-2026';
 if (!process.env.JWT_SECRET) {
     console.warn('[WARNING] JWT_SECRET is not defined in environment variables. Using fallback key for development.');
 }
-const db = require('./db');
+const db = require('./server/lib/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   // Allow any origin for testing purposes
   res.setHeader('Access-Control-Allow-Origin', origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, x-api-key');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
@@ -492,10 +492,16 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
 app.get('/', (req, res) => res.send('Server is running'));
 
 // ========================================================
-// PUBLIC V1 API GATEWAY
+// PUBLIC V1 API GATEWAY — Content Delivery (Data Routes)
 // ========================================================
-const publicRoutes = require('./routes/public');
-app.use('/api/v1/public', publicRoutes);
+const dataRoutes = require('./server/routes/data');
+app.use('/api/v1/public', dataRoutes);
+
+// ========================================================
+// HEALTH CHECK ENDPOINT (Public — no auth required)
+// ========================================================
+const healthRoutes = require('./server/routes/health');
+app.use('/api/v1/health', healthRoutes);
 
 // ========================================================
 // PROTECTED ROUTES BELOW
@@ -504,6 +510,12 @@ app.use('/api', authenticateToken);
 
 // Override the hardcoded tenant_id = 1 dynamically based on req.user.tenant_id
 const getTenantId = (req) => req.user.tenant_id;
+
+// ========================================================
+// AUTH & API KEY MANAGEMENT (Protected — JWT required)
+// ========================================================
+const { router: authRoutes } = require('./server/routes/auth');
+app.use('/api/settings', authRoutes);
 
 // --- Settings ---
 app.get('/api/settings', async (req, res) => {
@@ -558,45 +570,7 @@ app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     }
 });
 
-// --- API Keys ---
-app.get('/api/settings/api-key', async (req, res) => {
-    try {
-        const tid = getTenantId(req);
-        const [keys] = await db.execute('SELECT api_key FROM api_keys WHERE tenant_id = ? LIMIT 1', [tid]);
-        
-        if (keys.length === 0) {
-            // Auto-generate if not exists (for older tenants)
-            const crypto = require('crypto');
-            const newKey = 'uni_' + crypto.randomBytes(24).toString('hex');
-            await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tid, newKey]);
-            return res.json({ api_key: newKey });
-        }
-        res.json({ api_key: keys[0].api_key });
-    } catch (error) {
-        console.error('[API ERROR] Get API Key:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-app.post('/api/settings/api-key/regenerate', async (req, res) => {
-    try {
-        const tid = getTenantId(req);
-        const crypto = require('crypto');
-        const newKey = 'uni_' + crypto.randomBytes(24).toString('hex');
-        
-        const [keys] = await db.execute('SELECT id FROM api_keys WHERE tenant_id = ?', [tid]);
-        if (keys.length > 0) {
-            await db.execute('UPDATE api_keys SET api_key = ? WHERE tenant_id = ?', [newKey, tid]);
-        } else {
-            await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tid, newKey]);
-        }
-        
-        res.json({ api_key: newKey });
-    } catch (error) {
-        console.error('[API ERROR] Regenerate API Key:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
+// --- API Keys → Moved to server/routes/auth.js ---
 
 // --- Pages ---
 app.get('/api/pages', async (req, res) => {
