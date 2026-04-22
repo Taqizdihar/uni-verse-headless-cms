@@ -106,9 +106,13 @@ components:
     Settings:
       type: object
       properties:
+        site_name:
+          type: string
+          description: Site name for header branding.
+          example: "Universitas Contoh"
         title:
           type: string
-          description: Site display name.
+          description: Site display name (alias for site_name).
           example: "Universitas Contoh"
         tagline:
           type: string
@@ -116,6 +120,7 @@ components:
         logo_url:
           type: string
           nullable: true
+          description: Logo URL for header branding (absolute URL).
           example: "https://res.cloudinary.com/demo/image/upload/logo.png"
         frontend_url:
           type: string
@@ -135,6 +140,47 @@ components:
               url:
                 type: string
                 example: "https://instagram.com/unicontoh"
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        author_name:
+          type: string
+          example: "Budi Santoso"
+        content:
+          type: string
+          example: "Artikel yang sangat informatif!"
+        created_at:
+          type: string
+          format: date-time
+
+    CommentInput:
+      type: object
+      required: [author_name, author_email, content]
+      properties:
+        author_name:
+          type: string
+          example: "Budi Santoso"
+        author_email:
+          type: string
+          format: email
+          example: "budi@example.com"
+        content:
+          type: string
+          example: "Artikel yang sangat informatif!"
+
+    NavItem:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Home"
+        slug:
+          type: string
+          example: "home"
 
     HealthStatus:
       type: object
@@ -236,11 +282,11 @@ paths:
 
   /api/v1/public/settings:
     get:
-      summary: Get site identity and footer configuration
+      summary: Get site identity, branding, and footer configuration
       description: |
         Returns the tenant's public-facing site configuration including
-        the site name (title), tagline, logo, copyright text, and
-        social media links for footer rendering.
+        `site_name` and `logo_url` for **header branding**, plus tagline,
+        copyright text, and social media links for footer rendering.
       tags: [Content Delivery]
       responses:
         "200":
@@ -257,6 +303,129 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: No settings found for this tenant.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/public/posts/{post_id}/comments:
+    get:
+      summary: List approved comments for a post
+      description: |
+        Returns all comments with `status = 'approved'` for the given
+        post, sorted by `created_at` ascending (oldest first).
+      tags: [Comments]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the post to fetch comments for.
+      responses:
+        "200":
+          description: Array of approved comments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Submit a new comment
+      description: |
+        Creates a comment on the specified post with `status = 'pending'`.
+        The comment will only be visible via the GET endpoint after an
+        administrator approves it.
+      tags: [Comments]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the post to comment on.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Comment submitted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Comment submitted successfully. It will appear after moderation."
+                  id:
+                    type: integer
+                    example: 42
+        "400":
+          description: Validation error (missing or invalid fields).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Post not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/public/navigation:
+    get:
+      summary: Get navigation header items
+      description: |
+        Returns the `title` and `slug` of pages where `is_in_navbar = 1`
+        and `status = 'published'`. Used to render the site header nav.
+      tags: [Content Delivery]
+      responses:
+        "200":
+          description: Array of navigation items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NavItem"
+        "401":
+          description: Missing or invalid API key.
           content:
             application/json:
               schema:

@@ -1458,4 +1458,42 @@ app.listen(PORT, '0.0.0.0', async () => {
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not verify/add file_name column to media:', e.message);
     }
+
+    // Auto-migration for comments table
+    try {
+        const [tables] = await db.execute("SHOW TABLES LIKE 'comments'");
+        if (tables.length === 0) {
+            console.log('[MIGRATION] Creating comments table...');
+            await db.execute(`
+                CREATE TABLE comments (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    post_id INT NOT NULL,
+                    tenant_id INT NOT NULL,
+                    author_name VARCHAR(255) NOT NULL,
+                    author_email VARCHAR(255) NOT NULL,
+                    content TEXT NOT NULL,
+                    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_comments_post (post_id, tenant_id, status)
+                )
+            `);
+            console.log('[MIGRATION] ✓ comments table created.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not create comments table:', e.message);
+    }
+
+    // Auto-migration for navbar visibility column on pages
+    try {
+        const [columns] = await db.execute("SHOW COLUMNS FROM pages LIKE 'is_in_navbar'");
+        if (columns.length === 0) {
+            console.log('[MIGRATION] Adding is_in_navbar to pages table...');
+            await db.execute('ALTER TABLE pages ADD COLUMN `is_in_navbar` TINYINT(1) DEFAULT 0');
+            // Backfill: Set all published pages as visible in navbar by default
+            await db.execute("UPDATE pages SET `is_in_navbar` = 1 WHERE status = 'published'");
+            console.log('[MIGRATION] ✓ is_in_navbar column added and backfilled.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not verify/add is_in_navbar column to pages:', e.message);
+    }
 });

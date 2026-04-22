@@ -2,9 +2,12 @@
 // Public Data Routes — Content Delivery API
 // =============================================================
 // Serves published content to frontend consumers.
-//   GET /posts     → Published posts with Dynamic Block content
-//   GET /pages     → Published pages with slug filtering
-//   GET /settings  → Site identity & footer configuration
+//   GET  /posts                       → Published posts
+//   POST /posts/:post_id/comments     → Submit a comment
+//   GET  /posts/:post_id/comments     → Approved comments
+//   GET  /pages                       → Published pages
+//   GET  /navigation                  → Navbar-visible pages
+//   GET  /settings                    → Site identity & branding
 //
 // All routes are protected by the apiAuth middleware which
 // validates the x-api-key header and resolves req.publicTenantId.
@@ -113,6 +116,88 @@ router.get('/posts', async (req, res) => {
 });
 
 // =============================================================
+// POST /posts/:post_id/comments — Submit a new comment
+// =============================================================
+// Inserts a comment with status 'pending' (requires moderation).
+// Validates author_name, author_email, and content.
+// =============================================================
+
+router.post('/posts/:post_id/comments', async (req, res) => {
+    try {
+        const tenantId = req.publicTenantId;
+        const { post_id } = req.params;
+        const { author_name, author_email, content } = req.body;
+
+        // Input validation
+        if (!author_name || !author_name.trim()) {
+            return res.status(400).json({ error: 'author_name is required.' });
+        }
+        if (!author_email || !author_email.trim()) {
+            return res.status(400).json({ error: 'author_email is required.' });
+        }
+        if (!content || !content.trim()) {
+            return res.status(400).json({ error: 'content is required.' });
+        }
+
+        // Basic email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(author_email.trim())) {
+            return res.status(400).json({ error: 'author_email format is invalid.' });
+        }
+
+        // Verify the post exists and belongs to this tenant
+        const [posts] = await db.execute(
+            'SELECT id FROM posts WHERE id = ? AND tenant_id = ?',
+            [post_id, tenantId]
+        );
+        if (posts.length === 0) {
+            return res.status(404).json({ error: 'Post not found.' });
+        }
+
+        const [result] = await db.execute(
+            `INSERT INTO comments (post_id, tenant_id, author_name, author_email, content, status)
+             VALUES (?, ?, ?, ?, ?, 'pending')`,
+            [post_id, tenantId, author_name.trim(), author_email.trim(), content.trim()]
+        );
+
+        res.status(201).json({
+            message: 'Comment submitted successfully. It will appear after moderation.',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Submit comment:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
+// GET /posts/:post_id/comments — Approved comments for a post
+// =============================================================
+// Returns only comments with status = 'approved', sorted by
+// creation date ascending (oldest first, like a conversation).
+// =============================================================
+
+router.get('/posts/:post_id/comments', async (req, res) => {
+    try {
+        const tenantId = req.publicTenantId;
+        const { post_id } = req.params;
+
+        const [comments] = await db.execute(
+            `SELECT id, author_name, content, created_at
+             FROM comments
+             WHERE post_id = ? AND tenant_id = ? AND status = 'approved'
+             ORDER BY created_at ASC`,
+            [post_id, tenantId]
+        );
+
+        res.json(comments);
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Get comments:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
 // GET /pages — Published pages with slug filtering
 // =============================================================
 router.get('/pages', async (req, res) => {
@@ -141,7 +226,32 @@ router.get('/pages', async (req, res) => {
 });
 
 // =============================================================
-// GET /settings — Site identity & footer configuration
+// GET /navigation — Pages visible in the navbar
+// =============================================================
+// Returns title and slug for pages where is_in_navbar = 1 and
+// status = 'published'. Used to render the site's header nav.
+// =============================================================
+
+router.get('/navigation', async (req, res) => {
+    try {
+        const tenantId = req.publicTenantId;
+        const [navItems] = await db.execute(
+            `SELECT title, slug
+             FROM pages
+             WHERE tenant_id = ? AND is_in_navbar = 1 AND status = 'published'
+             ORDER BY id ASC`,
+            [tenantId]
+        );
+
+        res.json(navItems);
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Get navigation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
+// GET /settings — Site identity, branding & footer configuration
 // =============================================================
 router.get('/settings', async (req, res) => {
     try {
@@ -166,10 +276,14 @@ router.get('/settings', async (req, res) => {
         }
 
         const settings = {
+            // Header Branding
+            site_name: row.title,
             title: row.title,
             tagline: row.tagline,
             logo_url: row.logo_url ? normalizeUrl(row.logo_url) : null,
+            // Frontend
             frontend_url: globalOptions.frontend_url || '',
+            // Footer
             copyright_text: globalOptions.footer_config?.copyright_text || '',
             social_links: globalOptions.footer_config?.social_links || []
         };
