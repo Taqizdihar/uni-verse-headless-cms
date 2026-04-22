@@ -14,7 +14,7 @@ import {
   Clock, 
   MessageCircle,
   ArrowRight,
-  Image
+  Image as ImageIcon
 } from 'lucide-react';
 import UnifiedPostLayout from '../../components/UnifiedPostLayout';
 
@@ -108,7 +108,7 @@ export default function MinimalistTemplate({
                   <img src={fixImg(content.hero_image)} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
-                    <Image size={48} />
+                    <ImageIcon size={48} />
                   </div>
                 )}
               </div>

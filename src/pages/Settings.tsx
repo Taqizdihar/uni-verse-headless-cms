@@ -229,7 +229,7 @@ export function Settings() {
                             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Logo Website</label>
                             <div className="flex gap-4 items-center">
                                 <div className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center bg-zinc-50 overflow-hidden cursor-pointer hover:border-amber-400 transition-colors" onClick={() => openMediaPicker('logo_url')}>
-                                    {formData.logo_url ? <img src={formData.logo_url} alt="Logo" className="w-full h-full object-contain p-1" /> : <Image className="w-6 h-6 text-zinc-300" />}
+                                    {formData.logo_url ? <img src={formData.logo_url} alt="Logo" className="w-full h-full object-contain p-1" /> : <ImageIcon className="w-6 h-6 text-zinc-300" />}
                                 </div>
                                 <div className="flex-1">
                                     <input type="text" readOnly value={formData.logo_url} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs outline-none text-zinc-500 mb-2 cursor-not-allowed" placeholder="Pilih gambar dari Media..." />

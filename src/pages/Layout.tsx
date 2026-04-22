@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
-import { Save, LayoutGrid, ArrowUp, ArrowDown, GripVertical, AlertCircle, Plus, Image, Newspaper, LayoutTemplate, Link as LinkIcon, FileText } from 'lucide-react';
+import { Save, LayoutGrid, ArrowUp, ArrowDown, GripVertical, AlertCircle, Plus, Image as ImageIcon, Newspaper, LayoutTemplate, Link as LinkIcon, FileText } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 
 export function Layout() {
@@ -88,7 +88,7 @@ export function Layout() {
 
   const getBlockIcon = (type: string) => {
       switch (type) {
-          case 'hero': return <Image className="w-5 h-5 text-amber-500" />;
+          case 'hero': return <ImageIcon className="w-5 h-5 text-amber-500" />;
           case 'gallery': return <LayoutGrid className="w-5 h-5 text-amber-500" />;
           case 'news': return <Newspaper className="w-5 h-5 text-amber-500" />;
           default: return <FileText className="w-5 h-5 text-amber-500" />;
