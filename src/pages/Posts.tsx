@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import RichTextEditor from '../components/RichTextEditor';
+import { BlockBuilder, Block } from '../components/BlockBuilder';
 
 export function Posts() {
   const { posts, savePost, deletePost, togglePostStatus, media, fetchAllData } = useCMS();
@@ -14,6 +15,7 @@ export function Posts() {
   const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('News');
   const [formData, setFormData] = useState<any>({});
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const [settings, setSettings] = useState<any>(null);
 
   React.useEffect(() => {
@@ -36,10 +38,15 @@ export function Posts() {
   
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [pickerContext, setPickerContext] = useState<{ field: string, index?: number } | null>(null);
+  const [pickerContext, setPickerContext] = useState<{ blockId?: string, field: string, index?: number, subIndex?: number } | null>(null);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const openMediaPickerForBlock = (blockId: string, field: string, index?: number, subIndex?: number) => {
+    setPickerContext({ blockId, field, index, subIndex });
+    setIsMediaPickerOpen(true);
   };
 
   const openMediaPicker = (field: string, index?: number) => {
@@ -85,13 +92,22 @@ export function Posts() {
       setTitle(post.title);
       setSlug(post.slug);
       setCategory(post.category || 'News');
-      setFormData(typeof post.content === 'string' ? JSON.parse(post.content) : (post.content || {}));
+      
+      let parsed = [];
+      if (typeof post.content === 'string') {
+        try { parsed = JSON.parse(post.content); } catch (e) {}
+      } else {
+        parsed = post.content || [];
+      }
+      setBlocks(Array.isArray(parsed) ? parsed : []);
+      
       handleInputChange('excerpt', post.excerpt || '');
     } else {
       setEditingId(null);
       setTitle('');
       setSlug('');
       setCategory('News');
+      setBlocks([]);
       setFormData({});
     }
     setIsModalOpen(true);
@@ -104,7 +120,7 @@ export function Posts() {
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       category,
-      content: formData,
+      content: blocks,
       excerpt: formData.excerpt || '',
       status: editingId ? (posts.find((p: any) => p.id === editingId)?.status || 'published') : 'published'
     };
@@ -119,128 +135,17 @@ export function Posts() {
   };
 
   const renderDynamicInputs = () => {
-    const fixImgLocal = (url: string) => url && url.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${url}` : url;
-
-    if (category === 'News') {
-      return (
-        <div className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Utama</label>
-            <div className="flex gap-2 items-center">
-                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
-                {formData.featured_image && (
-                    <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
-                        <Trash2 className="w-5 h-5" />
-                    </button>
-                )}
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
-                    <ImageIcon className="w-5 h-5" />
-                </button>
-            </div>
-            {formData.featured_image && (
-                <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                    <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-            )}
-          </div>
+    return (
+      <div className="space-y-6">
           <div>
             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5"><AlignLeft className="w-3 h-3"/> Ringkasan Konten (Excerpt)</label>
             <RichTextEditor value={formData.excerpt || ''} onChange={val => handleInputChange('excerpt', val)} placeholder="Ringkasan singkat tentang post ini..." />
           </div>
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
-            <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
-          </div>
-        </div>
-      );
-    }
-
-    if (category === 'Event') {
-      return (
-        <div className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Sampul Event</label>
-            <div className="flex gap-2 items-center">
-                <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
-                {formData.featured_image && (
-                    <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
-                        <Trash2 className="w-5 h-5" />
-                    </button>
-                )}
-                <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
-                    <ImageIcon className="w-5 h-5" />
-                </button>
-            </div>
-            {formData.featured_image && (
-                <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                    <img src={fixImgLocal(formData.featured_image)} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><Calendar className="w-3 h-3"/> Tanggal & Waktu Event</label>
-              <input type="text" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: 24 Okt 2026, 09:00 AM" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><MapPin className="w-3 h-3"/> Lokasi</label>
-              <input type="text" value={formData.location || ''} onChange={e => handleInputChange('location', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: Grand Ballroom, Tech Valley" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 flex items-center gap-1.5 text-zinc-400"><AlignLeft className="w-3 h-3"/> Deskripsi Event</label>
-            <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Deskripsi lengkap mengenai event ini..." />
-          </div>
-
-          {/* Agenda Section */}
-          <div className="p-6 bg-zinc-50/50 border border-zinc-100 rounded-[2rem]">
-            <div className="flex items-center justify-between mb-4">
-                <label className="block text-xs font-black text-zinc-400 uppercase tracking-[0.1em] flex items-center gap-2"><Clock className="w-4 h-4 text-emerald-500"/> Agenda Acara</label>
-                <button type="button" onClick={addAgendaItem} className="text-[10px] font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-100 flex items-center gap-1.5 transition-all shadow-sm">
-                    <Plus className="w-3 h-3" /> Tambah Sesi
-                </button>
-            </div>
-            <div className="space-y-3">
-              {(formData.agenda || []).map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm group">
-                  <input type="text" value={item.time} onChange={(e) => updateAgendaItem(idx, 'time', e.target.value)} placeholder="Waktu" className="w-full md:w-32 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-emerald-400 text-sm font-bold" />
-                  <input type="text" value={item.activity} onChange={(e) => updateAgendaItem(idx, 'activity', e.target.value)} placeholder="Nama Aktivitas" className="w-full flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-emerald-400 text-sm font-medium" />
-                  <button type="button" onClick={() => removeAgendaItem(idx)} className="p-2.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-              {(!formData.agenda || formData.agenda.length === 0) && (
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider text-center py-4 opacity-50">Belum ada agenda.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Speakers Section */}
-          <div className="p-6 bg-zinc-50/50 border border-zinc-100 rounded-[2rem]">
-            <div className="flex items-center justify-between mb-4">
-                <label className="block text-xs font-black text-zinc-400 uppercase tracking-[0.1em] flex items-center gap-2"><Users className="w-4 h-4 text-blue-500"/> Narasumber / Pembicara</label>
-                <button type="button" onClick={addSpeaker} className="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest bg-blue-50 px-3 py-2 rounded-xl border border-blue-100 flex items-center gap-1.5 transition-all shadow-sm">
-                    <Plus className="w-3 h-3" /> Tambah Personel
-                </button>
-            </div>
-            <div className="space-y-3">
-              {(formData.speakers || []).map((item: any, idx: number) => (
-                <div key={idx} className="flex flex-col md:flex-row gap-2 items-start md:items-center bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm group">
-                  <input type="text" value={item.name} onChange={(e) => updateSpeaker(idx, 'name', e.target.value)} placeholder="Nama Lengkap" className="w-full md:w-48 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" />
-                  <input type="text" value={item.role} onChange={(e) => updateSpeaker(idx, 'role', e.target.value)} placeholder="Jabatan / Peran" className="w-full flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-blue-400 text-sm font-medium" />
-                  <button type="button" onClick={() => removeSpeaker(idx)} className="p-2.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              ))}
-              {(!formData.speakers || formData.speakers.length === 0) && (
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider text-center py-4 opacity-50">Belum ada pembicara.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    return null;
+          <BlockBuilder blocks={blocks} onChange={setBlocks} onOpenMediaPicker={openMediaPickerForBlock} />
+      </div>
+    );
   };
+
 
   return (
     <div className="animate-in fade-in duration-500 pb-10">
@@ -441,13 +346,29 @@ export function Posts() {
                                 key={idx} 
                                 onClick={() => {
                                     if (pickerContext) {
-                                        const { field, index } = pickerContext;
-                                        if (index !== undefined) {
-                                            const currentArr = [...(formData[field] || [])];
-                                            currentArr[index] = m.file_url || m.url;
-                                            handleInputChange(field, currentArr);
-                                        } else {
-                                            handleInputChange(field, m.file_url || m.url);
+                                        const { blockId, field, index, subIndex } = pickerContext;
+                                        const mediaUrl = m.file_url || m.url;
+
+                                        if (blockId) {
+                                            setBlocks(prev => prev.map(block => {
+                                                if (block.id !== blockId) return block;
+                                                
+                                                if (field === 'activities' && typeof index === 'number') {
+                                                    const newActivities = [...block.data.activities];
+                                                    newActivities[index] = { ...newActivities[index], image: mediaUrl };
+                                                    return { ...block, data: { ...block.data, activities: newActivities } };
+                                                }
+                                                
+                                                return { ...block, data: { ...block.data, [field]: mediaUrl } };
+                                            }));
+                                        } else if (field) {
+                                            if (index !== undefined) {
+                                                const currentArr = [...(formData[field] || [])];
+                                                currentArr[index] = mediaUrl;
+                                                handleInputChange(field, currentArr);
+                                            } else {
+                                                handleInputChange(field, mediaUrl);
+                                            }
                                         }
                                     }
                                     setIsMediaPickerOpen(false);

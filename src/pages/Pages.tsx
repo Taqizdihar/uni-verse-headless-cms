@@ -6,6 +6,7 @@ import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import RichTextEditor from '../components/RichTextEditor';
+import { BlockBuilder, Block } from '../components/BlockBuilder';
 import axios from 'axios';
 
 export function Pages() {
@@ -20,11 +21,11 @@ export function Pages() {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [pageType, setPageType] = useState('home');
-  const [formData, setFormData] = useState<any>({});
+  const [blocks, setBlocks] = useState<Block[]>([]);
   
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [pickerContext, setPickerContext] = useState<{ field: string, index?: number } | null>(null);
+  const [pickerContext, setPickerContext] = useState<{ blockId?: string, field: string, index?: number, subIndex?: number } | null>(null);
 
   // Status Toggle Loading State
   const [togglingIds, setTogglingIds] = useState<Set<number>>(new Set());
@@ -32,23 +33,9 @@ export function Pages() {
   // Confirmation State
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: number | null }>({ isOpen: false, id: null });
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
-  };
-
-  const openMediaPicker = (field: string, index?: number) => {
-    setPickerContext({ field, index });
+  const openMediaPickerForBlock = (blockId: string, field: string, index?: number, subIndex?: number) => {
+    setPickerContext({ blockId, field, index, subIndex });
     setIsMediaPickerOpen(true);
-  };
-
-  const addGalleryImage = () => {
-    const currentImages = formData.images || [];
-    openMediaPicker('images', currentImages.length);
-  };
-
-  const removeGalleryImage = (index: number) => {
-    const currentImages = formData.images || [];
-    handleInputChange('images', currentImages.filter((_: any, i: number) => i !== index));
   };
 
   // Real Data Fetching on mount
@@ -95,13 +82,19 @@ export function Pages() {
       setTitle(page.title);
       setSlug(page.slug);
       setPageType(page.page_type);
-      setFormData(typeof page.content === 'string' ? JSON.parse(page.content) : (page.content || {}));
+      let parsed = [];
+      if (typeof page.content === 'string') {
+        try { parsed = JSON.parse(page.content); } catch (e) {}
+      } else {
+        parsed = page.content;
+      }
+      setBlocks(Array.isArray(parsed) ? parsed : []);
     } else {
       setEditingId(null);
       setTitle('');
       setSlug('');
       setPageType('home');
-      setFormData({});
+      setBlocks([]);
     }
     setIsModalOpen(true);
   };
@@ -129,7 +122,7 @@ export function Pages() {
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       page_type: pageType,
-      content: formData,
+      content: blocks,
       status: status || 'published'
     };
     await savePage(payload);
@@ -144,148 +137,7 @@ export function Pages() {
   };
 
   const renderDynamicInputs = () => {
-    switch (pageType) {
-      case 'home':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Judul Utama (Headline)</label>
-              <input type="text" value={formData.headline || ''} onChange={e => handleInputChange('headline', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Judul Hero" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Sub Judul</label>
-              <input type="text" value={formData.sub_headline || ''} onChange={e => handleInputChange('sub_headline', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400" placeholder="Teks pendukung" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Hero</label>
-              <div className="flex gap-2 items-center">
-                  <input type="text" value={formData.hero_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none" placeholder="Pilih gambar..." />
-                  {formData.hero_image && (
-                      <button type="button" onClick={() => handleInputChange('hero_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors">
-                          <Trash2 className="w-5 h-5" />
-                      </button>
-                  )}
-                  <button type="button" onClick={() => openMediaPicker('hero_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors">
-                      <ImageIcon className="w-5 h-5" />
-                  </button>
-              </div>
-              {formData.hero_image && (
-                  <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                      <img src={formData.hero_image} alt="Hero Preview" className="w-full h-full object-cover" />
-                  </div>
-              )}
-            </div>
-          </div>
-        );
-      case 'contact':
-        return (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Email Dukungan</label>
-              <input type="email" value={formData.email || ''} onChange={e => handleInputChange('email', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="hello@perusahaan.com" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Nomor Telepon</label>
-              <input type="tel" value={formData.phone || ''} onChange={e => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="+62 812-0000-0000" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Tautan Embed Google Maps</label>
-              <input type="text" value={formData.maps_link || ''} onChange={e => handleInputChange('maps_link', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs text-amber-600" placeholder="https://maps.google.com/..." />
-            </div>
-          </div>
-        );
-      case 'profile':
-        return (
-          <div className="space-y-4">
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Tentang Kami</label>
-            <RichTextEditor value={formData.about_us || ''} onChange={val => handleInputChange('about_us', val)} placeholder="Misi perusahaan kami..." />
-          </div>
-        );
-      case 'gallery':
-        return (
-          <div className="space-y-4 font-bold">
-             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 italic">Judul Galeri</label>
-              <input type="text" value={formData.gallery_title || ''} onChange={e => handleInputChange('gallery_title', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400" placeholder="Misal: Portofolio Kami" />
-            </div>
-            <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1 italic">Deskripsi</label>
-                <RichTextEditor value={formData.description || ''} onChange={val => handleInputChange('description', val)} placeholder="Deskripsikan secara singkat koleksi ini..." />
-            </div>
-            <div>
-                <div className="flex items-center justify-between mb-2">
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 italic">Gambar Galeri</label>
-                    <button type="button" onClick={addGalleryImage} className="text-[10px] font-black text-amber-600 hover:text-amber-700 uppercase tracking-widest bg-amber-50 px-2 py-1 rounded-md border border-amber-100 flex items-center gap-1">
-                        <Plus className="w-3 h-3 stroke-[4]" /> Tambah Gambar
-                    </button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    {(formData.images || []).map((img: string, idx: number) => (
-                        <div key={idx} className="relative group rounded-xl overflow-hidden border border-zinc-100 bg-zinc-50 p-2 shadow-sm">
-                            {img ? (
-                                <img src={img} alt="Preview" className="w-full aspect-square object-cover rounded-lg mb-2" />
-                            ) : (
-                                <div className="aspect-square bg-zinc-100 rounded-lg mb-2 flex items-center justify-center">
-                                    <ImageIcon className="w-6 h-6 text-zinc-300" />
-                                </div>
-                            )}
-                            <div className="flex gap-1">
-                                <button type="button" onClick={() => openMediaPicker('images', idx)} className="flex-1 p-2 bg-amber-400 text-zinc-900 rounded-lg hover:bg-amber-500 transition-colors flex justify-center shadow-lg shadow-amber-400/20">
-                                    <Pencil className="w-3 h-3" />
-                                </button>
-                                <button type="button" onClick={() => removeGalleryImage(idx)} className="p-2 bg-zinc-100 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all flex justify-center">
-                                    <Trash2 className="w-3 h-3" />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                    {(formData.images || []).length === 0 && (
-                        <div className="col-span-full py-8 border-2 border-dashed border-zinc-100 rounded-2xl flex flex-col items-center justify-center text-zinc-400 italic text-xs">
-                            Belum ada gambar yang ditambahkan. Klik "Tambah Gambar" di atas.
-                        </div>
-                    )}
-                </div>
-            </div>
-          </div>
-        );
-      case 'news':
-        return (
-          <div className="space-y-4">
-             <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Judul Artikel</label>
-              <input type="text" value={formData.news_title || ''} onChange={e => handleInputChange('news_title', e.target.value)} className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold" placeholder="Misal: Laporan Pertumbuhan Q3" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Gambar Utama</label>
-              <div className="flex gap-2 items-center">
-                  <input type="text" value={formData.featured_image || ''} readOnly className="flex-1 px-4 py-3 bg-zinc-100 border border-zinc-200 text-zinc-500 rounded-xl outline-none text-xs" placeholder="Pilih aset header..." />
-                  {formData.featured_image && (
-                      <button type="button" onClick={() => handleInputChange('featured_image', '')} className="p-3 bg-red-100 text-red-500 rounded-xl hover:bg-red-200 transition-colors shadow-lg shadow-red-500/20">
-                          <Trash2 className="w-5 h-5" />
-                      </button>
-                  )}
-                  <button type="button" onClick={() => openMediaPicker('featured_image')} className="p-3 bg-amber-400 text-zinc-900 rounded-xl hover:bg-amber-500 transition-colors shadow-lg shadow-amber-400/20">
-                      <ImageIcon className="w-5 h-5" />
-                  </button>
-              </div>
-              {formData.featured_image && (
-                  <div className="mt-3 aspect-video w-48 rounded-xl overflow-hidden border border-zinc-200 shadow-sm">
-                      <img src={formData.featured_image} alt="Main Preview" className="w-full h-full object-cover" />
-                  </div>
-              )}
-            </div>
-            <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Ringkasan</label>
-                <RichTextEditor value={formData.summary || ''} onChange={val => handleInputChange('summary', val)} placeholder="Pengantar singkat..." />
-            </div>
-            <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Konten Utama</label>
-                <RichTextEditor value={formData.body || ''} onChange={val => handleInputChange('body', val)} placeholder="Tuliskan isi artikel lengkap di sini..." />
-            </div>
-          </div>
-        );
-      default: return null;
-    }
+    return <BlockBuilder blocks={blocks} onChange={setBlocks} onOpenMediaPicker={openMediaPickerForBlock} />;
   };
 
   if (isLoading) {
@@ -489,18 +341,26 @@ export function Pages() {
                                 key={idx} 
                                 onClick={() => {
                                     if (pickerContext) {
-                                        const { field, index } = pickerContext;
-                                        if (index !== undefined) {
-                                            const currentArr = [...(formData[field] || [])];
-                                            currentArr[index] = m.file_url || m.url;
-                                            handleInputChange(field, currentArr);
-                                        } else {
-                                            handleInputChange(field, m.file_url || m.url);
-                                        }
+                                    const { blockId, field, index, subIndex } = pickerContext;
+                                    const mediaUrl = m.file_url || m.url;
+                                    
+                                    if (blockId) {
+                                        setBlocks(prev => prev.map(block => {
+                                            if (block.id !== blockId) return block;
+                                            
+                                            if (field === 'activities' && typeof index === 'number') {
+                                                const newActivities = [...block.data.activities];
+                                                newActivities[index] = { ...newActivities[index], image: mediaUrl };
+                                                return { ...block, data: { ...block.data, activities: newActivities } };
+                                            }
+                                            
+                                            return { ...block, data: { ...block.data, [field]: mediaUrl } };
+                                        }));
                                     }
-                                    setIsMediaPickerOpen(false);
-                                    setPickerContext(null);
-                                }}
+                                }
+                                setIsMediaPickerOpen(false);
+                                setPickerContext(null);
+                            }}
                                 className="group cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-400 transition-all relative aspect-square bg-zinc-50"
                             >
                                 {(m.file_type || '').startsWith('image/') ? (
