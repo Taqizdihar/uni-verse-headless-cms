@@ -267,7 +267,7 @@ export function Settings() {
                                     value={formData.frontend_url} 
                                     onChange={e => handleInputChange('frontend_url', e.target.value)}
                                     className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-blue-600" 
-                                    placeholder="https://my-frontend.vercel.app" 
+                                    placeholder="https://uninside.app | kroombox.com | netlify.app | dll." 
                                 />
                             </div>
                         </div>
