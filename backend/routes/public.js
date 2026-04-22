@@ -113,7 +113,7 @@ router.get('/settings', async (req, res) => {
     try {
         const tenantId = req.publicTenantId;
         const [settingsRows] = await db.execute(
-            "SELECT site_name as title, tagline, logo_url FROM settings WHERE tenant_id = ? LIMIT 1",
+            "SELECT site_name as title, tagline, logo_url, global_options FROM settings WHERE tenant_id = ? LIMIT 1",
             [tenantId]
         );
 
@@ -121,10 +121,24 @@ router.get('/settings', async (req, res) => {
             return res.status(404).json({ error: 'Settings not found for this tenant' });
         }
 
-        const settings = settingsRows[0];
-        if (settings.logo_url) {
-            settings.logo_url = normalizeUrl(settings.logo_url);
+        const row = settingsRows[0];
+        let globalOptions = {};
+        if (row.global_options) {
+            try { 
+                globalOptions = typeof row.global_options === 'string' ? JSON.parse(row.global_options) : row.global_options; 
+            } catch (e) {
+                console.error('[PUBLIC API] Failed to parse global_options:', e);
+            }
         }
+
+        const settings = {
+            title: row.title,
+            tagline: row.tagline,
+            logo_url: row.logo_url ? normalizeUrl(row.logo_url) : null,
+            frontend_url: globalOptions.frontend_url || '',
+            copyright_text: globalOptions.footer_config?.copyright_text || '',
+            social_links: globalOptions.footer_config?.social_links || []
+        };
 
         res.json(settings);
     } catch (error) {

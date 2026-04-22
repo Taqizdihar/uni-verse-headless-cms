@@ -79,10 +79,8 @@ export interface PluginItem {
 export interface Settings {
   siteName?: string;
   tagline?: string;
-  primaryColor?: string;
   supportEmail?: string;
   site_name?: string;
-  active_template?: string;
   [key: string]: any;
 }
 

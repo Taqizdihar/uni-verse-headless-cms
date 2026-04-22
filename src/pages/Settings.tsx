@@ -13,10 +13,8 @@ export function Settings() {
     logo_url: '',
     frontend_url: '',
     footer_config: {
-      social_links: [],
-      quick_links: [],
-      contact_info: { phone: '', whatsapp: '', email: '', service_hours: '' },
-      location_embed_link: ''
+      copyright_text: '',
+      social_links: []
     }
   });
 
@@ -58,10 +56,8 @@ export function Settings() {
         logo_url: settings.logo_url || '',
         frontend_url: settings.global_options?.frontend_url || '',
         footer_config: settings.global_options?.footer_config || {
-          social_links: [],
-          quick_links: [],
-          contact_info: { phone: '', whatsapp: '', email: '', service_hours: '' },
-          location_embed_link: ''
+          copyright_text: '',
+          social_links: []
         }
       });
       setIsSettingsLoaded(true);
@@ -80,15 +76,12 @@ export function Settings() {
   const handleFooterChange = (section: string, field: string, value: any, index?: number) => {
     setFormData(prev => {
         const newFooter = { ...prev.footer_config };
-        if (section === 'contact_info') {
-            newFooter.contact_info = { ...newFooter.contact_info, [field]: value };
-        } else if (section === 'social_links' || section === 'quick_links') {
-            const listName = section as 'social_links' | 'quick_links';
-            const arr = [...(newFooter[listName] as any[])];
+        if (section === 'social_links') {
+            const arr = [...newFooter.social_links];
             if (index !== undefined) {
                 arr[index] = { ...arr[index], [field]: value };
             }
-            newFooter[listName] = arr as any;
+            newFooter.social_links = arr;
         } else {
             (newFooter as any)[section] = value;
         }
@@ -96,21 +89,17 @@ export function Settings() {
     });
   };
 
-  const addFooterItem = (section: 'social_links' | 'quick_links') => {
+  const addFooterItem = (section: 'social_links') => {
       setFormData(prev => {
           const newFooter = { ...prev.footer_config };
           if (section === 'social_links') {
               newFooter.social_links = [...newFooter.social_links, { icon: 'instagram', url: '' }];
-          } else {
-              if (newFooter.quick_links.length < 5) {
-                  newFooter.quick_links = [...newFooter.quick_links, { label: '', url: '' }];
-              }
           }
           return { ...prev, footer_config: newFooter };
       });
   };
 
-  const removeFooterItem = (section: 'social_links' | 'quick_links', index: number) => {
+  const removeFooterItem = (section: 'social_links', index: number) => {
       setFormData(prev => {
           const newFooter = { ...prev.footer_config };
           const arr = [...newFooter[section]];
@@ -132,18 +121,12 @@ export function Settings() {
   const handleSave = async () => {
     setStatus('saving');
     
-    // Sanitize Maps URL - Task 3
-    const sanitizedFooter = { 
-        ...formData.footer_config, 
-        location_embed_link: resolveMapsUrl(formData.footer_config.location_embed_link) 
-    };
-
     try {
         await updateSettings({
           ...formData,
           global_options: {
               ...settings?.global_options,
-              footer_config: sanitizedFooter,
+              footer_config: formData.footer_config,
               frontend_url: formData.frontend_url,
               support_email: formData.support_email
           }
@@ -347,36 +330,28 @@ export function Settings() {
                         </h3>
                         
 
-                        {/* Quick Links */}
-                        <div className="mb-6 border-t border-zinc-100 pt-6">
-                            <div className="flex justify-between items-center mb-2 ml-1">
-                                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tautan Cepat (Quick Links) - Max 5</label>
-                                {formData.footer_config.quick_links.length < 5 && (
-                                    <button type="button" onClick={() => addFooterItem('quick_links')} className="text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"><Plus className="w-3 h-3" /> Tambah Tautan</button>
-                                )}
-                            </div>
-                            <div className="space-y-3">
-                                {formData.footer_config.quick_links.map((link, idx) => (
-                                    <div key={idx} className="flex gap-3">
-                                        <input type="text" value={link.label} onChange={(e) => handleFooterChange('quick_links', 'label', e.target.value, idx)} className="flex-1 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="Label (e.g. Profil)" />
-                                        <input type="text" value={link.url} onChange={(e) => handleFooterChange('quick_links', 'url', e.target.value, idx)} className="flex-1 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="URL (e.g. /profil)" />
-                                        <button type="button" onClick={() => removeFooterItem('quick_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>
-                                    </div>
-                                ))}
-                                {formData.footer_config.quick_links.length === 0 && <p className="text-xs text-zinc-400 italic">Belum ada tautan ditambahkan.</p>}
-                            </div>
+                        {/* Copyright Text */}
+                        <div className="mb-6">
+                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Teks Hak Cipta (Copyright Text)</label>
+                            <input 
+                                type="text" 
+                                value={formData.footer_config.copyright_text} 
+                                onChange={(e) => handleFooterChange('copyright_text', '', e.target.value)}
+                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600" 
+                                placeholder="© 2026 Uni-Inside. All rights reserved." 
+                            />
                         </div>
 
                         {/* Social Media */}
-                        <div className="mb-6 border-t border-zinc-100 pt-6">
-                            <div className="flex justify-between items-center mb-2 ml-1">
+                        <div className="border-t border-zinc-100 pt-6">
+                            <div className="flex justify-between items-center mb-4 ml-1">
                                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Ikon Media Sosial</label>
                                 <button type="button" onClick={() => addFooterItem('social_links')} className="text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"><Plus className="w-3 h-3" /> Tambah Sosial</button>
                             </div>
                             <div className="space-y-3">
                                 {formData.footer_config.social_links.map((social, idx) => (
-                                    <div key={idx} className="flex gap-3 items-center">
-                                        <select value={social.icon} onChange={(e) => handleFooterChange('social_links', 'icon', e.target.value, idx)} className="w-32 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400">
+                                    <div key={idx} className="flex gap-3 items-center animate-in slide-in-from-top-2 duration-200">
+                                        <select value={social.icon} onChange={(e) => handleFooterChange('social_links', 'icon', e.target.value, idx)} className="w-32 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 font-bold">
                                             <option value="instagram">Instagram</option>
                                             <option value="tiktok">TikTok</option>
                                             <option value="youtube">YouTube</option>
@@ -388,31 +363,7 @@ export function Settings() {
                                         <button type="button" onClick={() => removeFooterItem('social_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
-
-                        {/* Hubungi Kami */}
-                        <div className="mb-6 border-t border-zinc-100 pt-6">
-                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 ml-1">Hubungi Kami</label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input type="text" value={formData.footer_config.contact_info.phone} onChange={(e) => handleFooterChange('contact_info', 'phone', e.target.value)} className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="Telepon (Misal: +62...)" />
-                                <input type="text" value={formData.footer_config.contact_info.whatsapp} onChange={(e) => handleFooterChange('contact_info', 'whatsapp', e.target.value)} className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="WhatsApp (Misal: +62...)" />
-                                <input type="email" value={formData.footer_config.contact_info.email} onChange={(e) => handleFooterChange('contact_info', 'email', e.target.value)} className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="Alamat Email" />
-                                <input type="text" value={formData.footer_config.contact_info.service_hours} onChange={(e) => handleFooterChange('contact_info', 'service_hours', e.target.value)} className="w-full px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="Jam Operasional (Misal: Senin-Jumat, 09:00-17:00)" />
-                            </div>
-                        </div>
-
-                        {/* Location */}
-                        <div className="border-t border-zinc-100 pt-6">
-                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Lokasi (Google Maps Embed URL)</label>
-                            <div className="flex gap-2">
-                                <MapPin className="w-5 h-5 text-zinc-400 mt-2 flex-shrink-0" />
-                                <textarea 
-                                    value={formData.footer_config.location_embed_link}
-                                    onChange={(e) => handleFooterChange('location_embed_link', '', e.target.value)}
-                                    className="flex-1 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 text-xs h-20 resize-none"
-                                    placeholder="<iframe src='...'></iframe> OR just the src URL..."
-                                />
+                                {formData.footer_config.social_links.length === 0 && <p className="text-xs text-zinc-400 italic ml-1">Belum ada media sosial ditambahkan.</p>}
                             </div>
                         </div>
                     </Card>
@@ -423,45 +374,21 @@ export function Settings() {
                             Pratinjau Footer
                         </h3>
                         <div className="bg-zinc-900 text-zinc-400 p-12 rounded-[2.5rem] text-xs space-y-4 font-mono shadow-xl overflow-hidden relative">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                            <div className="flex flex-col md:flex-row justify-between items-center gap-8 border-t border-zinc-800 pt-12 mt-12">
                                 <div>
                                     <h4 className="font-bold mb-4 text-sm text-amber-400">{formData.site_name || 'Logo / Judul'}</h4>
-                                    <p className="opacity-70 leading-relaxed mb-6 text-[11px]">{formData.tagline || 'Tagline tertera di sini...'}</p>
+                                    <p className="opacity-70 leading-relaxed mb-6 text-[11px] max-w-xs">{formData.tagline || 'Tagline tertera di sini...'}</p>
                                     <div className="flex gap-3 items-center">
                                         {formData.footer_config.social_links.map((s, i) => (
-                                           <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 transition-transform hover:scale-110 bg-zinc-800 text-amber-400">
+                                           <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 transition-transform hover:scale-110 bg-zinc-800 text-amber-400 border border-zinc-700">
                                               {s.icon[0].toUpperCase()}
                                            </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-bold mb-4 text-sm text-amber-400">Tautan Cepat</h4>
-                                    <ul className="space-y-3 opacity-70 text-[11px]">
-                                        {formData.footer_config.quick_links.map((link, idx) => (
-                                            <li key={idx} className="hover:translate-x-1 transition-transform">→ {link.label || 'Tautan'}</li>
-                                        ))}
-                                        {formData.footer_config.quick_links.length === 0 && <li>- Belum ada tautan -</li>}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4 text-sm text-amber-400">Hubungi Kami</h4>
-                                    <div className="space-y-3 opacity-70 text-[11px]">
-                                       <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> {formData.footer_config.contact_info.phone || '+62...'}</p>
-                                       <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> {formData.footer_config.contact_info.whatsapp || '+62...'}</p>
-                                       <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5" /> {formData.footer_config.contact_info.email || 'email@contoh.com'}</p>
-                                       <p className="flex items-center gap-2"><Globe className="w-3.5 h-3.5" /> {formData.footer_config.contact_info.service_hours || 'Senin-Jumat'}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 className="font-bold mb-4 text-sm text-amber-400">Lokasi Kami</h4>
-                                    {formData.footer_config.location_embed_link ? (
-                                        <div className="w-full h-32 rounded-2xl overflow-hidden shadow-lg border border-amber-400/20">
-                                            <iframe src={resolveMapsUrl(formData.footer_config.location_embed_link)} width="100%" height="100%" style={{ border: 0 }} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                                        </div>
-                                    ) : (
-                                        <div className="w-full h-32 rounded-2xl flex items-center justify-center opacity-30 border border-dashed border-amber-400 bg-amber-400/5">Peta (Maps Embed)</div>
-                                    )}
+                                <div className="text-center md:text-right">
+                                    <p className="opacity-50 text-[10px] uppercase tracking-widest mb-2">Didukung oleh UNI-VERSE CMS</p>
+                                    <p className="text-zinc-300 font-bold">{formData.footer_config.copyright_text || `© ${new Date().getFullYear()} ${formData.site_name || 'My Site'}. All rights reserved.`}</p>
                                 </div>
                             </div>
                         </div>

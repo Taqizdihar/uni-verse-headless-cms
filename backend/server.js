@@ -85,7 +85,7 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
         // 2. Resolve Page or Post for that specific tenant
         // Page lookup
         const [pages] = await db.execute(
-            `SELECT p.*, s.site_name, s.tagline, s.active_template, s.global_options, s.logo_url
+            `SELECT p.*, s.site_name, s.tagline, s.global_options, s.logo_url
              FROM pages p
              LEFT JOIN settings s ON p.tenant_id = s.tenant_id
              WHERE p.slug = ? AND p.tenant_id = ?
@@ -111,14 +111,14 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
             return res.json({
                 type: 'page',
                 page: { id: row.id, title: row.title, slug: row.slug, page_type: row.page_type, content: row.content, status: row.status, tenant_id: tenantId },
-                settings: { site_name: row.site_name || 'Uni-Inside', tagline: row.tagline || '', active_template: row.active_template || 'minimalist', logo_url: row.logo_url || null, global_options: globalOptions },
+                settings: { site_name: row.site_name || 'Uni-Inside', tagline: row.tagline || '', logo_url: row.logo_url || null, global_options: globalOptions },
                 navPages
             });
         }
 
         // Post lookup (if no page matches)
         const [posts] = await db.execute(
-            `SELECT p.*, s.site_name, s.tagline, s.active_template, s.global_options, s.logo_url
+            `SELECT p.*, s.site_name, s.tagline, s.global_options, s.logo_url
              FROM posts p
              LEFT JOIN settings s ON p.tenant_id = s.tenant_id
              WHERE p.slug = ? AND p.tenant_id = ?
@@ -144,7 +144,7 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
             return res.json({
                 type: 'post',
                 page: { id: row.id, title: row.title, slug: row.slug, category: row.category, content: row.content, created_at: row.created_at, tenant_id: tenantId },
-                settings: { site_name: row.site_name || 'Uni-Inside', tagline: row.tagline || '', active_template: row.active_template || 'minimalist', logo_url: row.logo_url || null, global_options: globalOptions },
+                settings: { site_name: row.site_name || 'Uni-Inside', tagline: row.tagline || '', logo_url: row.logo_url || null, global_options: globalOptions },
                 navPages
             });
         }
@@ -384,10 +384,19 @@ app.post('/api/auth/register', async (req, res) => {
         console.log(`[AUTH] Linking user and tenant`);
         await db.execute('INSERT INTO tenant_users (tenant_id, user_id, role) VALUES (?, ?, ?)', [tenantId, userId, 'admin']);
 
+        // Task 1: Auto-generate API Key for new tenant
+        const crypto = require('crypto');
+        const apiKey = 'uni_' + crypto.randomBytes(24).toString('hex');
+        await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tenantId, apiKey]);
+
         // Create default settings registry
         await db.execute(
-            'INSERT INTO settings (tenant_id, site_name, tagline, active_template, logo_url, global_options) VALUES (?, ?, ?, ?, ?, ?)',
-            [tenantId, 'My Site', '', 'minimalist', null, '{}']
+            'INSERT INTO settings (tenant_id, site_name, tagline, logo_url, global_options) VALUES (?, ?, ?, ?, ?)',
+            [tenantId, 'My Site', '', null, JSON.stringify({
+                copyright_text: `© ${new Date().getFullYear()} My Site. All rights reserved.`,
+                social_links: [],
+                frontend_url: ''
+            })]
         );
 
         const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
@@ -567,7 +576,7 @@ app.get('/api/settings', async (req, res) => {
 app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     const { 
         site_name, tagline, 
-        active_template, support_email, theme_color, branding_palette, 
+        support_email, 
         logo_url, footer_config, frontend_url 
     } = req.body;
     // Prefer explicitly passed param, otherwise fallback to jwt
@@ -575,15 +584,13 @@ app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     try {
         const globalOptions = JSON.stringify({
             support_email: support_email || '',
-            theme_color: theme_color || '#fbbf24',
-            branding_palette: branding_palette || null,
             footer_config: footer_config || null,
             frontend_url: frontend_url || ''
         });
 
         await db.execute(
-            'UPDATE settings SET site_name = ?, tagline = ?, active_template = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
-            [site_name, tagline, active_template, logo_url || null, globalOptions, tid]
+            'UPDATE settings SET site_name = ?, tagline = ?, logo_url = ?, global_options = ? WHERE tenant_id = ?',
+            [site_name, tagline, logo_url || null, globalOptions, tid]
         );
         res.json({ message: 'Configuration synchronized successfully' });
     } catch (error) {
