@@ -524,6 +524,12 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
 app.get('/', (req, res) => res.send('Server is running'));
 
 // ========================================================
+// PUBLIC V1 API GATEWAY
+// ========================================================
+const publicRoutes = require('./routes/public');
+app.use('/api/v1/public', publicRoutes);
+
+// ========================================================
 // PROTECTED ROUTES BELOW
 // ========================================================
 app.use('/api', authenticateToken);
