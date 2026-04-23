@@ -239,9 +239,10 @@ router.get('/navigation', async (req, res) => {
             `SELECT title, slug
              FROM pages
              WHERE tenant_id = ? AND is_in_navbar = 1 AND status = 'published'
-             ORDER BY id ASC`,
+             ORDER BY priority ASC`,
             [tenantId]
         );
+
 
         res.json(navItems);
     } catch (error) {

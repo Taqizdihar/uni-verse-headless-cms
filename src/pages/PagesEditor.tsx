@@ -8,7 +8,10 @@ export function PagesEditor() {
   const [pageType, setPageType] = useState('home');
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
+  const [isInNavbar, setIsInNavbar] = useState(false);
+  const [priority, setPriority] = useState(0);
   const [formData, setFormData] = useState<any>({});
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -21,14 +24,19 @@ export function PagesEditor() {
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       page_type: pageType,
       content: { ...formData },
-      status: 'published'
+      status: 'published',
+      is_in_navbar: isInNavbar ? 1 : 0,
+      priority: Number(priority)
     };
     await savePage(payload);
     setIsModalOpen(false);
     setTitle('');
     setSlug('');
     setFormData({});
+    setIsInNavbar(false);
+    setPriority(0);
   };
+
 
   const renderDynamicInputs = () => {
     switch (pageType) {
@@ -138,6 +146,32 @@ export function PagesEditor() {
                             </select>
                         </div>
                     </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex-1 flex items-center h-[50px] mt-[26px]">
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={isInNavbar}
+                                    onChange={(e) => setIsInNavbar(e.target.checked)}
+                                    className="w-5 h-5 rounded border-zinc-200 text-amber-500 focus:ring-amber-500 focus:ring-offset-1"
+                                />
+                                <span className="text-sm font-bold text-zinc-700">Tampilkan di Navbar</span>
+                            </label>
+                        </div>
+                        <div className="w-1/3">
+                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Urutan Menu</label>
+                            <input 
+                                type="number" 
+                                value={priority} 
+                                onChange={(e) => setPriority(parseInt(e.target.value) || 0)} 
+                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400" 
+                                placeholder="0" 
+                                min="0"
+                            />
+                        </div>
+                    </div>
+
 
                     <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
                         {renderDynamicInputs()}

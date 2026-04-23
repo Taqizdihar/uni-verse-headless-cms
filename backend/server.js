@@ -605,8 +605,9 @@ app.get('/api/pages/:id', async (req, res) => {
 });
 
 app.post('/api/pages', async (req, res) => {
-    const { title, slug, content, status } = req.body;
+    const { title, slug, content, status, is_in_navbar, priority } = req.body;
     const tid = getTenantId(req);
+
 
     // Validate mandatory fields
     if (!title || !title.trim()) return res.status(400).json({ error: 'Judul halaman wajib diisi.' });
@@ -622,9 +623,10 @@ app.post('/api/pages', async (req, res) => {
 
         // 1. Save or Update the Page
         const [result] = await db.execute(
-            'INSERT INTO pages (tenant_id, title, slug, content, status) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content)',
-            [tid, title.trim(), finalSlug, jsonContent, status || 'published']
+            'INSERT INTO pages (tenant_id, title, slug, content, status, is_in_navbar, priority) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content), is_in_navbar = VALUES(is_in_navbar), priority = VALUES(priority)',
+            [tid, title.trim(), finalSlug, jsonContent, status || 'published', is_in_navbar || 0, priority || 0]
         );
+
 
         const pageId = result.insertId;
 
@@ -642,9 +644,10 @@ app.post('/api/pages', async (req, res) => {
 });
 
 app.put('/api/pages/:id', async (req, res) => {
-    const { title, slug, content } = req.body;
+    const { title, slug, content, is_in_navbar, priority } = req.body;
     const { id } = req.params;
     const tid = getTenantId(req);
+
 
     // Validate mandatory fields
     if (!title || !title.trim()) return res.status(400).json({ error: 'Judul halaman wajib diisi.' });
@@ -657,9 +660,10 @@ app.put('/api/pages/:id', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
         await db.execute(
-            'UPDATE pages SET title = ?, slug = ?, content = ? WHERE id = ? AND tenant_id = ?',
-            [title.trim(), finalSlug, jsonContent, id, tid]
+            'UPDATE pages SET title = ?, slug = ?, content = ?, is_in_navbar = ?, priority = ? WHERE id = ? AND tenant_id = ?',
+            [title.trim(), finalSlug, jsonContent, is_in_navbar || 0, priority || 0, id, tid]
         );
+
         res.json({ message: 'Page updated successfully' });
     } catch (error) {
         console.error('Update Page Error:', error);
