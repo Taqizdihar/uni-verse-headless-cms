@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
-import { Save, Globe, Mail, CheckCircle2, Eye, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw, BookOpen } from 'lucide-react';
+import { Save, Globe, Mail, CheckCircle2, Eye, EyeOff, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw, BookOpen } from 'lucide-react';
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { NotificationModal } from '../components/ui/NotificationModal';
 
 export function Settings() {
   const { settings, updateSettings, fetchAllData, media } = useCMS();
@@ -27,6 +28,9 @@ export function Settings() {
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
   const [isKeyConfirmOpen, setIsKeyConfirmOpen] = useState(false);
+  const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notification, setNotification] = useState({ title: '', message: '', type: 'success' as 'success' | 'warning' | 'info' });
 
   useEffect(() => {
     // Fetch API Key
@@ -152,10 +156,20 @@ export function Settings() {
         if (res.ok) {
            const data = await res.json();
            setApiKey(data.api_key);
-           alert("API Key berhasil diregenerasi!");
+           setNotification({
+               title: 'Berhasil',
+               message: 'API Key berhasil diregenerasi!',
+               type: 'success'
+           });
+           setIsNotificationOpen(true);
         }
     } catch (err) {
-        alert("Gagal meregenerasi API Key.");
+        setNotification({
+            title: 'Gagal',
+            message: 'Gagal meregenerasi API Key.',
+            type: 'warning'
+        });
+        setIsNotificationOpen(true);
     } finally {
         setIsKeyLoading(false);
     }
@@ -289,16 +303,32 @@ export function Settings() {
                             <div className="relative flex-1">
                                 <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
                                 <input 
-                                    type="text" 
+                                    type={isKeyVisible ? "text" : "password"} 
                                     readOnly
                                     value={apiKey}
-                                    className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-sm" 
+                                    className="w-full pl-11 pr-12 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-sm" 
                                     placeholder={isKeyLoading ? 'Memuat...' : 'Belum ada API Key'}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setIsKeyVisible(!isKeyVisible)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                                    title={isKeyVisible ? "Sembunyikan Key" : "Tampilkan Key"}
+                                >
+                                    {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
                             </div>
                             <button 
                                 type="button"
-                                onClick={() => { navigator.clipboard.writeText(apiKey); alert('API Key disalin!'); }}
+                                onClick={() => { 
+                                    navigator.clipboard.writeText(apiKey); 
+                                    setNotification({
+                                        title: 'Disalin',
+                                        message: 'API Key berhasil disalin ke papan klip.',
+                                        type: 'success'
+                                    });
+                                    setIsNotificationOpen(true);
+                                }}
                                 className="px-4 py-3 bg-zinc-100 text-zinc-600 rounded-xl font-bold hover:bg-zinc-200 transition-all flex items-center justify-center border border-zinc-200"
                                 title="Salin Key"
                             >
@@ -539,6 +569,14 @@ export function Settings() {
         variant="danger"
         onConfirm={handleRegenerateApiKey}
         onClose={() => setIsKeyConfirmOpen(false)}
+      />
+
+      <NotificationModal 
+        isOpen={isNotificationOpen}
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setIsNotificationOpen(false)}
       />
     </div>
   );

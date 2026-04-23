@@ -4,6 +4,7 @@ import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { NotificationModal } from '../components/ui/NotificationModal';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V2.png';
 
 interface HeaderProps {
@@ -15,6 +16,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { user, setUser, setToken, settings } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -59,7 +61,7 @@ export function Header({ onMenuClick }: HeaderProps) {
            onClick={() => {
               const url = settings?.global_options?.frontend_url;
               if (url) window.open(url, '_blank');
-              else alert('Frontend URL belum diatur di Pengaturan.');
+              else setIsWarningOpen(true);
            }}
            className="hidden md:flex px-4 py-2 bg-amber-400 text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-amber-500 transition-colors shadow-sm items-center gap-2"
          >
@@ -114,6 +116,14 @@ export function Header({ onMenuClick }: HeaderProps) {
         confirmLabel="Keluar"
         onConfirm={handleLogout}
         onClose={() => setIsLogoutConfirmOpen(false)}
+      />
+
+      <NotificationModal 
+        isOpen={isWarningOpen}
+        title="URL Belum Diatur"
+        message="Frontend URL belum dikonfigurasi. Silakan atur di menu Pengaturan terlebih dahulu."
+        type="warning"
+        onClose={() => setIsWarningOpen(false)}
       />
     </header>
   );
