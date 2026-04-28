@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy, ArrowUp, ArrowDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
@@ -249,9 +250,18 @@ export function Pages() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
+                <AnimatePresence mode="popLayout">
                 {filteredPages.length > 0 ? (
                   filteredPages.map((page, idx) => (
-                    <tr key={page.id} className="hover:bg-zinc-50/50 transition-colors group">
+                    <motion.tr
+                      key={page.id}
+                      layout
+                      layoutId={`page-row-${page.id}`}
+                      initial={false}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+                      className="hover:bg-zinc-50/50 transition-colors group"
+                    >
                       <td className="px-8 py-6">
                         <p className="font-bold text-zinc-900 text-base leading-tight">{page.title}</p>
                         <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{page.slug}</p>
@@ -282,22 +292,22 @@ export function Pages() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => handleReorder(page.id!, 'up')}
                             disabled={idx === 0 || reorderingIds.has(page.id!)}
-                            className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
                             title="Naikkan"
                           >
-                            {reorderingIds.has(page.id!) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowUp className="w-3.5 h-3.5" />}
+                            {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5 stroke-[2.5]" />}
                           </button>
                           <button
                             onClick={() => handleReorder(page.id!, 'down')}
                             disabled={idx === filteredPages.length - 1 || reorderingIds.has(page.id!)}
-                            className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
                             title="Turunkan"
                           >
-                            {reorderingIds.has(page.id!) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowDown className="w-3.5 h-3.5" />}
+                            {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowDown className="w-5 h-5 stroke-[2.5]" />}
                           </button>
                         </div>
                       </td>
@@ -323,15 +333,21 @@ export function Pages() {
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))
                 ) : (
-                  <tr>
+                  <motion.tr
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <td colSpan={6} className="px-8 py-20 text-center text-zinc-400 italic">
                         Tidak ada halaman yang cocok dengan pencarian.
                     </td>
-                  </tr>
+                  </motion.tr>
                 )}
+                </AnimatePresence>
               </tbody>
             </table>
           </div>
