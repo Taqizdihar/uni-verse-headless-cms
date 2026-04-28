@@ -323,13 +323,16 @@ export function Settings() {
                     <div>
                         <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Current API Key</label>
                         <div className="flex gap-2">
-                            <div className="relative flex-1">
-                                <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
+                            <div className="relative flex-1 flex items-center">
+                                <div className="absolute left-4 z-10 flex items-center gap-2 pointer-events-none">
+                                    <Key className="w-4 h-4 text-zinc-300" />
+                                    <span className="text-zinc-400 font-mono text-xs font-bold border-r border-zinc-200 pr-2">x-api-key:</span>
+                                </div>
                                 <input 
                                     type={isKeyVisible ? "text" : "password"} 
                                     readOnly
                                     value={apiKey}
-                                    className="w-full pl-11 pr-12 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-sm" 
+                                    className="w-full pl-[6.5rem] pr-12 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-sm" 
                                     placeholder={isKeyLoading ? 'Memuat...' : 'Belum ada API Key'}
                                 />
                                 <button
@@ -376,41 +379,14 @@ export function Settings() {
                         </h4>
                         <p className="text-zinc-400 text-xs font-medium mb-5">Referensi lengkap endpoint yang tersedia untuk aplikasi frontend Anda.</p>
 
-                        {/* Authentication Reminder */}
-                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5 mb-5">
-                            <div className="flex items-start gap-3">
-                                <div className="w-9 h-9 bg-blue-500/10 flex items-center justify-center rounded-xl flex-shrink-0 mt-0.5">
-                                    <ShieldCheck className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-blue-900 mb-1">Header Autentikasi Diperlukan</p>
-                                    <p className="text-xs text-blue-700/80 leading-relaxed mb-3">
-                                        Semua endpoint (kecuali <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono text-[10px]">/health</code>) memerlukan header <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono text-[10px]">x-api-key</code>.
-                                    </p>
-                                    <div className="bg-zinc-900 rounded-lg px-4 py-2.5 font-mono text-xs flex items-center justify-between gap-3">
-                                        <code className="text-blue-300 truncate">x-api-key: <span className="text-amber-400">{apiKey ? (isKeyVisible ? apiKey : '••••••••••••••••') : 'YOUR_API_KEY'}</span></code>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                navigator.clipboard.writeText(`x-api-key: ${apiKey}`);
-                                                setNotification({ title: 'Disalin', message: 'Header autentikasi berhasil disalin.', type: 'success' });
-                                                setIsNotificationOpen(true);
-                                            }}
-                                            className="text-zinc-500 hover:text-white transition-colors flex-shrink-0"
-                                            title="Salin Header"
-                                        >
-                                            <Copy className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Base URL */}
                         <div className="bg-zinc-900 rounded-xl px-5 py-3.5 mb-4 flex items-center justify-between gap-3">
                             <div className="min-w-0">
                                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">Production Base URL</span>
-                                <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
+                                <div className="flex flex-col">
+                                    <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
+                                    <span className="text-[10px] text-zinc-500 mt-1 font-medium italic">Semua request (kecuali /health) memerlukan header x-api-key.</span>
+                                </div>
                             </div>
                             <button
                                 type="button"

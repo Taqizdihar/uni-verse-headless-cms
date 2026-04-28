@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye } from 'lucide-react';
+import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { NotificationModal } from '../components/ui/NotificationModal';
 import RichTextEditor from '../components/RichTextEditor';
 import { BlockBuilder, Block } from '../components/BlockBuilder';
 
@@ -35,6 +36,12 @@ export function Posts() {
   
   // Confirmation State
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: number | null }>({ isOpen: false, id: null });
+
+  // Duplicate State
+  const [duplicatingIds, setDuplicatingIds] = useState<Set<number>>(new Set());
+  const [notification, setNotification] = useState<{ isOpen: boolean, title: string, message: string, type: 'success' | 'warning' | 'info' }>({
+    isOpen: false, title: '', message: '', type: 'success'
+  });
   
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -134,6 +141,42 @@ export function Posts() {
       setToggling(prev => ({ ...prev, [id]: false }));
   };
 
+  const handleDuplicate = async (postId: number) => {
+    if (duplicatingIds.has(postId)) return;
+    setDuplicatingIds(prev => new Set(prev).add(postId));
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/duplicate`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.status === 201) {
+        await fetchAllData();
+        setNotification({
+          isOpen: true,
+          title: 'Berhasil Diduplikasi',
+          message: `Post "${res.data.title}" berhasil dibuat sebagai draft.`,
+          type: 'success'
+        });
+      }
+    } catch (err) {
+      console.error('Duplicate post failed:', err);
+      setNotification({
+        isOpen: true,
+        title: 'Gagal',
+        message: 'Gagal menduplikasi post. Silakan coba lagi.',
+        type: 'warning'
+      });
+    } finally {
+      setDuplicatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(postId);
+        return next;
+      });
+    }
+  };
+
   const renderDynamicInputs = () => {
     return (
       <div className="space-y-6">
@@ -230,6 +273,14 @@ export function Posts() {
                             </td>
                             <td className="px-8 py-6 text-right pr-10">
                                 <div className="flex justify-end gap-1.5">
+                                    <button 
+                                      onClick={() => handleDuplicate(post.id!)}
+                                      disabled={duplicatingIds.has(post.id!)}
+                                      className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title="Duplikasi Post"
+                                    >
+                                      {duplicatingIds.has(post.id!) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                                    </button>
                                     <button onClick={() => openEditor(post)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Post">
                                         <Pencil className="w-4 h-4" />
                                     </button>
@@ -403,6 +454,14 @@ export function Posts() {
             setConfirmDelete({ isOpen: false, id: null });
         }}
         onClose={() => setConfirmDelete({ isOpen: false, id: null })}
+      />
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

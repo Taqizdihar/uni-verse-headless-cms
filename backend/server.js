@@ -843,6 +843,60 @@ app.delete('/api/posts/:id', async (req, res) => {
     }
 });
 
+// --- Duplicate Post ---
+app.post('/api/posts/:id/duplicate', async (req, res) => {
+    const { id } = req.params;
+    const tid = getTenantId(req);
+
+    try {
+        // 1. Fetch original post scoped to tenant
+        const [rows] = await db.execute('SELECT * FROM posts WHERE id = ? AND tenant_id = ?', [id, tid]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Post not found' });
+
+        const original = rows[0];
+
+        // 2. Rename title
+        const newTitle = `${original.title} - Copy`;
+
+        // 3. Generate unique slug
+        let baseSlug = newTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        let finalSlug = baseSlug;
+        let suffix = 1;
+
+        while (true) {
+            const [existing] = await db.execute(
+                'SELECT id FROM posts WHERE slug = ? AND tenant_id = ?',
+                [finalSlug, tid]
+            );
+            if (existing.length === 0) break;
+            suffix++;
+            finalSlug = `${baseSlug}-${suffix}`;
+        }
+
+        // 4. Clone with clean data — status defaults to 'draft'
+        const contentStr = typeof original.content === 'object'
+            ? JSON.stringify(original.content)
+            : (original.content || '{}');
+
+        const [result] = await db.execute(
+            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [tid, newTitle, finalSlug, contentStr, original.excerpt || '', original.category || 'Berita', 'draft']
+        );
+
+        // 5. Return success with new post data
+        const [newRows] = await db.execute('SELECT * FROM posts WHERE id = ? AND tenant_id = ?', [result.insertId, tid]);
+        const newPost = newRows[0];
+        if (newPost.content && typeof newPost.content === 'string') {
+            try { newPost.content = JSON.parse(newPost.content); } catch(e) {}
+        }
+
+        res.status(201).json(newPost);
+    } catch (error) {
+        console.error('[API ERROR] Duplicate Post:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    }
+});
+
 app.patch('/api/posts/:id/status', async (req, res) => {
     const { id } = req.params;
     const tid = getTenantId(req);
