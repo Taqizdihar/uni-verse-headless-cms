@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
-import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy, ArrowUp, ArrowDown } from 'lucide-react';
 
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
@@ -38,6 +38,9 @@ export function Pages() {
   const [notification, setNotification] = useState<{ isOpen: boolean, title: string, message: string, type: 'success' | 'warning' | 'info' }>({
     isOpen: false, title: '', message: '', type: 'success'
   });
+
+  // Reorder State
+  const [reorderingIds, setReorderingIds] = useState<Set<number>>(new Set());
 
   const openMediaPickerForBlock = (blockId: string, field: string, index?: number, subIndex?: number) => {
     setPickerContext({ blockId, field, index, subIndex });
@@ -77,9 +80,9 @@ export function Pages() {
   }, [setPages]);
 
   const filteredPages = useMemo(() => {
-    return pages.filter(page => 
-      page.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return pages
+      .filter(page => page.title.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
   }, [pages, searchQuery]);
 
   const openEditor = (page: any = null) => {
@@ -154,6 +157,32 @@ export function Pages() {
     }
   };
 
+  const handleReorder = async (pageId: number, direction: 'up' | 'down') => {
+    if (reorderingIds.has(pageId)) return;
+    setReorderingIds(prev => new Set(prev).add(pageId));
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/pages/${pageId}/reorder`,
+        { direction },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Refresh list
+      const listRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPages(listRes.data);
+    } catch (err) {
+      console.error('Reorder failed:', err);
+    } finally {
+      setReorderingIds(prev => {
+        const next = new Set(prev);
+        next.delete(pageId);
+        return next;
+      });
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -215,12 +244,13 @@ export function Pages() {
                   <th scope="col" className="px-8 py-5">Tanggal</th>
                   <th scope="col" className="px-8 py-5 text-center">Tampilkan</th>
                   <th scope="col" className="px-8 py-5 text-center">Status</th>
+                  <th scope="col" className="px-8 py-5 text-center">Urutan</th>
                   <th scope="col" className="px-8 py-5 text-right pr-10">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {filteredPages.length > 0 ? (
-                  filteredPages.map((page) => (
+                  filteredPages.map((page, idx) => (
                     <tr key={page.id} className="hover:bg-zinc-50/50 transition-colors group">
                       <td className="px-8 py-6">
                         <p className="font-bold text-zinc-900 text-base leading-tight">{page.title}</p>
@@ -251,6 +281,26 @@ export function Pages() {
                             </span>
                         </div>
                       </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => handleReorder(page.id!, 'up')}
+                            disabled={idx === 0 || reorderingIds.has(page.id!)}
+                            className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Naikkan"
+                          >
+                            {reorderingIds.has(page.id!) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowUp className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => handleReorder(page.id!, 'down')}
+                            disabled={idx === filteredPages.length - 1 || reorderingIds.has(page.id!)}
+                            className="p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Turunkan"
+                          >
+                            {reorderingIds.has(page.id!) ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowDown className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-8 py-6 text-right pr-10">
                         <div className="flex items-center justify-end gap-1.5">
                           <button 
@@ -277,7 +327,7 @@ export function Pages() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-8 py-20 text-center text-zinc-400 italic">
+                    <td colSpan={6} className="px-8 py-20 text-center text-zinc-400 italic">
                         Tidak ada halaman yang cocok dengan pencarian.
                     </td>
                   </tr>

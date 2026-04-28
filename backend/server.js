@@ -608,7 +608,6 @@ app.post('/api/pages', async (req, res) => {
     const { title, slug, content, status, is_in_navbar, priority } = req.body;
     const tid = getTenantId(req);
 
-
     // Validate mandatory fields
     if (!title || !title.trim()) return res.status(400).json({ error: 'Judul halaman wajib diisi.' });
     const finalSlug = (slug || title).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -621,12 +620,19 @@ app.post('/api/pages', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
 
+        // Calculate next priority: MAX(priority) + 1 for this tenant
+        const [maxRow] = await db.execute('SELECT COALESCE(MAX(priority), -1) AS max_priority FROM pages WHERE tenant_id = ?', [tid]);
+        const nextPriority = (maxRow[0].max_priority ?? -1) + 1;
+
+        // Defaults: status = 'published', is_in_navbar = 1 (visible by default)
+        const finalStatus = status || 'published';
+        const finalNavbar = finalStatus === 'published' ? 1 : 0;
+
         // 1. Save or Update the Page
         const [result] = await db.execute(
             'INSERT INTO pages (tenant_id, title, slug, content, status, is_in_navbar, priority) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content), is_in_navbar = VALUES(is_in_navbar), priority = VALUES(priority)',
-            [tid, title.trim(), finalSlug, jsonContent, status || 'published', is_in_navbar || 0, priority || 0]
+            [tid, title.trim(), finalSlug, jsonContent, finalStatus, finalNavbar, nextPriority]
         );
-
 
         const pageId = result.insertId;
 
@@ -769,6 +775,71 @@ app.patch('/api/pages/:id/status', async (req, res) => {
     } catch (error) {
         console.error('[DATABASE ERROR]:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// --- Reorder Page (Swap Priority) ---
+app.patch('/api/pages/:id/reorder', async (req, res) => {
+    const { id } = req.params;
+    const { direction } = req.body;
+    const tid = getTenantId(req);
+
+    if (direction !== 'up' && direction !== 'down') {
+        return res.status(400).json({ error: 'Direction must be "up" or "down".' });
+    }
+
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // 1. Get the current page's priority
+        const [currentRows] = await connection.execute(
+            'SELECT id, priority FROM pages WHERE id = ? AND tenant_id = ?',
+            [id, tid]
+        );
+        if (currentRows.length === 0) {
+            await connection.rollback();
+            connection.release();
+            return res.status(404).json({ error: 'Page not found' });
+        }
+
+        const currentPage = currentRows[0];
+        const currentPriority = currentPage.priority;
+
+        // 2. Find the target neighbor
+        let targetQuery;
+        if (direction === 'up') {
+            // Find the page with the highest priority that is still less than current
+            targetQuery = 'SELECT id, priority FROM pages WHERE tenant_id = ? AND priority < ? ORDER BY priority DESC LIMIT 1';
+        } else {
+            // Find the page with the lowest priority that is still greater than current
+            targetQuery = 'SELECT id, priority FROM pages WHERE tenant_id = ? AND priority > ? ORDER BY priority ASC LIMIT 1';
+        }
+
+        const [targetRows] = await connection.execute(targetQuery, [tid, currentPriority]);
+        if (targetRows.length === 0) {
+            // Already at the boundary — nothing to swap
+            await connection.rollback();
+            connection.release();
+            return res.status(200).json({ message: 'Already at boundary, no swap needed.' });
+        }
+
+        const targetPage = targetRows[0];
+
+        // 3. Swap priorities in a single transaction
+        await connection.execute('UPDATE pages SET priority = ? WHERE id = ? AND tenant_id = ?', [targetPage.priority, currentPage.id, tid]);
+        await connection.execute('UPDATE pages SET priority = ? WHERE id = ? AND tenant_id = ?', [currentPriority, targetPage.id, tid]);
+
+        await connection.commit();
+
+        console.log(`[REORDER] Page ${currentPage.id} (pri: ${currentPriority}) ↔ Page ${targetPage.id} (pri: ${targetPage.priority})`);
+        res.json({ message: 'Pages reordered successfully' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('[API ERROR] Reorder page:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    } finally {
+        connection.release();
     }
 });
 
