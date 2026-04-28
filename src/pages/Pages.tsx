@@ -241,6 +241,7 @@ export function Pages() {
             <table className="w-full text-sm text-left border-collapse">
               <thead className="text-[10px] text-zinc-400 uppercase bg-zinc-50/50 font-black tracking-[0.2em] border-b border-zinc-100">
                 <tr>
+                  <th scope="col" className="pl-8 pr-3 py-5 w-12 text-center">No</th>
                   <th scope="col" className="px-8 py-5">Judul Halaman</th>
                   <th scope="col" className="px-8 py-5">Tanggal</th>
                   <th scope="col" className="px-8 py-5 text-center">Tampilkan</th>
@@ -262,6 +263,9 @@ export function Pages() {
                       transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                       className="hover:bg-zinc-50/50 transition-colors group"
                     >
+                      <td className="pl-8 pr-3 py-6 text-center">
+                        <span className="text-zinc-400 font-bold tabular-nums text-xs">{idx + 1}</span>
+                      </td>
                       <td className="px-8 py-6">
                         <p className="font-bold text-zinc-900 text-base leading-tight">{page.title}</p>
                         <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{page.slug}</p>
@@ -344,7 +348,7 @@ export function Pages() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <td colSpan={6} className="px-8 py-20 text-center text-zinc-400 italic">
+                    <td colSpan={7} className="px-8 py-20 text-center text-zinc-400 italic">
                         Tidak ada halaman yang cocok dengan pencarian.
                     </td>
                   </motion.tr>

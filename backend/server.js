@@ -620,9 +620,9 @@ app.post('/api/pages', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
 
-        // Calculate next priority: MAX(priority) + 1 for this tenant
-        const [maxRow] = await db.execute('SELECT COALESCE(MAX(priority), -1) AS max_priority FROM pages WHERE tenant_id = ?', [tid]);
-        const nextPriority = (maxRow[0].max_priority ?? -1) + 1;
+        // Calculate next priority: MAX(priority) + 1 for this tenant (starts at 1 for empty tables)
+        const [maxRow] = await db.execute('SELECT COALESCE(MAX(priority), 0) AS max_priority FROM pages WHERE tenant_id = ?', [tid]);
+        const nextPriority = maxRow[0].max_priority + 1;
 
         // Defaults: status = 'published', is_in_navbar = 1 (visible by default)
         const finalStatus = status || 'published';

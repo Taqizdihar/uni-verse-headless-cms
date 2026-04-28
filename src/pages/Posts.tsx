@@ -216,6 +216,7 @@ export function Posts() {
             <table className="w-full text-left border-collapse">
                 <thead className="bg-zinc-50/50 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-zinc-100">
                     <tr>
+                        <th className="pl-8 pr-3 py-5 w-12 text-center">No</th>
                         <th className="px-8 py-5">Judul Post</th>
                         <th className="px-8 py-5">Format</th>
                         <th className="px-8 py-5 text-center">Status</th>
@@ -227,6 +228,9 @@ export function Posts() {
                 <tbody className="divide-y divide-zinc-100 text-sm">
                     {posts && posts.length > 0 ? posts.map((post, idx) => (
                         <tr key={idx} className="hover:bg-zinc-50/50 transition-colors group">
+                            <td className="pl-8 pr-3 py-6 text-center">
+                                <span className="text-zinc-400 font-bold tabular-nums text-xs">{idx + 1}</span>
+                            </td>
                             <td className="px-8 py-6">
                                 <p className="font-bold text-zinc-900 text-base leading-tight">{post.title}</p>
                                 <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{post.slug}</p>
@@ -292,7 +296,7 @@ export function Posts() {
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan={6} className="px-8 py-20 text-center text-zinc-400 italic">Belum ada Post yang dibuat.</td>
+                            <td colSpan={7} className="px-8 py-20 text-center text-zinc-400 italic">Belum ada Post yang dibuat.</td>
                         </tr>
                     )}
                 </tbody>
