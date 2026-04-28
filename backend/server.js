@@ -693,12 +693,20 @@ app.post('/api/pages/:id/duplicate', async (req, res) => {
     const { id } = req.params;
     const tid = getTenantId(req);
 
+    const connection = await db.getConnection();
     try {
+        await connection.beginTransaction();
+
         // 1. Fetch original page scoped to tenant
-        const [rows] = await db.execute('SELECT * FROM pages WHERE id = ? AND tenant_id = ?', [id, tid]);
-        if (rows.length === 0) return res.status(404).json({ error: 'Page not found' });
+        const [rows] = await connection.execute('SELECT * FROM pages WHERE id = ? AND tenant_id = ?', [id, tid]);
+        if (rows.length === 0) {
+            await connection.rollback();
+            connection.release();
+            return res.status(404).json({ error: 'Page not found' });
+        }
 
         const original = rows[0];
+        const originalPriority = original.priority ?? 0;
 
         // 2. Rename title
         const newTitle = `${original.title} - Copy`;
@@ -708,9 +716,8 @@ app.post('/api/pages/:id/duplicate', async (req, res) => {
         let finalSlug = baseSlug;
         let suffix = 1;
 
-        // Check for slug collisions and increment until unique
         while (true) {
-            const [existing] = await db.execute(
+            const [existing] = await connection.execute(
                 'SELECT id FROM pages WHERE slug = ? AND tenant_id = ?',
                 [finalSlug, tid]
             );
@@ -719,27 +726,39 @@ app.post('/api/pages/:id/duplicate', async (req, res) => {
             finalSlug = `${baseSlug}-${suffix}`;
         }
 
-        // 4. Clone with clean data — status defaults to 'draft'
+        // 4. Shift priorities: push all pages with priority > P down by 1
+        await connection.execute(
+            'UPDATE pages SET priority = priority + 1 WHERE tenant_id = ? AND priority > ?',
+            [tid, originalPriority]
+        );
+
+        // 5. Insert duplicate at priority P + 1 (directly below original)
         const contentStr = typeof original.content === 'object'
             ? JSON.stringify(original.content)
             : (original.content || '{}');
 
-        const [result] = await db.execute(
+        const [result] = await connection.execute(
             'INSERT INTO pages (tenant_id, title, slug, content, status, is_in_navbar, priority) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [tid, newTitle, finalSlug, contentStr, 'draft', 0, original.priority || 0]
+            [tid, newTitle, finalSlug, contentStr, 'draft', 0, originalPriority + 1]
         );
 
-        // 5. Return the new page
+        await connection.commit();
+
+        // 6. Return the new page
         const [newRows] = await db.execute('SELECT * FROM pages WHERE id = ? AND tenant_id = ?', [result.insertId, tid]);
         const newPage = newRows[0];
         if (newPage.content && typeof newPage.content === 'string') {
             try { newPage.content = JSON.parse(newPage.content); } catch(e) {}
         }
 
+        console.log(`[DUPLICATE] Page "${original.title}" → "${newTitle}" at priority ${originalPriority + 1}`);
         res.status(201).json(newPage);
     } catch (error) {
+        await connection.rollback();
         console.error('[API ERROR] Duplicate Page:', error);
         res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    } finally {
+        connection.release();
     }
 });
 

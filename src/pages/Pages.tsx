@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
-import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy, ArrowUp, ArrowDown, CheckCircle, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useSearch } from '../context/SearchContext';
@@ -282,13 +282,15 @@ export function Pages() {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex justify-center">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            page.status === 'published' 
-                                ? 'bg-green-100 text-green-700 border-green-200' 
-                                : 'bg-zinc-100 text-zinc-500 border-zinc-200'
-                            }`}>
-                            {page.status === 'published' ? 'DITERBITKAN' : 'DISEMBUNYIKAN'}
-                            </span>
+                            {page.status === 'published' ? (
+                                <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-200">
+                                    <CheckCircle className="w-3 h-3" /> DITERBITKAN
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-zinc-200">
+                                    <EyeOff className="w-3 h-3" /> DISEMBUNYIKAN
+                                </span>
+                            )}
                         </div>
                       </td>
                       <td className="px-8 py-6">
