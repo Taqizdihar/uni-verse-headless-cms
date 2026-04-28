@@ -749,14 +749,22 @@ app.patch('/api/pages/:id/status', async (req, res) => {
         return res.status(400).json({ error: 'Invalid status. Must be strictly "published" or "draft".' });
     }
 
+    // Sync is_in_navbar with status: published → 1, draft → 0
+    const isInNavbar = status === 'published' ? 1 : 0;
+
     try {
-        // ✅ SECURITY FIX: Scope update to the authenticated tenant
-        const [result] = await db.execute('UPDATE pages SET status = ? WHERE id = ? AND tenant_id = ?', [status, id, tid]);
+        // ✅ Single atomic query: update both status and is_in_navbar together
+        const [result] = await db.execute(
+            'UPDATE pages SET status = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
+            [status, isInNavbar, id, tid]
+        );
         
         if (result.affectedRows === 0) {
             console.warn('[WARN]: No row updated. Check if ID exists or belongs to this tenant.');
             return res.status(404).json({ message: 'Page not found or access denied' });
         }
+
+        console.log(`[TOGGLE] Page ${id} → status: ${status}, is_in_navbar: ${isInNavbar}`);
         res.json({ message: 'Status updated successfully' });
     } catch (error) {
         console.error('[DATABASE ERROR]:', error);
