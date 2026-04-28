@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCMS } from '../context/CMSContext';
-import { Save, Globe, Mail, CheckCircle2, Eye, EyeOff, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw, BookOpen } from 'lucide-react';
+import { Save, Globe, Mail, CheckCircle2, Eye, EyeOff, X, Image as ImageIcon, LayoutTemplate, MapPin, Phone, Link as LinkIcon, Plus, Trash, Key, Copy, RefreshCw, BookOpen, Check, ShieldCheck, ExternalLink } from 'lucide-react';
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
@@ -31,6 +31,29 @@ export function Settings() {
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notification, setNotification] = useState({ title: '', message: '', type: 'success' as 'success' | 'warning' | 'info' });
+  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
+
+  // ─── Centralized Public Endpoint Definitions ──────────────────────
+  const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
+
+  const PUBLIC_ENDPOINTS = [
+    { name: 'Health',        method: 'GET',  path: '/api/v1/health',                     auth: false, desc: 'Cek status server.' },
+    { name: 'Settings',      method: 'GET',  path: '/api/v1/public/settings',            auth: true,  desc: 'Metadata & konfigurasi situs.' },
+    { name: 'Navigation',    method: 'GET',  path: '/api/v1/public/navigation',          auth: true,  desc: 'Data menu navigasi.' },
+    { name: 'Pages List',    method: 'GET',  path: '/api/v1/public/pages',               auth: true,  desc: 'Daftar halaman (terbit).' },
+    { name: 'Page Detail',   method: 'GET',  path: '/api/v1/public/pages/:slug',         auth: true,  desc: 'Detail halaman berdasarkan slug.' },
+    { name: 'Posts List',    method: 'GET',  path: '/api/v1/public/posts',               auth: true,  desc: 'Daftar post (terbit).' },
+    { name: 'Post Detail',   method: 'GET',  path: '/api/v1/public/posts/:slug',         auth: true,  desc: 'Detail post berdasarkan slug.' },
+    { name: 'Get Comments',  method: 'GET',  path: '/api/v1/public/posts/:id/comments',  auth: true,  desc: 'Komentar untuk sebuah post.' },
+    { name: 'Post Comment',  method: 'POST', path: '/api/v1/public/posts/:id/comments',  auth: true,  desc: 'Kirim komentar baru.' },
+  ];
+
+  const copyEndpointUrl = (path: string) => {
+    const fullUrl = `${PRODUCTION_BASE_URL}${path}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopiedEndpoint(path);
+    setTimeout(() => setCopiedEndpoint(null), 2000);
+  };
 
   useEffect(() => {
     // Fetch API Key
@@ -347,33 +370,118 @@ export function Settings() {
                     </div>
 
                     <div className="mt-8 pt-8 border-t border-zinc-100">
-                        <h4 className="text-sm font-bold text-zinc-900 mb-4 flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-zinc-900 mb-1 flex items-center gap-2">
                             <BookOpen className="w-4 h-4 text-amber-500" />
                             Dokumentasi API Publik
                         </h4>
-                        
-                        <div className="bg-zinc-900 rounded-xl p-5 font-mono text-xs text-zinc-300 space-y-4 shadow-inner">
-                            <div>
-                                <span className="text-amber-400 font-bold block mb-1">Base URL:</span>
-                                <code className="bg-black/50 px-2 py-1 rounded select-all break-all">https://uni-verse-headless-cms.onrender.com/api/v1/public</code>
-                            </div>
-                            
-                            <div>
-                                <span className="text-amber-400 font-bold block mb-1">Endpoints Tersedia:</span>
-                                <ul className="space-y-1 list-disc list-inside">
-                                    <li><code className="bg-black/50 px-1 rounded">GET /posts</code> - Daftar post (terbit).</li>
-                                    <li><code className="bg-black/50 px-1 rounded">GET /pages</code> - Daftar halaman (terbit).</li>
-                                    <li><code className="bg-black/50 px-1 rounded">GET /settings</code> - Metadata situs.</li>
-                                </ul>
-                            </div>
+                        <p className="text-zinc-400 text-xs font-medium mb-5">Referensi lengkap endpoint yang tersedia untuk aplikasi frontend Anda.</p>
 
-                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mt-4">
-                                <span className="text-blue-400 font-bold block mb-1">Penting: Header Autentikasi</span>
-                                <p className="text-zinc-400">Sertakan header berikut di setiap request API:</p>
-                                <code className="block mt-2 bg-black/50 p-2 rounded text-blue-300">
-                                    x-api-key: [API_KEY_ANDA]
-                                </code>
+                        {/* Authentication Reminder */}
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5 mb-5">
+                            <div className="flex items-start gap-3">
+                                <div className="w-9 h-9 bg-blue-500/10 flex items-center justify-center rounded-xl flex-shrink-0 mt-0.5">
+                                    <ShieldCheck className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-blue-900 mb-1">Header Autentikasi Diperlukan</p>
+                                    <p className="text-xs text-blue-700/80 leading-relaxed mb-3">
+                                        Semua endpoint (kecuali <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono text-[10px]">/health</code>) memerlukan header <code className="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono text-[10px]">x-api-key</code>.
+                                    </p>
+                                    <div className="bg-zinc-900 rounded-lg px-4 py-2.5 font-mono text-xs flex items-center justify-between gap-3">
+                                        <code className="text-blue-300 truncate">x-api-key: <span className="text-amber-400">{apiKey ? (isKeyVisible ? apiKey : '••••••••••••••••') : 'YOUR_API_KEY'}</span></code>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(`x-api-key: ${apiKey}`);
+                                                setNotification({ title: 'Disalin', message: 'Header autentikasi berhasil disalin.', type: 'success' });
+                                                setIsNotificationOpen(true);
+                                            }}
+                                            className="text-zinc-500 hover:text-white transition-colors flex-shrink-0"
+                                            title="Salin Header"
+                                        >
+                                            <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Base URL */}
+                        <div className="bg-zinc-900 rounded-xl px-5 py-3.5 mb-4 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">Production Base URL</span>
+                                <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => { navigator.clipboard.writeText(PRODUCTION_BASE_URL); setCopiedEndpoint('__base__'); setTimeout(() => setCopiedEndpoint(null), 2000); }}
+                                className={`flex-shrink-0 p-2.5 rounded-xl transition-all ${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
+                                title="Salin Base URL"
+                            >
+                                {copiedEndpoint === '__base__' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
+
+                        {/* Endpoint List */}
+                        <div className="space-y-2">
+                            {PUBLIC_ENDPOINTS.map((ep) => {
+                                const fullUrl = `${PRODUCTION_BASE_URL}${ep.path}`;
+                                const isCopied = copiedEndpoint === ep.path;
+                                return (
+                                    <div
+                                        key={`${ep.method}-${ep.path}`}
+                                        className="group bg-zinc-900 rounded-xl border border-zinc-800/60 hover:border-zinc-700 transition-all overflow-hidden"
+                                    >
+                                        <div className="flex items-center gap-3 px-4 py-3">
+                                            {/* Method Badge */}
+                                            <span className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                                ep.method === 'POST'
+                                                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                                                    : 'bg-sky-500/15 text-sky-400 border border-sky-500/20'
+                                            }`}>
+                                                {ep.method}
+                                            </span>
+
+                                            {/* URL */}
+                                            <div className="flex-1 min-w-0">
+                                                <code className="font-mono text-xs text-zinc-300 break-all leading-relaxed select-all">{fullUrl}</code>
+                                            </div>
+
+                                            {/* Auth Badge */}
+                                            {ep.auth ? (
+                                                <span className="flex-shrink-0 hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/15">
+                                                    <Key className="w-2.5 h-2.5" /> Key
+                                                </span>
+                                            ) : (
+                                                <span className="flex-shrink-0 hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/15">
+                                                    Public
+                                                </span>
+                                            )}
+
+                                            {/* Copy Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => copyEndpointUrl(ep.path)}
+                                                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                                                    isCopied
+                                                        ? 'bg-green-500/20 text-green-400'
+                                                        : 'bg-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-700 active:scale-95'
+                                                }`}
+                                                title={isCopied ? 'Disalin!' : 'Salin URL'}
+                                            >
+                                                {isCopied ? <><Check className="w-3.5 h-3.5" /> <span>Copied!</span></> : <><Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy</span></>}
+                                            </button>
+                                        </div>
+
+                                        {/* Description Row */}
+                                        <div className="px-4 pb-3 flex items-center gap-2">
+                                            <span className="text-[11px] text-zinc-500 font-medium">{ep.name}</span>
+                                            <span className="text-zinc-700">·</span>
+                                            <span className="text-[11px] text-zinc-600">{ep.desc}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </Card>
