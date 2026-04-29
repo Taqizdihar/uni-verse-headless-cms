@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical, X } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical, X, LayoutTemplate, UserSquare, GalleryHorizontal, Newspaper, Type, Phone, HelpCircle, Quote, Users, Aperture, MousePointerClick, Star, Briefcase } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 
 export interface Block {
@@ -561,6 +561,25 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
 
   const getBlockLabel = (type: string) => BLOCK_TYPES.find(b => b.id === type)?.label || type;
 
+  const getBlockIcon = (typeId: string) => {
+    switch (typeId) {
+      case 'hero': return <LayoutTemplate className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'profile-tabs': return <UserSquare className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'activity-slider': return <GalleryHorizontal className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'dynamic-post-feed': return <Newspaper className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'rich-text': return <Type className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'contacts': return <Phone className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'features': return <Star className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'faq': return <HelpCircle className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'testimonials': return <Quote className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'partners': return <Briefcase className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'team': return <Users className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'gallery': return <Aperture className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      case 'cta-banner': return <MousePointerClick className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+      default: return <Plus className="w-6 h-6 text-zinc-400 group-hover:text-amber-600 transition-colors" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -635,7 +654,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                     className="flex flex-col items-center p-4 text-center border-2 border-zinc-100 hover:border-amber-400 hover:bg-amber-50 rounded-2xl transition-all group"
                   >
                     <div className="w-14 h-14 bg-zinc-100 group-hover:bg-amber-100 rounded-xl flex items-center justify-center mb-3 transition-colors">
-                      <Plus className="w-6 h-6 text-zinc-400 group-hover:text-amber-600" />
+                      {getBlockIcon(type.id)}
                     </div>
                     <span className="text-sm font-bold text-zinc-700 group-hover:text-amber-700">
                       {type.label}

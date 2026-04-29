@@ -14,7 +14,8 @@ import {
   Loader2,
   Trash2,
   Edit2,
-  Check
+  Check,
+  Eye
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -192,12 +193,15 @@ export function Media() {
         }>
             {media.map((m: any, idx) => (
               <div key={m.id || idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
-                <div className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0`}>
+                <div 
+                  className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 cursor-pointer group/preview`}
+                  onClick={() => window.open(m.file_url || m.url, '_blank')}
+                >
                   {(m.file_type || '').startsWith('image/') ? (
                     <img 
                       src={m.file_url || m.url} 
                       alt={m.file_name || m.filename} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" 
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Corrupt+Asset';
                       }}
@@ -207,9 +211,16 @@ export function Media() {
                       <FileIcon className="w-10 h-10 text-zinc-200" />
                     </div>
                   )}
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
+                      <Eye className="w-6 h-6 mb-1" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 transition-opacity duration-300 group-hover:opacity-90">
                   <div className="flex items-center justify-between gap-2">
                     {editingId === m.id ? (
                       <div className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1">
