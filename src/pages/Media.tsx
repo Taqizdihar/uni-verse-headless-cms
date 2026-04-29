@@ -53,13 +53,23 @@ export function Media() {
     fetchMedia();
   }, [setMedia]);
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      const isImage = file.type.startsWith('image/');
+      const maxSizeMB = isImage ? 2 : 10;
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+      if (file.size > maxSizeBytes) {
+        setUploadError(`Ukuran file terlalu besar. Maksimal ${maxSizeMB} MB untuk jenis file ini.`);
+      }
+      setSelectedFile(file);
     }
   };
-
-  const [isUploading, setIsUploading] = useState(false);
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -136,32 +146,40 @@ export function Media() {
                 </button>
             </div>
 
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
             {selectedFile ? (
-                <div className="flex items-center gap-3 bg-white p-1 pr-4 border border-amber-400 rounded-xl shadow-lg animate-in slide-in-from-right-2">
-                    <span className="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase truncate max-w-[120px]">{selectedFile.name}</span>
-                    <button 
-                        onClick={handleUpload} 
-                        disabled={isUploading}
-                        className="bg-zinc-900 text-amber-400 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-black transition-all flex items-center gap-2 disabled:opacity-50"
-                    >
-                        {isUploading ? (
-                            <>
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                Memproses...
-                            </>
-                        ) : 'Unggah'}
-                    </button>
-                    <button onClick={() => setSelectedFile(null)} className="text-zinc-400 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
+                <div className="flex flex-col items-end gap-1">
+                  <div className={`flex items-center gap-3 bg-white p-1 pr-4 border ${uploadError ? 'border-red-400' : 'border-amber-400'} rounded-xl shadow-lg animate-in slide-in-from-right-2`}>
+                      <span className={`${uploadError ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'} px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase truncate max-w-[120px]`}>{selectedFile.name}</span>
+                      <button 
+                          onClick={handleUpload} 
+                          disabled={isUploading || !!uploadError}
+                          className="bg-zinc-900 text-amber-400 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-black transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                          {isUploading ? (
+                              <>
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  Memproses...
+                              </>
+                          ) : 'Unggah'}
+                      </button>
+                      <button onClick={() => { setSelectedFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} className="text-zinc-400 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
+                  </div>
+                  {uploadError && <span className="text-xs font-bold text-red-500 animate-in fade-in">{uploadError}</span>}
                 </div>
             ) : (
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
-                >
-                  <Plus className="w-5 h-5 stroke-[3]" />
-                  Unggah Baru
-                </button>
+                <div className="relative group">
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
+                  >
+                    <Plus className="w-5 h-5 stroke-[3]" />
+                    Unggah Baru
+                  </button>
+                  <div className="absolute top-full right-0 mt-2 w-max max-w-xs p-2 bg-zinc-900 text-white text-xs font-medium rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                    Batas Unggah: Gambar (Maks 2MB), Video & Dokumen (Maks 10MB)
+                  </div>
+                </div>
             )}
         </div>
       </div>
@@ -267,6 +285,7 @@ export function Media() {
             >
                 Buka Panel Unggah
             </button>
+            <p className="text-xs text-zinc-400 mt-4">Batas Unggah: Gambar (Maks 2MB), Video & Dokumen (Maks 10MB)</p>
         </div>
       )}
       {/* Confirmation Modal */}

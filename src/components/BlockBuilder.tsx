@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical, X } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
 
 export interface Block {
@@ -607,7 +607,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
       <div className="relative flex justify-center">
         <button 
           type="button"
-          onClick={() => setShowMenu(!showMenu)}
+          onClick={() => setShowMenu(true)}
           className="flex items-center gap-2 bg-zinc-900 text-white px-6 py-3.5 rounded-full font-bold text-sm shadow-xl shadow-zinc-900/20 hover:scale-105 transition-all"
         >
           <Plus className="w-5 h-5" />
@@ -615,18 +615,35 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
         </button>
 
         {showMenu && (
-          <div className="absolute bottom-full mb-3 mt-0 p-2 bg-white border border-zinc-100 shadow-2xl rounded-2xl w-64 animate-in zoom-in-95 origin-bottom z-50 flex flex-col items-center">
-            <div className="w-full text-[10px] font-black text-zinc-400 uppercase tracking-widest px-3 py-2 border-b border-zinc-100 mb-1">Select Block Type</div>
-            {BLOCK_TYPES.map(type => (
-              <button
-                key={type.id}
-                type="button"
-                onClick={() => addBlock(type.id as any)}
-                className="w-full text-left px-3 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-amber-50 hover:text-amber-700 rounded-xl transition-colors"
-              >
-                {type.label}
-              </button>
-            ))}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowMenu(false)}>
+            <div className="bg-white rounded-3xl p-6 w-full max-w-3xl shadow-2xl animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-zinc-900">Add New Block</h3>
+                  <p className="text-sm text-zinc-500">Select a block type to add to your page</p>
+                </div>
+                <button type="button" onClick={() => setShowMenu(false)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto pr-2 pb-4">
+                {BLOCK_TYPES.map(type => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => addBlock(type.id as any)}
+                    className="flex flex-col items-center p-4 text-center border-2 border-zinc-100 hover:border-amber-400 hover:bg-amber-50 rounded-2xl transition-all group"
+                  >
+                    <div className="w-14 h-14 bg-zinc-100 group-hover:bg-amber-100 rounded-xl flex items-center justify-center mb-3 transition-colors">
+                      <Plus className="w-6 h-6 text-zinc-400 group-hover:text-amber-600" />
+                    </div>
+                    <span className="text-sm font-bold text-zinc-700 group-hover:text-amber-700">
+                      {type.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
