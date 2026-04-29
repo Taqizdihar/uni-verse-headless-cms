@@ -263,10 +263,12 @@ export function Media() {
                   </div>
                   <div className="flex items-center gap-2 mt-1">
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                        {m.file_size ? `${(m.file_size / (1024 * 1024)).toFixed(2)} MB` : '0.0MB'}
+                        {m.file_type ? m.file_type.split('/').pop()?.toUpperCase() : 'UNKNOWN'}
                       </p>
                       <span className="text-zinc-200">|</span>
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{m.date || 'Hari Ini'}</p>
+                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                        {m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (m.date || 'HARI INI')}
+                      </p>
                   </div>
                 </div>
               </div>

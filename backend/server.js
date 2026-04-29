@@ -620,13 +620,11 @@ app.post('/api/pages', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
 
-        // Defaults: status = 'published', is_in_navbar syncs with status
-        const finalStatus = status || 'published';
-        const finalNavbar = finalStatus === 'published' ? 1 : 0;
+        // Defaults: is_in_navbar syncs with status
 
         // Check if a page with this slug already exists for this tenant
         const [existingRows] = await db.execute(
-            'SELECT id FROM pages WHERE slug = ? AND tenant_id = ?',
+            'SELECT id, status FROM pages WHERE slug = ? AND tenant_id = ?',
             [finalSlug, tid]
         );
 
@@ -635,11 +633,17 @@ app.post('/api/pages', async (req, res) => {
         if (existingRows.length > 0) {
             // UPDATE existing page — strictly preserve priority
             pageId = existingRows[0].id;
+            const currentStatus = status || existingRows[0].status || 'published';
+            const finalNavbar = currentStatus === 'published' ? 1 : 0;
+            
             await db.execute(
                 'UPDATE pages SET title = ?, content = ?, status = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
-                [title.trim(), jsonContent, finalStatus, finalNavbar, pageId, tid]
+                [title.trim(), jsonContent, currentStatus, finalNavbar, pageId, tid]
             );
         } else {
+            const finalStatus = status || 'published';
+            const finalNavbar = finalStatus === 'published' ? 1 : 0;
+
             // INSERT new page — calculate next priority (1-based, gapless)
             const [maxRow] = await db.execute(
                 'SELECT COALESCE(MAX(priority), 0) + 1 AS nextPriority FROM pages WHERE tenant_id = ?',
@@ -668,7 +672,7 @@ app.post('/api/pages', async (req, res) => {
 });
 
 app.put('/api/pages/:id', async (req, res) => {
-    const { title, slug, content, is_in_navbar } = req.body;
+    const { title, slug, content, status } = req.body;
     const { id } = req.params;
     const tid = getTenantId(req);
 
@@ -677,6 +681,16 @@ app.put('/api/pages/:id', async (req, res) => {
     const finalSlug = (slug || title).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
     try {
+        let currentStatus = status;
+        if (!currentStatus) {
+            const [rows] = await db.execute('SELECT status FROM pages WHERE id = ? AND tenant_id = ?', [id, tid]);
+            if (rows.length === 0) return res.status(404).json({ error: 'Page not found' });
+            currentStatus = rows[0].status;
+        }
+
+        const finalStatus = currentStatus || 'published';
+        const finalNavbar = finalStatus === 'published' ? 1 : 0;
+
         // Safely serialize content — default to '{}' if missing
         let jsonContent = '{}';
         if (content !== undefined && content !== null) {
@@ -686,8 +700,8 @@ app.put('/api/pages/:id', async (req, res) => {
         // ✅ Priority is intentionally EXCLUDED from this query.
         // Priority must only change via the dedicated reorder endpoint.
         await db.execute(
-            'UPDATE pages SET title = ?, slug = ?, content = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
-            [title.trim(), finalSlug, jsonContent, is_in_navbar ?? 1, id, tid]
+            'UPDATE pages SET title = ?, slug = ?, content = ?, status = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
+            [title.trim(), finalSlug, jsonContent, finalStatus, finalNavbar, id, tid]
         );
 
         res.json({ message: 'Page updated successfully' });
