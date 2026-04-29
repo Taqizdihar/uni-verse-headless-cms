@@ -116,6 +116,38 @@ router.get('/posts', async (req, res) => {
 });
 
 // =============================================================
+// GET /posts/:slug — Get a single published post by slug
+// =============================================================
+router.get('/posts/:slug', async (req, res) => {
+    try {
+        const tenantId = req.publicTenantId;
+        const { slug } = req.params;
+
+        const [rows] = await db.execute(
+            "SELECT * FROM posts WHERE tenant_id = ? AND slug = ? AND status = 'published' LIMIT 1",
+            [tenantId, slug]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Post not found.' });
+        }
+
+        const post = rows[0];
+        if (post.featured_image) {
+            post.featured_image = normalizeUrl(post.featured_image);
+        }
+        if (post.content) {
+            post.content = normalizeContentImages(post.content);
+        }
+
+        res.json(post);
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Get single post:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
 // POST /posts/:post_id/comments — Submit a new comment
 // =============================================================
 // Inserts a comment with status 'pending' (requires moderation).
