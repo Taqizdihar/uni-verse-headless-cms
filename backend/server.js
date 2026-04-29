@@ -605,7 +605,7 @@ app.get('/api/pages/:id', async (req, res) => {
 });
 
 app.post('/api/pages', async (req, res) => {
-    const { title, slug, content, status, is_in_navbar, priority } = req.body;
+    const { title, slug, content, status } = req.body;
     const tid = getTenantId(req);
 
     // Validate mandatory fields
@@ -620,27 +620,45 @@ app.post('/api/pages', async (req, res) => {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
 
-        // Calculate next priority: MAX(priority) + 1 for this tenant (starts at 1 for empty tables)
-        const [maxRow] = await db.execute('SELECT COALESCE(MAX(priority), 0) AS max_priority FROM pages WHERE tenant_id = ?', [tid]);
-        const nextPriority = maxRow[0].max_priority + 1;
-
-        // Defaults: status = 'published', is_in_navbar = 1 (visible by default)
+        // Defaults: status = 'published', is_in_navbar syncs with status
         const finalStatus = status || 'published';
         const finalNavbar = finalStatus === 'published' ? 1 : 0;
 
-        // 1. Save or Update the Page
-        const [result] = await db.execute(
-            'INSERT INTO pages (tenant_id, title, slug, content, status, is_in_navbar, priority) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), content = VALUES(content), is_in_navbar = VALUES(is_in_navbar), priority = VALUES(priority)',
-            [tid, title.trim(), finalSlug, jsonContent, finalStatus, finalNavbar, nextPriority]
+        // Check if a page with this slug already exists for this tenant
+        const [existingRows] = await db.execute(
+            'SELECT id FROM pages WHERE slug = ? AND tenant_id = ?',
+            [finalSlug, tid]
         );
 
-        const pageId = result.insertId;
+        let pageId;
 
-        // 2. Layout Sync
-        await db.execute(
-            "INSERT IGNORE INTO layouts (tenant_id, page_identifier, blocks_order) VALUES (?, ?, '[]')",
-            [tid, 'index']
-        );
+        if (existingRows.length > 0) {
+            // UPDATE existing page — strictly preserve priority
+            pageId = existingRows[0].id;
+            await db.execute(
+                'UPDATE pages SET title = ?, content = ?, status = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
+                [title.trim(), jsonContent, finalStatus, finalNavbar, pageId, tid]
+            );
+        } else {
+            // INSERT new page — calculate next priority (1-based, gapless)
+            const [maxRow] = await db.execute(
+                'SELECT COALESCE(MAX(priority), 0) + 1 AS nextPriority FROM pages WHERE tenant_id = ?',
+                [tid]
+            );
+            const nextPriority = maxRow[0].nextPriority;
+
+            const [result] = await db.execute(
+                'INSERT INTO pages (tenant_id, title, slug, content, status, is_in_navbar, priority) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [tid, title.trim(), finalSlug, jsonContent, finalStatus, finalNavbar, nextPriority]
+            );
+            pageId = result.insertId;
+
+            // Layout Sync (only for new pages)
+            await db.execute(
+                "INSERT IGNORE INTO layouts (tenant_id, page_identifier, blocks_order) VALUES (?, ?, '[]')",
+                [tid, 'index']
+            );
+        }
 
         res.status(201).json({ message: 'Page saved successfully', id: pageId });
     } catch (error) {
@@ -650,10 +668,9 @@ app.post('/api/pages', async (req, res) => {
 });
 
 app.put('/api/pages/:id', async (req, res) => {
-    const { title, slug, content, is_in_navbar, priority } = req.body;
+    const { title, slug, content, is_in_navbar } = req.body;
     const { id } = req.params;
     const tid = getTenantId(req);
-
 
     // Validate mandatory fields
     if (!title || !title.trim()) return res.status(400).json({ error: 'Judul halaman wajib diisi.' });
@@ -665,9 +682,12 @@ app.put('/api/pages/:id', async (req, res) => {
         if (content !== undefined && content !== null) {
             jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
         }
+
+        // ✅ Priority is intentionally EXCLUDED from this query.
+        // Priority must only change via the dedicated reorder endpoint.
         await db.execute(
-            'UPDATE pages SET title = ?, slug = ?, content = ?, is_in_navbar = ?, priority = ? WHERE id = ? AND tenant_id = ?',
-            [title.trim(), finalSlug, jsonContent, is_in_navbar || 0, priority || 0, id, tid]
+            'UPDATE pages SET title = ?, slug = ?, content = ?, is_in_navbar = ? WHERE id = ? AND tenant_id = ?',
+            [title.trim(), finalSlug, jsonContent, is_in_navbar ?? 1, id, tid]
         );
 
         res.json({ message: 'Page updated successfully' });
