@@ -440,6 +440,36 @@ export function Pages() {
                                                 newActivities[index] = { ...newActivities[index], image: mediaUrl };
                                                 return { ...block, data: { ...block.data, activities: newActivities } };
                                             }
+
+                                            if (field === 'features_icon' && typeof index === 'number') {
+                                                const newItems = [...(block.data.items || [])];
+                                                newItems[index] = { ...newItems[index], icon_url: mediaUrl };
+                                                return { ...block, data: { ...block.data, items: newItems } };
+                                            }
+
+                                            if (field === 'testimonial_image' && typeof index === 'number') {
+                                                const newItems = [...(block.data.items || [])];
+                                                newItems[index] = { ...newItems[index], author_image: mediaUrl };
+                                                return { ...block, data: { ...block.data, items: newItems } };
+                                            }
+
+                                            if (field === 'partner_logo' && typeof index === 'number') {
+                                                const newLogos = [...(block.data.logos || [])];
+                                                newLogos[index] = { ...newLogos[index], logo_url: mediaUrl };
+                                                return { ...block, data: { ...block.data, logos: newLogos } };
+                                            }
+
+                                            if (field === 'team_photo' && typeof index === 'number') {
+                                                const newMembers = [...(block.data.members || [])];
+                                                newMembers[index] = { ...newMembers[index], photo_url: mediaUrl };
+                                                return { ...block, data: { ...block.data, members: newMembers } };
+                                            }
+
+                                            if (field === 'gallery_image' && typeof index === 'number') {
+                                                const newImages = [...(block.data.images || [])];
+                                                newImages[index] = { ...newImages[index], url: mediaUrl };
+                                                return { ...block, data: { ...block.data, images: newImages } };
+                                            }
                                             
                                             return { ...block, data: { ...block.data, [field]: mediaUrl } };
                                         }));

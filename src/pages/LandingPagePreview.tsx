@@ -119,14 +119,152 @@ export function LandingPagePreview() {
     );
   };
 
-  const renderBlock = (block: any) => {
+  const renderBlock = (block: any, idx: number) => {
+    const d = block.data || {};
     switch (block.type) {
       case 'hero':
-        return <HeroSection key="hero" content={getPageContent('home')} />;
+        return <HeroSection key={`hero-${idx}`} content={getPageContent('home')} />;
       case 'contact':
-        return <ContactSection key="contact" content={getPageContent('contact')} />;
+        return <ContactSection key={`contact-${idx}`} content={getPageContent('contact')} />;
       case 'profile':
-        return <AboutSection key="profile" content={getPageContent('profile')} />;
+        return <AboutSection key={`profile-${idx}`} content={getPageContent('profile')} />;
+
+      case 'contacts':
+        return (
+          <section key={`contacts-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-6">{d.title || 'Contact Us'}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {(d.phone_numbers || []).length > 0 && (
+                <div><Phone className="w-5 h-5 mb-2 text-indigo-500" /><p className="font-bold text-xs uppercase text-gray-400 mb-1">Phone</p>{d.phone_numbers.map((p: string, i: number) => <p key={i} className="text-sm">{p}</p>)}</div>
+              )}
+              {(d.emails || []).length > 0 && (
+                <div><Mail className="w-5 h-5 mb-2 text-indigo-500" /><p className="font-bold text-xs uppercase text-gray-400 mb-1">Email</p>{d.emails.map((e: string, i: number) => <p key={i} className="text-sm">{e}</p>)}</div>
+              )}
+              {(d.addresses || []).length > 0 && (
+                <div><MapPin className="w-5 h-5 mb-2 text-indigo-500" /><p className="font-bold text-xs uppercase text-gray-400 mb-1">Address</p>{d.addresses.map((a: string, i: number) => <p key={i} className="text-sm">{a}</p>)}</div>
+              )}
+            </div>
+            {d.working_hours && <p className="mt-4 text-sm text-gray-500">🕒 {d.working_hours}</p>}
+          </section>
+        );
+
+      case 'features':
+        return (
+          <section key={`features-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-2">{d.title || 'Features'}</h2>
+            {d.subtitle && <p className="text-gray-500 mb-8">{d.subtitle}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {(d.items || []).map((item: any, i: number) => (
+                <div key={i} className="p-6 rounded-2xl border border-gray-200 text-center">
+                  {item.icon_url && <img src={item.icon_url} alt="" className="w-12 h-12 mx-auto mb-4 object-contain" />}
+                  <h3 className="font-bold mb-2">{item.title || 'Feature'}</h3>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'faq':
+        return (
+          <section key={`faq-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-2">{d.title || 'FAQ'}</h2>
+            {d.subtitle && <p className="text-gray-500 mb-8">{d.subtitle}</p>}
+            <div className="space-y-4 max-w-3xl">
+              {(d.items || []).map((item: any, i: number) => (
+                <div key={i} className="p-5 rounded-xl border border-gray-200">
+                  <h4 className="font-bold mb-2">{item.question || 'Question'}</h4>
+                  <p className="text-sm text-gray-500">{item.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'testimonials':
+        return (
+          <section key={`testimonials-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-8">{d.title || 'Testimonials'}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(d.items || []).map((item: any, i: number) => (
+                <div key={i} className="p-6 rounded-2xl border border-gray-200">
+                  <p className="text-sm italic text-gray-600 mb-4">"{item.content}"</p>
+                  <div className="flex items-center gap-3">
+                    {item.author_image && <img src={item.author_image} alt="" className="w-10 h-10 rounded-full object-cover" />}
+                    <div>
+                      <p className="font-bold text-sm">{item.author_name}</p>
+                      <p className="text-xs text-gray-400">{item.author_role}</p>
+                    </div>
+                    {item.rating && <span className="ml-auto text-amber-500 text-sm">{'★'.repeat(item.rating)}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'partners':
+        return (
+          <section key={`partners-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-8 text-center">{d.title || 'Our Partners'}</h2>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              {(d.logos || []).map((logo: any, i: number) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  {logo.logo_url ? <img src={logo.logo_url} alt={logo.partner_name || ''} className="h-16 object-contain" /> : <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400">Logo</div>}
+                  {logo.partner_name && <span className="text-xs font-bold text-gray-500">{logo.partner_name}</span>}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'team':
+        return (
+          <section key={`team-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-2">{d.title || 'Our Team'}</h2>
+            {d.subtitle && <p className="text-gray-500 mb-8">{d.subtitle}</p>}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {(d.members || []).map((m: any, i: number) => (
+                <div key={i} className="text-center">
+                  {m.photo_url ? <img src={m.photo_url} alt={m.name || ''} className="w-24 h-24 rounded-full object-cover mx-auto mb-3" /> : <div className="w-24 h-24 rounded-full bg-gray-100 mx-auto mb-3" />}
+                  <p className="font-bold text-sm">{m.name || 'Name'}</p>
+                  <p className="text-xs text-gray-400">{m.role}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'gallery':
+        return (
+          <section key={`gallery-${idx}`} className={sectionClasses}>
+            <h2 className="text-3xl font-bold mb-2">{d.title || 'Gallery'}</h2>
+            {d.subtitle && <p className="text-gray-500 mb-8">{d.subtitle}</p>}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {(d.images || []).map((img: any, i: number) => (
+                <div key={i} className="rounded-xl overflow-hidden">
+                  {img.url ? <img src={img.url} alt={img.alt_text || ''} className="w-full aspect-square object-cover" /> : <div className="w-full aspect-square bg-gray-100 flex items-center justify-center text-gray-300">No image</div>}
+                  {img.caption && <p className="text-xs text-gray-500 mt-2 text-center">{img.caption}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'cta-banner':
+        return (
+          <section key={`cta-${idx}`} className="relative py-20 px-6 text-center overflow-hidden" style={{ backgroundColor: d.background_color || '#000' }}>
+            {d.background_image_url && <img src={d.background_image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />}
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <h2 className="text-4xl font-black text-white mb-4">{d.headline || 'Ready to Start?'}</h2>
+              {d.sub_headline && <p className="text-white/70 mb-8">{d.sub_headline}</p>}
+              {d.button_text && (
+                <a href={d.button_link || '#'} className="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity">{d.button_text}</a>
+              )}
+            </div>
+          </section>
+        );
+
       default:
         return null;
     }
