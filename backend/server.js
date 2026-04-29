@@ -811,7 +811,36 @@ app.patch('/api/pages/:id/reorder', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        // 1. Get the current page's priority
+        // 0. Cleanup & Re-index: detect duplicate or zero-priority collisions
+        //    If any pages share the same priority value, re-index all pages for this
+        //    tenant to a clean, gapless 1-based sequence before attempting the swap.
+        const [collisionCheck] = await connection.execute(
+            'SELECT priority, COUNT(*) AS cnt FROM pages WHERE tenant_id = ? GROUP BY priority HAVING cnt > 1',
+            [tid]
+        );
+        const [zeroCheck] = await connection.execute(
+            'SELECT id FROM pages WHERE tenant_id = ? AND (priority IS NULL OR priority < 1) LIMIT 1',
+            [tid]
+        );
+
+        if (collisionCheck.length > 0 || zeroCheck.length > 0) {
+            console.log(`[REORDER] Priority collision or zero-value detected for tenant ${tid}. Running re-index...`);
+            // Fetch all pages ordered by current priority (then by id as tiebreaker)
+            const [allPages] = await connection.execute(
+                'SELECT id FROM pages WHERE tenant_id = ? ORDER BY priority ASC, id ASC',
+                [tid]
+            );
+            // Assign clean 1-based sequential priorities
+            for (let i = 0; i < allPages.length; i++) {
+                await connection.execute(
+                    'UPDATE pages SET priority = ? WHERE id = ? AND tenant_id = ?',
+                    [i + 1, allPages[i].id, tid]
+                );
+            }
+            console.log(`[REORDER] Re-indexed ${allPages.length} pages for tenant ${tid} (1..${allPages.length})`);
+        }
+
+        // 1. Get the current page's priority (re-fetch after potential re-index)
         const [currentRows] = await connection.execute(
             'SELECT id, priority FROM pages WHERE id = ? AND tenant_id = ?',
             [id, tid]
@@ -838,7 +867,7 @@ app.patch('/api/pages/:id/reorder', async (req, res) => {
         const [targetRows] = await connection.execute(targetQuery, [tid, currentPriority]);
         if (targetRows.length === 0) {
             // Already at the boundary — nothing to swap
-            await connection.rollback();
+            await connection.commit(); // commit the re-index if it happened
             connection.release();
             return res.status(200).json({ message: 'Already at boundary, no swap needed.' });
         }
