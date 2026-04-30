@@ -9,49 +9,46 @@ interface FAQ {
   category: string;
 }
 
-function FaqItem({ faq, isLastOdd, isOpen, onToggle }: { faq: FAQ, isLastOdd: boolean, isOpen: boolean, onToggle: () => void }) {
+function FaqItem({ faq }: { faq: FAQ }) {
   return (
-    <div 
-      className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col ${isLastOdd ? 'md:col-span-2 md:w-1/2 md:mx-auto' : ''}`}
+    <details 
+      className="group bg-[#ffffff] rounded-lg shadow-md overflow-hidden"
     >
-      <button 
-        onClick={onToggle}
-        className="flex items-center justify-between p-5 w-full text-left outline-none select-none transition-colors hover:bg-zinc-50"
+      <summary 
+        className="flex items-center justify-between p-5 w-full text-left outline-none cursor-pointer select-none transition-colors hover:bg-zinc-50 list-none [&::-webkit-details-marker]:hidden"
       >
         <div className="flex items-center gap-3 pr-4 min-w-0">
-          <div className={`p-2 rounded-xl transition-colors flex-shrink-0 ${isOpen ? 'bg-amber-100 text-amber-600' : 'bg-amber-50 text-amber-500'}`}>
+          <div className="p-2 rounded-xl transition-colors flex-shrink-0 group-open:bg-amber-100 group-open:text-amber-600 bg-amber-50 text-amber-500">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <span className="text-sm font-bold text-zinc-800 leading-snug break-words">{faq.question}</span>
+          <span className="text-base font-bold text-amber-600 leading-snug">{faq.question}</span>
         </div>
-        <div className={`flex-shrink-0 text-zinc-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+        <div className="flex-shrink-0 text-zinc-400 transition-transform duration-300 group-open:rotate-180">
           <ChevronDown className="w-5 h-5" />
         </div>
-      </button>
+      </summary>
       
-      {isOpen && (
-        <div className="px-5 pb-5 pt-0 border-t border-zinc-100 animate-in slide-in-from-top-2 duration-200">
-          <div 
-            className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2 break-words whitespace-normal"
-            dangerouslySetInnerHTML={{ __html: faq.answer }}
-          />
-          {faq.category && (
-            <div className="mt-4 pt-3 border-t border-zinc-100 inline-block">
-              <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-full">
-                {faq.category}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+      <div className="p-6 border-t border-zinc-100 bg-white">
+        <div 
+          className="prose prose-sm max-w-none text-zinc-600 leading-relaxed text-left"
+          style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}
+          dangerouslySetInnerHTML={{ __html: faq.answer }}
+        />
+        {faq.category && (
+          <div className="mt-4 pt-3 border-t border-zinc-100 inline-block">
+            <span className="px-3 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-full">
+              {faq.category}
+            </span>
+          </div>
+        )}
+      </div>
+    </details>
   );
 }
 
 export function FaqCenter() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
-  const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchFaqs = async () => {
@@ -77,7 +74,7 @@ export function FaqCenter() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-8 max-w-[1200px]">
+    <div className="animate-in fade-in duration-500 max-w-4xl mx-auto space-y-8">
       {/* Header - consistent with Halaman / Postingan modules */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -95,15 +92,9 @@ export function FaqCenter() {
           <p className="text-zinc-500 mt-2 font-medium italic">FAQ akan muncul setelah Super Admin menambahkan konten.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {faqs.map((faq, index) => (
-            <FaqItem 
-              key={faq.id} 
-              faq={faq} 
-              isLastOdd={index === faqs.length - 1 && faqs.length % 2 !== 0} 
-              isOpen={openFaqId === faq.id}
-              onToggle={() => setOpenFaqId(openFaqId === faq.id ? null : faq.id)}
-            />
+        <div className="flex flex-col space-y-4">
+          {faqs.map((faq) => (
+            <FaqItem key={faq.id} faq={faq} />
           ))}
         </div>
       )}
