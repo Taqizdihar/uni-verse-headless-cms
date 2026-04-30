@@ -37,8 +37,8 @@ function FaqItem({ faq, isLastOdd }: { faq: FAQ, isLastOdd: boolean }) {
             className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2 break-words"
             style={{ 
               overflowWrap: 'break-word', 
-              wordBreak: 'break-word', 
-              hyphens: 'auto' 
+              wordBreak: 'normal', 
+              hyphens: 'none' 
             }}
             dangerouslySetInnerHTML={{ __html: faq.answer }}
           />

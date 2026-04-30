@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, UserCircle, LogOut, Menu, History } from 'lucide-react';
-import { useSearch } from '../context/SearchContext';
+import { Bell, UserCircle, LogOut, Menu, History } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -10,7 +9,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { searchQuery, setSearchQuery } = useSearch();
+
   const { user, setUser, setToken, settings } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -43,17 +42,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             PANEL <span className="text-zinc-400">ADMIN</span>
           </span>
         </div>
-        {/* Search bar */}
-        <div className="relative hidden lg:block">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <input 
-            type="text" 
-            placeholder="Cari sumber daya, dokumen..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-11 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-full text-sm focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition-all w-80 text-zinc-900 placeholder-zinc-400"
-          />
-        </div>
+
       </div>
 
       <div className="flex items-center gap-4 md:gap-6">

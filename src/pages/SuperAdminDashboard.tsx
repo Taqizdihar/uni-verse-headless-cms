@@ -12,6 +12,7 @@ import axios from 'axios';
 
 export function SuperAdminDashboard() {
   const [stats, setStats] = useState({ totalUsers: 0, totalTenants: 0 });
+  const [infraStats, setInfraStats] = useState({ total_used_mb: 0, quota_mb: 1024 });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -22,12 +23,24 @@ export function SuperAdminDashboard() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/super-admin/stats`, {
+      // Fetch Basic Stats
+      const statsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/super-admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStats(res.data);
+      setStats(statsRes.data);
+
+      // Fetch Infrastructure Stats for Storage
+      const infraRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/infrastructure/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (infraRes.data && infraRes.data.storage) {
+        setInfraStats({
+          total_used_mb: infraRes.data.storage.total_used_mb || 0,
+          quota_mb: infraRes.data.storage.quota_mb || 1024
+        });
+      }
     } catch (err) {
-      console.error('Failed to fetch stats:', err);
+      console.error('Failed to fetch dashboard stats:', err);
     } finally {
       setLoading(false);
     }
@@ -48,9 +61,9 @@ export function SuperAdminDashboard() {
     );
   }
 
-  // Mock Storage Data
-  const storageUsed = 345; // MB
-  const storageTotal = 1024; // MB
+  // Live Storage Data
+  const storageUsed = infraStats.total_used_mb;
+  const storageTotal = infraStats.quota_mb;
   const storagePercentage = Math.round((storageUsed / storageTotal) * 100);
 
   return (

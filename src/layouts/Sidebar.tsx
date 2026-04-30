@@ -47,7 +47,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <div className="p-8">
         <div className="flex items-center justify-between mb-2 md:block">
           <div className="flex flex-col items-start gap-1">
-            <img src={universeLogo} alt="UNI-VERSE" className="h-8 w-auto brightness-0 invert" />
+            <img src={universeLogo} alt="UNI-VERSE" className="h-8 w-auto" />
             <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] mt-1 opacity-90">UNI-INSIDE'S CMS</p>
           </div>
           <button 

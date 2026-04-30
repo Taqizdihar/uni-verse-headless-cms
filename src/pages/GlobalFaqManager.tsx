@@ -199,7 +199,7 @@ export function GlobalFaqManager() {
                  </h3>
                  <div 
                    className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed break-words overflow-hidden"
-                   style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                   style={{ wordBreak: 'normal', overflowWrap: 'break-word', hyphens: 'none' }}
                    dangerouslySetInnerHTML={{ __html: faq.answer }}
                  />
               </div>
