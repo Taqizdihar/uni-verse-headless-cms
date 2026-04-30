@@ -1388,11 +1388,12 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const filename = req.file.filename; // Cloudinary public_id
         const file_url = req.file.path; // Cloudinary secure_url
         const file_type = req.file.mimetype;
+        const file_size = req.file.size || 0; // Size in bytes
         const uploaded_by = req.user?.userId || 1;
 
         const [result] = await db.execute(
-            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name) VALUES (?, ?, ?, ?, ?, ?)',
-            [tid, filename, file_url, file_type, uploaded_by, filename]
+            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [tid, filename, file_url, file_type, uploaded_by, filename, file_size]
         );
 
         res.status(201).json({ 

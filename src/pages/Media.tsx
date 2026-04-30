@@ -272,10 +272,18 @@ export function Media() {
                       </button>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
                         {m.file_type ? m.file_type.split('/').pop()?.toUpperCase() : 'UNKNOWN'}
                       </p>
+                      {m.file_size ? (
+                        <>
+                          <span className="text-zinc-200">|</span>
+                          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
+                            {(m.file_size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </>
+                      ) : null}
                       <span className="text-zinc-200">|</span>
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
                         {m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (m.date || 'HARI INI')}

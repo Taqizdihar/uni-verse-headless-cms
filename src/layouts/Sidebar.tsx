@@ -58,7 +58,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em] mt-1 ml-0.5 opacity-60">Konsol Admin</p>
       </div>
 
-      <nav className="flex-1 px-4 pb-8 space-y-1">
+      <nav className="flex-1 px-4 pb-4 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -69,7 +69,7 @@ export function Sidebar({ onClose }: SidebarProps) {
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm pointer-events-auto",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-bold text-[13px] pointer-events-auto",
                   isActive 
                     ? "bg-amber-400 text-zinc-950 shadow-lg shadow-amber-400/20" 
                     : "text-zinc-400 hover:bg-white/5 hover:text-white"
@@ -83,7 +83,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-6 border-t border-zinc-800">
+      <div className="p-4 border-t border-zinc-800 flex-shrink-0">
           <div className="bg-zinc-800/50 rounded-2xl p-4">
               <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
