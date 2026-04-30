@@ -233,8 +233,7 @@ export function ApiIntegration() {
   return (
     <div className="animate-in fade-in duration-500 space-y-8 pb-10">
       <div>
-        <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-2">
-          <Terminal className="w-6 h-6 text-amber-500" />
+        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight flex items-center gap-2">
           Panduan Integrasi API
         </h2>
         <p className="text-zinc-500 mt-1 font-medium">Pelajari cara menghubungkan dan mengintegrasikan frontend Anda ke API UNI-VERSE.</p>

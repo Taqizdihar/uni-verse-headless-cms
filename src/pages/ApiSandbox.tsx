@@ -239,8 +239,7 @@ export function ApiSandbox() {
     <div className="animate-in fade-in duration-500 space-y-8 pb-10">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-2">
-          <Zap className="w-6 h-6 text-violet-500" />
+        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight flex items-center gap-2">
           Uji Coba API
         </h2>
         <p className="text-zinc-500 mt-1 font-medium">
