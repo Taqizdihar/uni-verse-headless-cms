@@ -87,7 +87,7 @@ export function ApiIntegration() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
-            headers: { 'Authorization': \`Bearer \${token}\` }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
            const data = await res.json();
@@ -107,7 +107,7 @@ export function ApiIntegration() {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key/regenerate`, {
             method: 'POST',
-            headers: { 'Authorization': \`Bearer \${token}\` }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
            const data = await res.json();
@@ -162,7 +162,7 @@ export function ApiIntegration() {
               <button
                   type="button"
                   onClick={() => copyToClipboard(PRODUCTION_BASE_URL, '__base__')}
-                  className={\`flex-shrink-0 p-2.5 rounded-xl transition-all \${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}\`}
+                  className={`flex-shrink-0 p-2.5 rounded-xl transition-all ${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
                   title="Salin Base URL"
               >
                   {copiedEndpoint === '__base__' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -183,25 +183,25 @@ export function ApiIntegration() {
           
           <div className="space-y-8">
             {PUBLIC_ENDPOINTS.map((ep, idx) => {
-              const fullUrl = \`\${PRODUCTION_BASE_URL}\${ep.path}\`;
-              const isCopiedSnippet = copiedEndpoint === \`snippet_\${idx}\`;
+              const fullUrl = `${PRODUCTION_BASE_URL}${ep.path}`;
+              const isCopiedSnippet = copiedEndpoint === `snippet_${idx}`;
               
-              const snippet = \`fetch("\${fullUrl}", {
+              const snippet = `fetch("${fullUrl}", {
   headers: {
     "x-api-key": "YOUR_API_KEY"
   }
 })
   .then(res => res.json())
-  .then(data => console.log(data));\`;
+  .then(data => console.log(data));`;
 
               return (
                 <div key={idx} className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-zinc-100 flex items-center gap-4">
-                    <span className={\`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider \${
+                    <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider ${
                         ep.method === 'GET' ? 'bg-sky-50 text-sky-600 border border-sky-100' : 
                         ep.method === 'POST' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
                         'bg-red-50 text-red-600 border border-red-100'
-                    }\`}>
+                    }`}>
                         {ep.method}
                     </span>
                     <h4 className="text-lg font-bold text-zinc-900">{ep.name}</h4>
@@ -225,7 +225,7 @@ export function ApiIntegration() {
                     <div className="relative group">
                       <div className="absolute top-4 right-4 z-10">
                         <button
-                          onClick={() => copyToClipboard(snippet, \`snippet_\${idx}\`)}
+                          onClick={() => copyToClipboard(snippet, `snippet_${idx}`)}
                           className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all"
                         >
                           {isCopiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
@@ -314,7 +314,7 @@ export function ApiIntegration() {
                       className="flex-shrink-0 px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center border border-red-100 disabled:opacity-50"
                       title="Regenerate Key"
                   >
-                      <RefreshCw className={\`w-5 h-5 \${isKeyLoading ? 'animate-spin' : ''}\`} />
+                      <RefreshCw className={`w-5 h-5 ${isKeyLoading ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
             </div>
