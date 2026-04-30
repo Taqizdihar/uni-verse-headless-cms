@@ -11,8 +11,8 @@ export const SuperAdminRoute = () => {
 
   const user = JSON.parse(userStr);
 
-  // Strict check for user_id === 1 as requested
-  if (user.id !== 1 || user.email !== 'm.taqizdihar@gmail.com') {
+  // Strict check for super_admin role as requested
+  if (user.role !== 'super_admin') {
     return <Navigate to="/dashboard" replace />;
   }
 

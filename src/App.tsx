@@ -1,6 +1,7 @@
 // File: src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminLayout } from './layouts/AdminLayout';
+import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Pages } from './pages/Pages';
 import { Posts } from './pages/Posts';
@@ -77,7 +78,9 @@ export default function App() {
               {/* Super Admin Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<SuperAdminRoute />}>
-                   <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+                   <Route element={<SuperAdminLayout />}>
+                     <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+                   </Route>
                 </Route>
               </Route>
 

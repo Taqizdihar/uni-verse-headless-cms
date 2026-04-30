@@ -18,7 +18,7 @@ export function Login() {
     if (localStorage.getItem('token')) {
        const user = JSON.parse(localStorage.getItem('user') || '{}');
         // Super Admin Check
-        if (user.email === 'm.taqizdihar@gmail.com' && user.id === 1) {
+        if (user.role === 'super_admin') {
           navigate('/super-admin/dashboard');
           return;
         }
@@ -50,7 +50,7 @@ export function Login() {
       console.log(`[FRONTEND] Login success. User ID: ${user.id}`);
 
       // Super Admin Check
-      if (user.email === 'm.taqizdihar@gmail.com' && user.id === 1) {
+      if (user.role === 'super_admin') {
         navigate('/super-admin/dashboard');
       } else if (user.site_name && user.site_name !== 'My Site') {
          navigate('/dashboard');
