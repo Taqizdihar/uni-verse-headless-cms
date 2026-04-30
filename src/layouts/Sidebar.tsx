@@ -31,8 +31,8 @@ const navItems = [
   { name: 'Pengguna', path: '/users', icon: Users },
   { name: 'Integrasi API', path: '/api-integration', icon: Terminal },
   { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap },
-  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle },
-  { name: 'Pengaturan', path: '/settings', icon: Settings }
+  { name: 'Pengaturan', path: '/settings', icon: Settings },
+  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle }
 ];
 
 interface SidebarProps {

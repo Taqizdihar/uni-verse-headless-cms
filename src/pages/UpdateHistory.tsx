@@ -118,13 +118,13 @@ export function UpdateHistory() {
 
                   {/* Images Gallery */}
                   {update.images && update.images.length > 0 && (
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-6 pt-6 border-t border-blue-200/50">
+                    <div className={`mt-6 pt-6 border-t border-blue-200/50 ${update.images.length === 1 ? 'block' : 'grid grid-cols-2 lg:grid-cols-3 gap-4'}`}>
                       {update.images.map((img, i) => (
-                        <div key={i} className="aspect-video rounded-xl overflow-hidden border border-blue-100 group/img cursor-pointer bg-blue-100/50">
+                        <div key={i} className={`${update.images.length === 1 ? 'w-full' : 'aspect-video'} rounded-xl overflow-hidden border border-zinc-200 shadow-sm group/img cursor-pointer bg-zinc-50 hover:shadow-md transition-shadow duration-300`}>
                             <img 
                                 src={img} 
                                 alt={`Update Screenshot ${i+1}`} 
-                                className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500" 
+                                className={`w-full ${update.images.length === 1 ? 'h-auto max-h-[500px]' : 'h-full'} object-cover group-hover/img:scale-105 transition-transform duration-500`} 
                             />
                         </div>
                       ))}
