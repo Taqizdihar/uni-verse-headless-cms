@@ -9,15 +9,13 @@ interface FAQ {
   category: string;
 }
 
-function FaqItem({ faq, isLastOdd }: { faq: FAQ, isLastOdd: boolean }) {
-  const [isOpen, setIsOpen] = useState(false);
-  
+function FaqItem({ faq, isLastOdd, isOpen, onToggle }: { faq: FAQ, isLastOdd: boolean, isOpen: boolean, onToggle: () => void }) {
   return (
     <div 
       className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col ${isLastOdd ? 'md:col-span-2 md:w-1/2 md:mx-auto' : ''}`}
     >
       <button 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className="flex items-center justify-between p-5 w-full text-left outline-none select-none transition-colors hover:bg-zinc-50"
       >
         <div className="flex items-center gap-3 pr-4 min-w-0">
@@ -34,13 +32,7 @@ function FaqItem({ faq, isLastOdd }: { faq: FAQ, isLastOdd: boolean }) {
       {isOpen && (
         <div className="px-5 pb-5 pt-0 border-t border-zinc-100 animate-in slide-in-from-top-2 duration-200">
           <div 
-            className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2"
-            style={{ 
-              overflowWrap: 'break-word', 
-              wordBreak: 'normal', 
-              whiteSpace: 'pre-wrap',
-              hyphens: 'none' 
-            }}
+            className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2 break-words whitespace-normal"
             dangerouslySetInnerHTML={{ __html: faq.answer }}
           />
           {faq.category && (
@@ -59,6 +51,7 @@ function FaqItem({ faq, isLastOdd }: { faq: FAQ, isLastOdd: boolean }) {
 export function FaqCenter() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchFaqs = async () => {
@@ -108,6 +101,8 @@ export function FaqCenter() {
               key={faq.id} 
               faq={faq} 
               isLastOdd={index === faqs.length - 1 && faqs.length % 2 !== 0} 
+              isOpen={openFaqId === faq.id}
+              onToggle={() => setOpenFaqId(openFaqId === faq.id ? null : faq.id)}
             />
           ))}
         </div>
