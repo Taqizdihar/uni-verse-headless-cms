@@ -26,8 +26,7 @@ const navItems = [
   { name: 'Komentar', path: '/comments', icon: MessageSquare },
 
   { name: 'Pengguna', path: '/users', icon: Users },
-  { name: 'Plugin', path: '/plugins', icon: Blocks },
-  { name: 'API Integration', path: '/api-integration', icon: Terminal },
+  { name: 'Integrasi API', path: '/api-integration', icon: Terminal },
   { name: 'Pengaturan', path: '/settings', icon: Settings }
 ];
 

@@ -9,17 +9,41 @@ const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
 
 const PUBLIC_ENDPOINTS = [
   { 
-    name: 'Navigation', 
+    name: 'Health Check', 
+    method: 'GET', 
+    path: '/api/v1/health', 
+    desc: 'Mengecek apakah server dan database sedang aktif.',
+    response: `{
+  "success": true,
+  "message": "Service is healthy"
+}`
+  },
+  { 
+    name: 'Pengaturan Global', 
+    method: 'GET', 
+    path: '/api/v1/public/settings', 
+    desc: 'Mengambil data identitas situs (Logo, Nama, Tagline, dan Pengaturan Global).',
+    response: `{
+  "success": true,
+  "data": {
+    "site_name": "Uni-Inside",
+    "site_tagline": "Portal Berita Terkini",
+    "site_logo": "https://..."
+  }
+}`
+  },
+  { 
+    name: 'Navigasi', 
     method: 'GET', 
     path: '/api/v1/public/navigation', 
-    desc: 'To fetch the navbar structure based on priority.',
+    desc: 'Mengambil daftar menu untuk Navbar (Halaman yang ditandai masuk menu).',
     response: `{
   "success": true,
   "data": [
     {
       "id": 1,
-      "title": "Home",
-      "slug": "home",
+      "title": "Beranda",
+      "slug": "beranda",
       "priority": 1,
       "status": "published"
     }
@@ -27,48 +51,117 @@ const PUBLIC_ENDPOINTS = [
 }`
   },
   { 
-    name: 'Page Detail', 
+    name: 'Daftar Halaman', 
     method: 'GET', 
-    path: '/api/v1/public/pages/:slug', 
-    desc: 'To fetch specific page content blocks.',
-    response: `{
-  "success": true,
-  "data": {
-    "title": "About Us",
-    "slug": "about-us",
-    "content": [ ... blocks ... ]
-  }
-}`
-  },
-  { 
-    name: 'Post Feed', 
-    method: 'GET', 
-    path: '/api/v1/public/posts', 
-    desc: 'To fetch categorized posts.',
+    path: '/api/v1/public/pages', 
+    desc: 'Mengambil daftar semua halaman yang berstatus Published.',
     response: `{
   "success": true,
   "data": [
     {
-      "id": 10,
-      "title": "New Event",
-      "category": "Event",
-      "excerpt": "Join us..."
+      "id": 1,
+      "title": "Tentang Kami",
+      "slug": "tentang-kami",
+      "status": "published"
     }
   ]
 }`
   },
   { 
-    name: 'Post Detail', 
+    name: 'Detail Halaman', 
     method: 'GET', 
-    path: '/api/v1/public/posts/:slug', 
-    desc: 'To fetch full post data (Article/Event/Product).',
+    path: '/api/v1/public/pages/:slug', 
+    desc: 'Mengambil detail konten halaman (blok-blok JSON) berdasarkan slug-nya.',
     response: `{
   "success": true,
   "data": {
-    "title": "New Event",
-    "slug": "new-event",
-    "content": { ... structured data ... }
+    "title": "Tentang Kami",
+    "slug": "tentang-kami",
+    "content": [
+      {
+        "id": "block-1",
+        "type": "hero",
+        "data": {
+          "title": "Selamat Datang di Uni-Inside",
+          "subtitle": "Temukan informasi terbaru."
+        }
+      }
+    ]
   }
+}`
+  },
+  { 
+    name: 'Daftar Post/Berita', 
+    method: 'GET', 
+    path: '/api/v1/public/posts', 
+    desc: 'Mengambil daftar berita/artikel yang berstatus Published.',
+    response: `{
+  "success": true,
+  "data": [
+    {
+      "id": 10,
+      "title": "Seminar Teknologi 2026",
+      "slug": "seminar-teknologi-2026",
+      "category": "Event",
+      "excerpt": "Bergabunglah dengan kami dalam seminar...",
+      "featured_image": "https://..."
+    }
+  ]
+}`
+  },
+  { 
+    name: 'Detail Post/Berita', 
+    method: 'GET', 
+    path: '/api/v1/public/posts/:slug', 
+    desc: 'Mengambil isi lengkap berita berdasarkan slug.',
+    response: `{
+  "success": true,
+  "data": {
+    "title": "Seminar Teknologi 2026",
+    "slug": "seminar-teknologi-2026",
+    "category": "Event",
+    "content": [
+      {
+        "type": "post_event",
+        "data": {
+          "location": "Auditorium Utama",
+          "start_date": "2026-05-10T09:00:00Z"
+        }
+      }
+    ]
+  }
+}`
+  },
+  {
+    name: 'Daftar Komentar',
+    method: 'GET',
+    path: '/api/v1/public/posts/:id/comments',
+    desc: 'Mengambil daftar komentar yang sudah disetujui untuk post tertentu.',
+    response: `{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "author_name": "Budi Santoso",
+      "content": "Informasi yang sangat bermanfaat!",
+      "created_at": "2026-04-30T08:00:00Z"
+    }
+  ]
+}`
+  },
+  {
+    name: 'Kirim Komentar',
+    method: 'POST',
+    path: '/api/v1/public/posts/:id/comments',
+    desc: 'Mengirimkan komentar baru dari pengunjung website.',
+    requestBody: `{
+  "author_name": "Budi Santoso",
+  "author_email": "budi@example.com",
+  "content": "Informasi yang sangat bermanfaat!"
+}`,
+    response: `{
+  "success": true,
+  "message": "Komentar berhasil dikirim dan menunggu persetujuan."
 }`
   }
 ];
@@ -142,9 +235,9 @@ export function ApiIntegration() {
       <div>
         <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-2">
           <Terminal className="w-6 h-6 text-amber-500" />
-          API Integration Guide
+          Panduan Integrasi API
         </h2>
-        <p className="text-zinc-500 mt-1 font-medium">Learn how to connect to the UNI-VERSE API and integrate your frontend in minutes.</p>
+        <p className="text-zinc-500 mt-1 font-medium">Pelajari cara menghubungkan dan mengintegrasikan frontend Anda ke API UNI-VERSE.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -154,16 +247,16 @@ export function ApiIntegration() {
           <div className="bg-zinc-900 rounded-[2rem] p-8 border border-zinc-800 shadow-xl text-white">
             <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
               <Key className="w-5 h-5 text-amber-500" />
-              Public API Base URL
+              URL Dasar API Publik
             </h3>
-            <p className="text-zinc-400 text-sm mb-6">All endpoints are relative to this base URL.</p>
+            <p className="text-zinc-400 text-sm mb-6">Semua endpoint relatif terhadap URL dasar ini.</p>
             <div className="bg-zinc-950 rounded-xl px-5 py-4 flex items-center justify-between gap-3 border border-zinc-800/60">
               <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
               <button
                   type="button"
                   onClick={() => copyToClipboard(PRODUCTION_BASE_URL, '__base__')}
                   className={`flex-shrink-0 p-2.5 rounded-xl transition-all ${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
-                  title="Salin Base URL"
+                  title="Salin URL Dasar"
               >
                   {copiedEndpoint === '__base__' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </button>
@@ -172,49 +265,70 @@ export function ApiIntegration() {
             <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
               <ShieldAlert className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">TIP: Headers Requirement</span>
-                <p className="text-xs text-blue-200/70 font-medium">Almost all requests require the <code className="bg-blue-500/20 px-1 py-0.5 rounded text-blue-300">x-api-key</code> header to authenticate the frontend application.</p>
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">TIPS: Kebutuhan Headers</span>
+                <p className="text-xs text-blue-200/70 font-medium">Hampir semua permintaan membutuhkan header <code className="bg-blue-500/20 px-1 py-0.5 rounded text-blue-300">x-api-key</code> untuk mengautentikasi aplikasi frontend.</p>
               </div>
             </div>
           </div>
 
           {/* Endpoints */}
-          <h3 className="text-xl font-bold text-zinc-900 mt-10 mb-6">Endpoints Documentation</h3>
+          <h3 className="text-xl font-bold text-zinc-900 mt-10 mb-6">Dokumentasi Endpoint</h3>
           
           <div className="space-y-8">
-            {PUBLIC_ENDPOINTS.map((ep, idx) => {
-              const fullUrl = `${PRODUCTION_BASE_URL}${ep.path}`;
-              const isCopiedSnippet = copiedEndpoint === `snippet_${idx}`;
+            {PUBLIC_ENDPOINTS.map((ep: any, idx: number) => {
+              const fullUrl = \`\${PRODUCTION_BASE_URL}\${ep.path}\`;
+              const isCopiedSnippet = copiedEndpoint === \`snippet_\${idx}\`;
+              const isCopiedUrl = copiedEndpoint === \`url_\${idx}\`;
+              const isPost = ep.method === 'POST';
               
-              const snippet = `fetch("${fullUrl}", {
+              const snippet = \`fetch("\${fullUrl}", {
+  method: "\${ep.method}",
   headers: {
-    "x-api-key": "YOUR_API_KEY"
-  }
+    "x-api-key": "YOUR_API_KEY"\${isPost ? ',\\n    "Content-Type": "application/json"' : ''}
+  }\${isPost && ep.requestBody ? \`,\\n  body: JSON.stringify(\${ep.requestBody.replace(/\\n/g, '\\n  ')})\` : ''}
 })
   .then(res => res.json())
-  .then(data => console.log(data));`;
+  .then(data => console.log(data));\`;
 
               return (
                 <div key={idx} className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden">
-                  <div className="p-6 border-b border-zinc-100 flex items-center gap-4">
-                    <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider ${
-                        ep.method === 'GET' ? 'bg-sky-50 text-sky-600 border border-sky-100' : 
-                        ep.method === 'POST' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
-                        'bg-red-50 text-red-600 border border-red-100'
-                    }`}>
-                        {ep.method}
-                    </span>
-                    <h4 className="text-lg font-bold text-zinc-900">{ep.name}</h4>
+                  <div className="p-6 border-b border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className={\`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider \${
+                          ep.method === 'GET' ? 'bg-sky-50 text-sky-600 border border-sky-100' : 
+                          ep.method === 'POST' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                          'bg-red-50 text-red-600 border border-red-100'
+                      }\`}>
+                          {ep.method}
+                      </span>
+                      <h4 className="text-lg font-bold text-zinc-900">{ep.name}</h4>
+                    </div>
                   </div>
                   
-                  <div className="p-6 pb-2">
+                  <div className="p-6 pb-4">
                     <p className="text-zinc-500 text-sm font-medium mb-4">{ep.desc}</p>
-                    {ep.name === 'Navigation' && (
+                    
+                    <div className="mb-4">
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Endpoint URL</label>
+                      <div className="bg-zinc-50 rounded-xl px-4 py-3 flex items-center justify-between gap-3 border border-zinc-200">
+                        <code className="text-zinc-700 font-mono text-xs font-medium break-all">{fullUrl}</code>
+                        <button
+                            type="button"
+                            onClick={() => copyToClipboard(fullUrl, \`url_\${idx}\`)}
+                            className={\`flex-shrink-0 p-2 rounded-lg transition-all \${isCopiedUrl ? 'bg-green-500/10 text-green-600' : 'bg-zinc-200/50 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-200'}\`}
+                            title="Salin URL"
+                        >
+                            {isCopiedUrl ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {ep.name === 'Navigasi' && (
                       <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
                         <ShieldAlert className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                         <div>
-                          <span className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest block mb-0.5">WARNING</span>
-                          <p className="text-xs text-yellow-800 font-medium">Always use the <code className="font-mono bg-yellow-100 px-1 py-0.5 rounded">priority</code> field for sorting navigation items correctly.</p>
+                          <span className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest block mb-0.5">PERINGATAN</span>
+                          <p className="text-xs text-yellow-800 font-medium">Selalu gunakan field <code className="font-mono bg-yellow-100 px-1 py-0.5 rounded">priority</code> untuk mengurutkan item navigasi dengan benar.</p>
                         </div>
                       </div>
                     )}
@@ -225,14 +339,15 @@ export function ApiIntegration() {
                     <div className="relative group">
                       <div className="absolute top-4 right-4 z-10">
                         <button
-                          onClick={() => copyToClipboard(snippet, `snippet_${idx}`)}
+                          onClick={() => copyToClipboard(snippet, \`snippet_\${idx}\`)}
                           className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all"
+                          title="Salin Permintaan"
                         >
                           {isCopiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                         </button>
                       </div>
                       <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Example Request (Fetch)</span>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Contoh Permintaan (Fetch)</span>
                       </div>
                       <div className="p-4 overflow-x-auto text-sm">
                         <SyntaxHighlighter language="javascript" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
@@ -244,7 +359,7 @@ export function ApiIntegration() {
                     {/* Right: Response */}
                     <div className="relative">
                       <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
-                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Success Response</span>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Respon Berhasil</span>
                       </div>
                       <div className="p-4 overflow-x-auto text-sm">
                         <SyntaxHighlighter language="json" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
@@ -265,13 +380,13 @@ export function ApiIntegration() {
           <div className="bg-white rounded-[2rem] border border-zinc-200 p-6 shadow-sm sticky top-8">
             <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
                 <Key className="w-4 h-4 text-amber-500" />
-                API Key Management
+                Manajemen API Key
             </h3>
-            <p className="text-zinc-500 text-xs font-medium mb-6">Manage the API key required for frontend authorization.</p>
+            <p className="text-zinc-500 text-xs font-medium mb-6">Kelola API key yang dibutuhkan untuk otorisasi frontend.</p>
             
             <div className="space-y-4">
                 <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Current Key</label>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Key Saat Ini</label>
                     <div className="relative flex items-center">
                         <input 
                             type={isKeyVisible ? "text" : "password"} 
@@ -305,16 +420,16 @@ export function ApiIntegration() {
                       className="flex-1 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 text-sm"
                   >
                       <Copy className="w-4 h-4" />
-                      Copy Key
+                      Salin Key
                   </button>
                   <button 
                       type="button"
                       onClick={() => setIsKeyConfirmOpen(true)}
                       disabled={isKeyLoading}
                       className="flex-shrink-0 px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center border border-red-100 disabled:opacity-50"
-                      title="Regenerate Key"
+                      title="Regenerasi Key"
                   >
-                      <RefreshCw className={`w-5 h-5 ${isKeyLoading ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={\`w-5 h-5 \${isKeyLoading ? 'animate-spin' : ''}\`} />
                   </button>
                 </div>
             </div>
@@ -323,7 +438,7 @@ export function ApiIntegration() {
                 <div className="flex items-start gap-3 bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200/50">
                   <ShieldAlert className="w-5 h-5 flex-shrink-0" />
                   <p className="text-[11px] font-medium leading-relaxed">
-                    <strong>Note:</strong> Regenerating the API Key will instantly invalidate the previous one. Ensure you update your frontend environment variables immediately after regenerating.
+                    <strong>Catatan:</strong> Meregenerasi API Key akan langsung menonaktifkan key sebelumnya. Pastikan Anda memperbarui variabel lingkungan frontend Anda segera setelah regenerasi.
                   </p>
                 </div>
             </div>
@@ -333,10 +448,10 @@ export function ApiIntegration() {
       
       <ConfirmModal 
         isOpen={isKeyConfirmOpen}
-        title="Regenerate API Key"
-        message="Warning: Regenerating the API Key will cause your existing frontend application to stop working until the key is updated. Continue?"
-        confirmLabel="Yes, Reset Key"
-        cancelLabel="Cancel"
+        title="Regenerasi API Key"
+        message="Peringatan: Meregenerasi API Key akan membuat aplikasi frontend Anda saat ini berhenti berfungsi hingga key diperbarui. Lanjutkan?"
+        confirmLabel="Ya, Reset Key"
+        cancelLabel="Batal"
         variant="danger"
         onConfirm={handleRegenerateApiKey}
         onClose={() => setIsKeyConfirmOpen(false)}
