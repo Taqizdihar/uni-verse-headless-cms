@@ -10,6 +10,7 @@ import { Layout } from './pages/Layout';
 import { Users } from './pages/Users';
 import { Plugins } from './pages/Plugins';
 import { ApiIntegration } from './pages/ApiIntegration';
+import { ApiSandbox } from './pages/ApiSandbox';
 import { Settings } from './pages/Settings';
 import { HeadlessSettings } from './pages/HeadlessSettings';
 import { LayoutManager } from './pages/LayoutManager';
@@ -59,6 +60,7 @@ export default function App() {
                   <Route path="/users" element={<Users />} />
                   <Route path="/plugins" element={<Plugins />} />
                   <Route path="/api-integration" element={<ApiIntegration />} />
+                  <Route path="/api-sandbox" element={<ApiSandbox />} />
                   <Route path="/settings" element={<Settings />} />
                   
                   {/* Headless Testing Routes */}

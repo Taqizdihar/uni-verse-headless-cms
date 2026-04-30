@@ -13,6 +13,7 @@ import {
   Settings,
   History,
   Terminal,
+  Zap,
   X
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
@@ -27,6 +28,7 @@ const navItems = [
 
   { name: 'Pengguna', path: '/users', icon: Users },
   { name: 'Integrasi API', path: '/api-integration', icon: Terminal },
+  { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap },
   { name: 'Pengaturan', path: '/settings', icon: Settings }
 ];
 
