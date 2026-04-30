@@ -21,6 +21,8 @@ import { LandingPagePreview } from './pages/LandingPagePreview';
 import { UpdateHistory } from './pages/UpdateHistory';
 import { Profile } from './pages/Profile';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
+import { TenantManagement } from './pages/TenantManagement';
+import { GlobalFaqManager } from './pages/GlobalFaqManager';
 import { SuperAdminRoute } from './components/SuperAdminRoute';
 import { SearchProvider } from './context/SearchContext';
 import { CMSProvider } from './context/CMSContext';
@@ -80,6 +82,8 @@ export default function App() {
                 <Route element={<SuperAdminRoute />}>
                    <Route element={<SuperAdminLayout />}>
                      <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+                     <Route path="/super-admin/tenants" element={<TenantManagement />} />
+                     <Route path="/super-admin/faq" element={<GlobalFaqManager />} />
                    </Route>
                 </Route>
               </Route>

@@ -219,6 +219,16 @@ app.get('/api/public/updates', async (req, res) => {
 });
 
 
+app.get('/api/v1/public/faqs', async (req, res) => {
+    try {
+        const [faqs] = await db.execute('SELECT * FROM global_faqs ORDER BY priority ASC, created_at DESC');
+        res.json(faqs);
+    } catch (error) {
+        console.error('[API ERROR] Get public faqs:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    }
+});
+
 // Auth Middleware
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -243,6 +253,132 @@ const verifySuperAdmin = (req, res, next) => {
 // =============================================================
 // ★ SUPER ADMIN PRIVILEGED ROUTES ★
 // =============================================================
+
+// --- FAQ Management ---
+app.get('/api/v1/superadmin/faqs', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const [faqs] = await db.execute('SELECT * FROM global_faqs ORDER BY priority ASC, created_at DESC');
+        res.json(faqs);
+    } catch (error) {
+        console.error('[SUPER ADMIN] Fetch faqs error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/v1/superadmin/faqs', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const { question, answer, category, priority } = req.body;
+        if (!question || !answer) return res.status(400).json({ error: 'Question and answer are required' });
+        
+        await db.execute(
+            'INSERT INTO global_faqs (question, answer, category, priority) VALUES (?, ?, ?, ?)',
+            [question, answer, category || 'Umum', priority || 0]
+        );
+        res.status(201).json({ success: true });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Add faq error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.put('/api/v1/superadmin/faqs/:id', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const { question, answer, category, priority } = req.body;
+        await db.execute(
+            'UPDATE global_faqs SET question = ?, answer = ?, category = ?, priority = ? WHERE id = ?',
+            [question, answer, category, priority, req.params.id]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Update faq error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.delete('/api/v1/superadmin/faqs/:id', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        await db.execute('DELETE FROM global_faqs WHERE id = ?', [req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Delete faq error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+app.get('/api/v1/superadmin/tenants', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const query = `
+            SELECT t.id as tenant_id, t.subdomain, t.created_at, IFNULL(t.status, 'active') as status,
+                   u.id as admin_id, u.name as admin_name, u.email as admin_email
+            FROM tenants t
+            LEFT JOIN tenant_users tu ON t.id = tu.tenant_id AND tu.role = 'admin'
+            LEFT JOIN users u ON tu.user_id = u.id
+            ORDER BY t.created_at DESC
+        `;
+        const [tenants] = await db.execute(query);
+        res.json(tenants);
+    } catch (error) {
+        console.error('[SUPER ADMIN] Fetch tenants error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.patch('/api/v1/superadmin/tenants/:id/status', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const tenantId = req.params.id;
+        const { status } = req.body;
+        if (!['active', 'suspended'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status' });
+        }
+        await db.execute('UPDATE tenants SET status = ? WHERE id = ?', [status, tenantId]);
+        res.json({ success: true, status });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Update tenant status error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/v1/superadmin/impersonate/:adminId', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+        const [users] = await db.execute('SELECT id, name, email, profile_picture_url FROM users WHERE id = ?', [adminId]);
+        
+        if (users.length === 0) return res.status(404).json({ error: 'Admin not found' });
+        const user = users[0];
+
+        const [tenantUsers] = await db.execute('SELECT tenant_id, role FROM tenant_users WHERE user_id = ?', [user.id]);
+        const tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
+        const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
+
+        let site_name = 'My Site';
+        if (tenant_id) {
+            const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
+            if (settings && settings.length > 0) {
+                site_name = settings[0].site_name;
+            }
+        }
+
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                profile_picture_url: user.profile_picture_url,
+                tenant_id,
+                role,
+                site_name
+            }
+        });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Impersonate error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (req, res) => {
     try {
         const [userCount] = await db.execute('SELECT COUNT(*) as total FROM users');
@@ -407,8 +543,21 @@ app.post('/api/auth/login', async (req, res) => {
         
         // 3. Retrieve tenant_id and role from tenant_users
         const [tenantUsers] = await db.execute('SELECT tenant_id, role FROM tenant_users WHERE user_id = ?', [user.id]);
-        const tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
-        const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
+        let tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
+        let role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
+
+        // Super Admin Hardcode Override
+        if (user.id === 1 || user.email === 'm.taqizdihar@gmail.com') {
+            role = 'super_admin';
+        }
+
+        // Suspend check
+        if (tenant_id && role !== 'super_admin') {
+            const [tenantData] = await db.execute('SELECT status FROM tenants WHERE id = ?', [tenant_id]);
+            if (tenantData.length > 0 && tenantData[0].status === 'suspended') {
+                return res.status(403).json({ error: 'Akses ditolak. Tenant Anda telah ditangguhkan (Suspended) oleh Super Admin.' });
+            }
+        }
 
         // 4. Fetch site_name for frontend redirection logic
         let site_name = 'My Site';
