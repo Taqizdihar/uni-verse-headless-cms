@@ -318,7 +318,9 @@ router.get('/settings', async (req, res) => {
             frontend_url: globalOptions.frontend_url || '',
             // Footer
             copyright_text: globalOptions.footer_config?.copyright_text || '',
-            social_links: globalOptions.footer_config?.social_links || []
+            social_links: globalOptions.footer_config?.social_links || [],
+            quick_links: globalOptions.footer_config?.quick_links || null,
+            google_maps_url: globalOptions.footer_config?.google_maps_url || null
         };
 
         res.json(settings);

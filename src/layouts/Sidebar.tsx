@@ -87,7 +87,6 @@ export function Sidebar({ onClose }: SidebarProps) {
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-xs font-bold text-zinc-300">Sistem Online</span>
-                    <span className="text-[10px] font-medium text-zinc-500">Beta Version</span>
                   </div>
               </div>
           </div>
