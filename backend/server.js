@@ -219,6 +219,19 @@ app.get('/api/public/updates', async (req, res) => {
 });
 
 
+app.get('/api/v1/public/broadcast', async (req, res) => {
+    try {
+        const [settings] = await db.execute("SELECT setting_value FROM global_settings WHERE setting_key = 'broadcast'");
+        if (settings.length > 0) {
+            res.json(JSON.parse(settings[0].setting_value));
+        } else {
+            res.json(null);
+        }
+    } catch (error) {
+        res.json(null);
+    }
+});
+
 app.get('/api/v1/public/faqs', async (req, res) => {
     try {
         const [faqs] = await db.execute('SELECT * FROM global_faqs ORDER BY priority ASC, created_at DESC');
@@ -253,6 +266,73 @@ const verifySuperAdmin = (req, res, next) => {
 // =============================================================
 // ★ SUPER ADMIN PRIVILEGED ROUTES ★
 // =============================================================
+
+// --- Infrastructure Management ---
+app.get('/api/v1/superadmin/infrastructure/stats', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        // 1. DB Connection Check
+        let dbStatus = 'disconnected';
+        try {
+            await db.execute('SELECT 1');
+            dbStatus = 'connected';
+        } catch (e) {
+            console.error('DB Health Check Failed:', e);
+        }
+
+        // 2. Global Row Counts
+        const [postsCount] = await db.execute('SELECT COUNT(*) as count FROM posts');
+        const [pagesCount] = await db.execute('SELECT COUNT(*) as count FROM pages');
+        const [mediaCount] = await db.execute('SELECT COUNT(*) as count FROM media');
+
+        // 3. Storage Usage (Total and Top 5)
+        // Assume file_size is stored in bytes. Convert to MB.
+        let totalUsedMB = 0;
+        try {
+            const [totalStorageQuery] = await db.execute('SELECT SUM(file_size) as total_used FROM media');
+            const totalUsedBytes = totalStorageQuery[0].total_used || 0;
+            totalUsedMB = Math.round(totalUsedBytes / (1024 * 1024));
+        } catch(err) {
+            console.warn('[SUPER ADMIN] file_size column might not exist or error summing:', err.message);
+        }
+
+        let formattedTopConsumers = [];
+        try {
+            const [topConsumers] = await db.execute(`
+                SELECT t.id as tenant_id, t.subdomain, SUM(m.file_size) as total_size_bytes
+                FROM tenants t
+                LEFT JOIN media m ON t.id = m.tenant_id
+                GROUP BY t.id, t.subdomain
+                ORDER BY total_size_bytes DESC
+                LIMIT 5
+            `);
+            formattedTopConsumers = topConsumers.map(c => ({
+                tenant_id: c.tenant_id,
+                subdomain: c.subdomain,
+                total_size_mb: Math.round((c.total_size_bytes || 0) / (1024 * 1024))
+            }));
+        } catch(err) {
+            console.warn('[SUPER ADMIN] top consumers query error:', err.message);
+        }
+
+        res.json({
+            dbStatus,
+            rowCounts: {
+                posts: postsCount[0].count,
+                pages: pagesCount[0].count,
+                media: mediaCount[0].count
+            },
+            storage: {
+                total_used_mb: totalUsedMB,
+                quota_mb: 1024,
+                top_consumers: formattedTopConsumers
+            }
+        });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Fetch infra stats error:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
 
 // --- FAQ Management ---
 app.get('/api/v1/superadmin/faqs', authenticateToken, verifySuperAdmin, async (req, res) => {
@@ -393,63 +473,120 @@ app.get('/api/super-admin/stats', authenticateToken, verifySuperAdmin, async (re
     }
 });
 
-app.post('/api/super-admin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
-    // 1. Explicit destructuring
-    const { title, description, version, update_date, update_images, images } = req.body;
-    
-    // Support both 'images' and 'update_images' from frontend just in case
-    const imageArray = update_images || images || [];
-
-    // Step 1: Strict Validation of Mandatory Fields
-    if (!title || !description || !version || !update_date) {
-        return res.status(400).json({ error: 'Title, description, version, and update_date are required.' });
+// --- Update History Management ---
+app.get('/api/v1/superadmin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const [updates] = await db.execute('SELECT * FROM update_history ORDER BY update_date DESC');
+        
+        const updatesWithImages = await Promise.all(updates.map(async (update) => {
+            const currentId = update.id || update.id_update || 0;
+            const [images] = await db.execute('SELECT id, image_url FROM update_images WHERE update_id = ?', [currentId]);
+            return {
+                id: currentId,
+                title: update.update_title,
+                description: update.update_description,
+                version: update.update_version,
+                date: update.update_date,
+                images: images
+            };
+        }));
+        res.json(updatesWithImages);
+    } catch (error) {
+        console.error('[SUPER ADMIN] Fetch updates error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
+});
 
-    // The Filter: Create a New Object specifically for the first query containing ONLY the 4 fields
-    const filteredUpdateData = {
-        title: title,
-        description: description,
-        version: version,
-        created_at: update_date
-    };
-
-    // Verification: Log the filtered object
-    console.log('[SUPER ADMIN] Filtered Data for update_history insert:', filteredUpdateData);
-
+app.post('/api/v1/superadmin/updates', authenticateToken, verifySuperAdmin, async (req, res) => {
+    const { title, description, version, date, images } = req.body;
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-
-        // Step 2: Main Data Insertion into update_history (using the explicit mapped values from our filtered object)
-        const [historyResult] = await connection.execute(
+        const [result] = await connection.execute(
             'INSERT INTO update_history (update_title, update_description, update_version, update_date) VALUES (?, ?, ?, ?)',
-            [filteredUpdateData.title, filteredUpdateData.description, filteredUpdateData.version, filteredUpdateData.created_at]
+            [title, description, version, date || new Date()]
         );
-        
-        const updateId = historyResult.insertId;
+        const updateId = result.insertId;
 
-        // Step 3: Conditional Images Data Insertion
-        if (imageArray && Array.isArray(imageArray) && imageArray.length > 0) {
-            const placeholders = imageArray.map(() => '(?, ?)').join(', ');
-            const flattenedParameters = [];
-            imageArray.forEach(url => {
-                flattenedParameters.push(updateId, url);
-            });
-
-            await connection.execute(
-                `INSERT INTO update_images (update_id, image_url) VALUES ${placeholders}`,
-                flattenedParameters
-            );
+        if (images && images.length > 0) {
+            const placeholders = images.map(() => '(?, ?)').join(', ');
+            const params = [];
+            images.forEach(url => params.push(updateId, url));
+            await connection.execute(`INSERT INTO update_images (update_id, image_url) VALUES ${placeholders}`, params);
         }
-
         await connection.commit();
-        res.status(201).json({ message: 'Update history and images recorded successfully', updateId });
+        res.json({ success: true, id: updateId });
     } catch (error) {
         await connection.rollback();
-        console.error('[SUPER ADMIN ERROR] Transactional history write failed:', error);
-        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+        console.error('[SUPER ADMIN] Add update error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     } finally {
         connection.release();
+    }
+});
+
+app.put('/api/v1/superadmin/updates/:id', authenticateToken, verifySuperAdmin, async (req, res) => {
+    const { title, description, version, date, images } = req.body;
+    const updateId = req.params.id;
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        await connection.execute(
+            'UPDATE update_history SET update_title = ?, update_description = ?, update_version = ?, update_date = ? WHERE id = ? OR id_update = ?',
+            [title, description, version, date, updateId, updateId]
+        );
+        
+        await connection.execute('DELETE FROM update_images WHERE update_id = ?', [updateId]);
+        if (images && images.length > 0) {
+            const placeholders = images.map(() => '(?, ?)').join(', ');
+            const params = [];
+            images.forEach(url => params.push(updateId, url));
+            await connection.execute(`INSERT INTO update_images (update_id, image_url) VALUES ${placeholders}`, params);
+        }
+        await connection.commit();
+        res.json({ success: true });
+    } catch (error) {
+        await connection.rollback();
+        console.error('[SUPER ADMIN] Edit update error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        connection.release();
+    }
+});
+
+app.delete('/api/v1/superadmin/updates/:id', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        await db.execute('DELETE FROM update_history WHERE id = ? OR id_update = ?', [req.params.id, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Delete update error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// --- Broadcast Management ---
+app.post('/api/v1/superadmin/broadcast', authenticateToken, verifySuperAdmin, async (req, res) => {
+    try {
+        const { message, urgency_level } = req.body;
+        
+        // Auto-create table if missing to prevent crash
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS global_settings (
+                setting_key VARCHAR(50) PRIMARY KEY,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+        
+        const payload = JSON.stringify({ message, urgency_level, timestamp: new Date().toISOString() });
+        await db.execute(
+            'INSERT INTO global_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
+            ['broadcast', payload, payload]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[SUPER ADMIN] Broadcast error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
