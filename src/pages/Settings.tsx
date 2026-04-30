@@ -25,54 +25,7 @@ export function Settings() {
   const [pickerContext, setPickerContext] = useState<{ field: string, index?: number } | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [isKeyLoading, setIsKeyLoading] = useState(false);
-  const [isKeyConfirmOpen, setIsKeyConfirmOpen] = useState(false);
-  const [isKeyVisible, setIsKeyVisible] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notification, setNotification] = useState({ title: '', message: '', type: 'success' as 'success' | 'warning' | 'info' });
-  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
 
-  // ─── Centralized Public Endpoint Definitions ──────────────────────
-  const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
-
-  const PUBLIC_ENDPOINTS = [
-    { name: 'Health',        method: 'GET',  path: '/api/v1/health',                     auth: false, desc: 'Cek status server.' },
-    { name: 'Settings',      method: 'GET',  path: '/api/v1/public/settings',            auth: true,  desc: 'Metadata & konfigurasi situs.' },
-    { name: 'Navigation',    method: 'GET',  path: '/api/v1/public/navigation',          auth: true,  desc: 'Data menu navigasi.' },
-    { name: 'Pages List',    method: 'GET',  path: '/api/v1/public/pages',               auth: true,  desc: 'Daftar halaman (terbit).' },
-    { name: 'Page Detail',   method: 'GET',  path: '/api/v1/public/pages/:slug',         auth: true,  desc: 'Detail halaman berdasarkan slug.' },
-    { name: 'Posts List',    method: 'GET',  path: '/api/v1/public/posts',               auth: true,  desc: 'Daftar post (terbit).' },
-    { name: 'Post Detail',   method: 'GET',  path: '/api/v1/public/posts/:slug',         auth: true,  desc: 'Detail post berdasarkan slug.' },
-    { name: 'Get Comments',  method: 'GET',  path: '/api/v1/public/posts/:id/comments',  auth: true,  desc: 'Komentar untuk sebuah post.' },
-    { name: 'Post Comment',  method: 'POST', path: '/api/v1/public/posts/:id/comments',  auth: true,  desc: 'Kirim komentar baru.' },
-  ];
-
-  const copyEndpointUrl = (path: string) => {
-    const fullUrl = `${PRODUCTION_BASE_URL}${path}`;
-    navigator.clipboard.writeText(fullUrl);
-    setCopiedEndpoint(path);
-    setTimeout(() => setCopiedEndpoint(null), 2000);
-  };
-
-  useEffect(() => {
-    // Fetch API Key
-    const fetchApiKey = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-           const data = await res.json();
-           setApiKey(data.api_key);
-        }
-      } catch (err) {
-        console.error('Failed to fetch API key');
-      }
-    }
-    fetchApiKey();
-  }, []);
 
   // Pre-fill form when data arrives from context
   useEffect(() => {
@@ -167,36 +120,7 @@ export function Settings() {
     }
   };
 
-  const handleRegenerateApiKey = async () => {
-    setIsKeyConfirmOpen(false);
-    setIsKeyLoading(true);
-    try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key/regenerate`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-           const data = await res.json();
-           setApiKey(data.api_key);
-           setNotification({
-               title: 'Berhasil',
-               message: 'API Key berhasil diregenerasi!',
-               type: 'success'
-           });
-           setIsNotificationOpen(true);
-        }
-    } catch (err) {
-        setNotification({
-            title: 'Gagal',
-            message: 'Gagal meregenerasi API Key.',
-            type: 'warning'
-        });
-        setIsNotificationOpen(true);
-    } finally {
-        setIsKeyLoading(false);
-    }
-  };
+
 
   if (!isSettingsLoaded) {
     return (
@@ -312,155 +236,7 @@ export function Settings() {
                     </div>
                 </Card>
 
-                {/* Akses API */}
-                <Card className="p-8">
-                    <h3 className="text-lg font-bold text-zinc-900 mb-2 flex items-center gap-2">
-                        <Key className="w-5 h-5 text-amber-500" />
-                        Akses API
-                    </h3>
-                    <p className="text-zinc-400 text-xs font-medium mb-6">Kelola kunci API untuk menghubungkan aplikasi frontend Anda dengan Headless CMS ini.</p>
-                    
-                    <div>
-                        <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Current API Key</label>
-                        <div className="flex gap-2">
-                            <div className="relative flex-1 flex items-center">
-                                <div className="absolute left-4 z-10 flex items-center gap-2 pointer-events-none">
-                                    <Key className="w-4 h-4 text-zinc-300" />
-                                    <span className="text-zinc-400 font-mono text-xs font-bold border-r border-zinc-200 pr-2">x-api-key:</span>
-                                </div>
-                                <input 
-                                    type={isKeyVisible ? "text" : "password"} 
-                                    readOnly
-                                    value={apiKey}
-                                    className="w-full pl-[6.5rem] pr-12 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-sm" 
-                                    placeholder={isKeyLoading ? 'Memuat...' : 'Belum ada API Key'}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setIsKeyVisible(!isKeyVisible)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-                                    title={isKeyVisible ? "Sembunyikan Key" : "Tampilkan Key"}
-                                >
-                                    {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                            <button 
-                                type="button"
-                                onClick={() => { 
-                                    navigator.clipboard.writeText(apiKey); 
-                                    setNotification({
-                                        title: 'Disalin',
-                                        message: 'API Key berhasil disalin ke papan klip.',
-                                        type: 'success'
-                                    });
-                                    setIsNotificationOpen(true);
-                                }}
-                                className="px-4 py-3 bg-zinc-100 text-zinc-600 rounded-xl font-bold hover:bg-zinc-200 transition-all flex items-center justify-center border border-zinc-200"
-                                title="Salin Key"
-                            >
-                                <Copy className="w-5 h-5" />
-                            </button>
-                            <button 
-                                type="button"
-                                onClick={() => setIsKeyConfirmOpen(true)}
-                                disabled={isKeyLoading}
-                                className="px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center border border-red-100 disabled:opacity-50"
-                                title="Regenerasi Key"
-                            >
-                                <RefreshCw className={`w-5 h-5 ${isKeyLoading ? 'animate-spin' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
 
-                    <div className="mt-8 pt-8 border-t border-zinc-100">
-                        <h4 className="text-sm font-bold text-zinc-900 mb-1 flex items-center gap-2">
-                            <BookOpen className="w-4 h-4 text-amber-500" />
-                            Dokumentasi API Publik
-                        </h4>
-                        <p className="text-zinc-400 text-xs font-medium mb-5">Referensi lengkap endpoint yang tersedia untuk aplikasi frontend Anda.</p>
-
-                        {/* Base URL */}
-                        <div className="bg-zinc-900 rounded-xl px-5 py-3.5 mb-4 flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">Production Base URL</span>
-                                <div className="flex flex-col">
-                                    <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
-                                    <span className="text-[10px] text-zinc-500 mt-1 font-medium italic">Semua request (kecuali /health) memerlukan header x-api-key.</span>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => { navigator.clipboard.writeText(PRODUCTION_BASE_URL); setCopiedEndpoint('__base__'); setTimeout(() => setCopiedEndpoint(null), 2000); }}
-                                className={`flex-shrink-0 p-2.5 rounded-xl transition-all ${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}`}
-                                title="Salin Base URL"
-                            >
-                                {copiedEndpoint === '__base__' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                            </button>
-                        </div>
-
-                        {/* Endpoint List */}
-                        <div className="space-y-2">
-                            {PUBLIC_ENDPOINTS.map((ep) => {
-                                const fullUrl = `${PRODUCTION_BASE_URL}${ep.path}`;
-                                const isCopied = copiedEndpoint === ep.path;
-                                return (
-                                    <div
-                                        key={`${ep.method}-${ep.path}`}
-                                        className="group bg-zinc-900 rounded-xl border border-zinc-800/60 hover:border-zinc-700 transition-all overflow-hidden"
-                                    >
-                                        <div className="flex items-center gap-3 px-4 py-3">
-                                            {/* Method Badge */}
-                                            <span className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                                                ep.method === 'POST'
-                                                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                                                    : 'bg-sky-500/15 text-sky-400 border border-sky-500/20'
-                                            }`}>
-                                                {ep.method}
-                                            </span>
-
-                                            {/* URL */}
-                                            <div className="flex-1 min-w-0">
-                                                <code className="font-mono text-xs text-zinc-300 break-all leading-relaxed select-all">{fullUrl}</code>
-                                            </div>
-
-                                            {/* Auth Badge */}
-                                            {ep.auth ? (
-                                                <span className="flex-shrink-0 hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/15">
-                                                    <Key className="w-2.5 h-2.5" /> Key
-                                                </span>
-                                            ) : (
-                                                <span className="flex-shrink-0 hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/15">
-                                                    Public
-                                                </span>
-                                            )}
-
-                                            {/* Copy Button */}
-                                            <button
-                                                type="button"
-                                                onClick={() => copyEndpointUrl(ep.path)}
-                                                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                                                    isCopied
-                                                        ? 'bg-green-500/20 text-green-400'
-                                                        : 'bg-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-700 active:scale-95'
-                                                }`}
-                                                title={isCopied ? 'Disalin!' : 'Salin URL'}
-                                            >
-                                                {isCopied ? <><Check className="w-3.5 h-3.5" /> <span>Copied!</span></> : <><Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy</span></>}
-                                            </button>
-                                        </div>
-
-                                        {/* Description Row */}
-                                        <div className="px-4 pb-3 flex items-center gap-2">
-                                            <span className="text-[11px] text-zinc-500 font-medium">{ep.name}</span>
-                                            <span className="text-zinc-700">·</span>
-                                            <span className="text-[11px] text-zinc-600">{ep.desc}</span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </Card>
               </div>
             )}
 
@@ -644,24 +420,7 @@ export function Settings() {
         onClose={() => setIsConfirmOpen(false)}
       />
       
-      <ConfirmModal 
-        isOpen={isKeyConfirmOpen}
-        title="Regenerasi API Key"
-        message="Peringatan: Regenerasi API Key akan membuat aplikasi frontend lama Anda berhenti berfungsi sampai Key diperbarui. Lanjutkan?"
-        confirmLabel="Ya, Reset Kunci"
-        cancelLabel="Batal"
-        variant="danger"
-        onConfirm={handleRegenerateApiKey}
-        onClose={() => setIsKeyConfirmOpen(false)}
-      />
 
-      <NotificationModal 
-        isOpen={isNotificationOpen}
-        title={notification.title}
-        message={notification.message}
-        type={notification.type}
-        onClose={() => setIsNotificationOpen(false)}
-      />
     </div>
   );
 }

@@ -1,0 +1,354 @@
+import React, { useState, useEffect } from 'react';
+import { Terminal, Copy, Check, Eye, EyeOff, RefreshCw, Key, ShieldAlert } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { NotificationModal } from '../components/ui/NotificationModal';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
+
+const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
+
+const PUBLIC_ENDPOINTS = [
+  { 
+    name: 'Navigation', 
+    method: 'GET', 
+    path: '/api/v1/public/navigation', 
+    desc: 'To fetch the navbar structure based on priority.',
+    response: `{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "title": "Home",
+      "slug": "home",
+      "priority": 1,
+      "status": "published"
+    }
+  ]
+}`
+  },
+  { 
+    name: 'Page Detail', 
+    method: 'GET', 
+    path: '/api/v1/public/pages/:slug', 
+    desc: 'To fetch specific page content blocks.',
+    response: `{
+  "success": true,
+  "data": {
+    "title": "About Us",
+    "slug": "about-us",
+    "content": [ ... blocks ... ]
+  }
+}`
+  },
+  { 
+    name: 'Post Feed', 
+    method: 'GET', 
+    path: '/api/v1/public/posts', 
+    desc: 'To fetch categorized posts.',
+    response: `{
+  "success": true,
+  "data": [
+    {
+      "id": 10,
+      "title": "New Event",
+      "category": "Event",
+      "excerpt": "Join us..."
+    }
+  ]
+}`
+  },
+  { 
+    name: 'Post Detail', 
+    method: 'GET', 
+    path: '/api/v1/public/posts/:slug', 
+    desc: 'To fetch full post data (Article/Event/Product).',
+    response: `{
+  "success": true,
+  "data": {
+    "title": "New Event",
+    "slug": "new-event",
+    "content": { ... structured data ... }
+  }
+}`
+  }
+];
+
+export function ApiIntegration() {
+  const [apiKey, setApiKey] = useState('');
+  const [isKeyLoading, setIsKeyLoading] = useState(false);
+  const [isKeyConfirmOpen, setIsKeyConfirmOpen] = useState(false);
+  const [isKeyVisible, setIsKeyVisible] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notification, setNotification] = useState({ title: '', message: '', type: 'success' as 'success' | 'warning' | 'info' });
+  const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
+            headers: { 'Authorization': \`Bearer \${token}\` }
+        });
+        if (res.ok) {
+           const data = await res.json();
+           setApiKey(data.api_key);
+        }
+      } catch (err) {
+        console.error('Failed to fetch API key');
+      }
+    }
+    fetchApiKey();
+  }, []);
+
+  const handleRegenerateApiKey = async () => {
+    setIsKeyConfirmOpen(false);
+    setIsKeyLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key/regenerate`, {
+            method: 'POST',
+            headers: { 'Authorization': \`Bearer \${token}\` }
+        });
+        if (res.ok) {
+           const data = await res.json();
+           setApiKey(data.api_key);
+           setNotification({
+               title: 'Berhasil',
+               message: 'API Key berhasil diregenerasi!',
+               type: 'success'
+           });
+           setIsNotificationOpen(true);
+        }
+    } catch (err) {
+        setNotification({
+            title: 'Gagal',
+            message: 'Gagal meregenerasi API Key.',
+            type: 'warning'
+        });
+        setIsNotificationOpen(true);
+    } finally {
+        setIsKeyLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedEndpoint(id);
+    setTimeout(() => setCopiedEndpoint(null), 2000);
+  };
+
+  return (
+    <div className="animate-in fade-in duration-500 space-y-8 pb-10">
+      <div>
+        <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-2">
+          <Terminal className="w-6 h-6 text-amber-500" />
+          API Integration Guide
+        </h2>
+        <p className="text-zinc-500 mt-1 font-medium">Learn how to connect to the UNI-VERSE API and integrate your frontend in minutes.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div className="lg:col-span-2 space-y-6">
+          {/* Base URL Card */}
+          <div className="bg-zinc-900 rounded-[2rem] p-8 border border-zinc-800 shadow-xl text-white">
+            <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+              <Key className="w-5 h-5 text-amber-500" />
+              Public API Base URL
+            </h3>
+            <p className="text-zinc-400 text-sm mb-6">All endpoints are relative to this base URL.</p>
+            <div className="bg-zinc-950 rounded-xl px-5 py-4 flex items-center justify-between gap-3 border border-zinc-800/60">
+              <code className="text-amber-400 font-mono text-sm font-bold break-all">{PRODUCTION_BASE_URL}</code>
+              <button
+                  type="button"
+                  onClick={() => copyToClipboard(PRODUCTION_BASE_URL, '__base__')}
+                  className={\`flex-shrink-0 p-2.5 rounded-xl transition-all \${copiedEndpoint === '__base__' ? 'bg-green-500/20 text-green-400' : 'bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700'}\`}
+                  title="Salin Base URL"
+              >
+                  {copiedEndpoint === '__base__' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">TIP: Headers Requirement</span>
+                <p className="text-xs text-blue-200/70 font-medium">Almost all requests require the <code className="bg-blue-500/20 px-1 py-0.5 rounded text-blue-300">x-api-key</code> header to authenticate the frontend application.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Endpoints */}
+          <h3 className="text-xl font-bold text-zinc-900 mt-10 mb-6">Endpoints Documentation</h3>
+          
+          <div className="space-y-8">
+            {PUBLIC_ENDPOINTS.map((ep, idx) => {
+              const fullUrl = \`\${PRODUCTION_BASE_URL}\${ep.path}\`;
+              const isCopiedSnippet = copiedEndpoint === \`snippet_\${idx}\`;
+              
+              const snippet = \`fetch("\${fullUrl}", {
+  headers: {
+    "x-api-key": "YOUR_API_KEY"
+  }
+})
+  .then(res => res.json())
+  .then(data => console.log(data));\`;
+
+              return (
+                <div key={idx} className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden">
+                  <div className="p-6 border-b border-zinc-100 flex items-center gap-4">
+                    <span className={\`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider \${
+                        ep.method === 'GET' ? 'bg-sky-50 text-sky-600 border border-sky-100' : 
+                        ep.method === 'POST' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                        'bg-red-50 text-red-600 border border-red-100'
+                    }\`}>
+                        {ep.method}
+                    </span>
+                    <h4 className="text-lg font-bold text-zinc-900">{ep.name}</h4>
+                  </div>
+                  
+                  <div className="p-6 pb-2">
+                    <p className="text-zinc-500 text-sm font-medium mb-4">{ep.desc}</p>
+                    {ep.name === 'Navigation' && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+                        <ShieldAlert className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest block mb-0.5">WARNING</span>
+                          <p className="text-xs text-yellow-800 font-medium">Always use the <code className="font-mono bg-yellow-100 px-1 py-0.5 rounded">priority</code> field for sorting navigation items correctly.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 xl:grid-cols-2 bg-zinc-950 divide-y xl:divide-y-0 xl:divide-x divide-zinc-800">
+                    {/* Left: Request */}
+                    <div className="relative group">
+                      <div className="absolute top-4 right-4 z-10">
+                        <button
+                          onClick={() => copyToClipboard(snippet, \`snippet_\${idx}\`)}
+                          className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all"
+                        >
+                          {isCopiedSnippet ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Example Request (Fetch)</span>
+                      </div>
+                      <div className="p-4 overflow-x-auto text-sm">
+                        <SyntaxHighlighter language="javascript" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
+                          {snippet}
+                        </SyntaxHighlighter>
+                      </div>
+                    </div>
+                    
+                    {/* Right: Response */}
+                    <div className="relative">
+                      <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Success Response</span>
+                      </div>
+                      <div className="p-4 overflow-x-auto text-sm">
+                        <SyntaxHighlighter language="json" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
+                          {ep.response}
+                        </SyntaxHighlighter>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+        </div>
+
+        {/* Sidebar Controls */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-[2rem] border border-zinc-200 p-6 shadow-sm sticky top-8">
+            <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4 text-amber-500" />
+                API Key Management
+            </h3>
+            <p className="text-zinc-500 text-xs font-medium mb-6">Manage the API key required for frontend authorization.</p>
+            
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Current Key</label>
+                    <div className="relative flex items-center">
+                        <input 
+                            type={isKeyVisible ? "text" : "password"} 
+                            readOnly
+                            value={apiKey}
+                            className="w-full pl-4 pr-12 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none font-mono text-zinc-700 text-xs" 
+                            placeholder={isKeyLoading ? 'Memuat...' : 'Belum ada API Key'}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setIsKeyVisible(!isKeyVisible)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                        >
+                            {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                      type="button"
+                      onClick={() => { 
+                          navigator.clipboard.writeText(apiKey); 
+                          setNotification({
+                              title: 'Disalin',
+                              message: 'API Key berhasil disalin ke papan klip.',
+                              type: 'success'
+                          });
+                          setIsNotificationOpen(true);
+                      }}
+                      className="flex-1 py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 text-sm"
+                  >
+                      <Copy className="w-4 h-4" />
+                      Copy Key
+                  </button>
+                  <button 
+                      type="button"
+                      onClick={() => setIsKeyConfirmOpen(true)}
+                      disabled={isKeyLoading}
+                      className="flex-shrink-0 px-4 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all flex items-center justify-center border border-red-100 disabled:opacity-50"
+                      title="Regenerate Key"
+                  >
+                      <RefreshCw className={\`w-5 h-5 \${isKeyLoading ? 'animate-spin' : ''}\`} />
+                  </button>
+                </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-zinc-100">
+                <div className="flex items-start gap-3 bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200/50">
+                  <ShieldAlert className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-[11px] font-medium leading-relaxed">
+                    <strong>Note:</strong> Regenerating the API Key will instantly invalidate the previous one. Ensure you update your frontend environment variables immediately after regenerating.
+                  </p>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <ConfirmModal 
+        isOpen={isKeyConfirmOpen}
+        title="Regenerate API Key"
+        message="Warning: Regenerating the API Key will cause your existing frontend application to stop working until the key is updated. Continue?"
+        confirmLabel="Yes, Reset Key"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={handleRegenerateApiKey}
+        onClose={() => setIsKeyConfirmOpen(false)}
+      />
+
+      <NotificationModal 
+        isOpen={isNotificationOpen}
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setIsNotificationOpen(false)}
+      />
+    </div>
+  );
+}

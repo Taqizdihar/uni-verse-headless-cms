@@ -9,6 +9,7 @@ import { Comments } from './pages/Comments';
 import { Layout } from './pages/Layout';
 import { Users } from './pages/Users';
 import { Plugins } from './pages/Plugins';
+import { ApiIntegration } from './pages/ApiIntegration';
 import { Settings } from './pages/Settings';
 import { HeadlessSettings } from './pages/HeadlessSettings';
 import { LayoutManager } from './pages/LayoutManager';
@@ -57,6 +58,7 @@ export default function App() {
                   <Route path="/layout" element={<Layout />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/plugins" element={<Plugins />} />
+                  <Route path="/api-integration" element={<ApiIntegration />} />
                   <Route path="/settings" element={<Settings />} />
                   
                   {/* Headless Testing Routes */}
