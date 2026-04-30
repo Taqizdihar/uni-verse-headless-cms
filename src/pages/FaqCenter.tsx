@@ -32,12 +32,13 @@ function FaqItem({ faq, isLastOdd }: { faq: FAQ, isLastOdd: boolean }) {
       </button>
       
       {isOpen && (
-        <div className="px-6 pb-6 pt-0 border-t border-zinc-100 animate-in slide-in-from-top-2 duration-200">
+        <div className="px-5 pb-5 pt-0 border-t border-zinc-100 animate-in slide-in-from-top-2 duration-200">
           <div 
-            className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2 break-words"
+            className="prose prose-sm max-w-none text-zinc-600 leading-relaxed mt-4 prose-a:text-amber-600 prose-strong:text-zinc-800 prose-p:my-2"
             style={{ 
               overflowWrap: 'break-word', 
               wordBreak: 'normal', 
+              whiteSpace: 'pre-wrap',
               hyphens: 'none' 
             }}
             dangerouslySetInnerHTML={{ __html: faq.answer }}

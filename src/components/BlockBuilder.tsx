@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical, X, LayoutTemplate, UserSquare, GalleryHorizontal, Newspaper, Type, Phone, HelpCircle, Quote, Users, Aperture, MousePointerClick, Star, Briefcase } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, ChevronUp, ChevronDown, ImageIcon, GripVertical, X, LayoutTemplate, UserSquare, GalleryHorizontal, Newspaper, Type, Phone, HelpCircle, Quote, Users, Aperture, MousePointerClick, Star, Briefcase, Calendar, ShoppingBag, Megaphone, ArrowUpDown, Zap, ListChecks, Loader2, CheckSquare } from 'lucide-react';
 import RichTextEditor from './RichTextEditor';
+import axios from 'axios';
+
+const POST_CATEGORIES = [
+  { id: 'all', label: 'Semua Kategori', icon: Newspaper, color: 'text-zinc-500', bg: 'bg-zinc-100' },
+  { id: 'Artikel', label: 'Artikel', icon: Newspaper, color: 'text-blue-500', bg: 'bg-blue-50' },
+  { id: 'Event', label: 'Event', icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { id: 'Produk', label: 'Produk', icon: ShoppingBag, color: 'text-amber-500', bg: 'bg-amber-50' },
+  { id: 'Lowongan', label: 'Lowongan', icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50' },
+  { id: 'Pengumuman', label: 'Pengumuman', icon: Megaphone, color: 'text-rose-500', bg: 'bg-rose-50' },
+];
 
 export interface Block {
   id: string;
@@ -32,6 +42,25 @@ const BLOCK_TYPES = [
 
 export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuilderProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const [availablePosts, setAvailablePosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
+  // Fetch posts for manual selection mode
+  const fetchPostsForPicker = async () => {
+    if (availablePosts.length > 0) return; // Already fetched
+    setLoadingPosts(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAvailablePosts(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch posts for picker:', err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   const addBlock = (type: Block['type']) => {
     const newBlock: Block = {
@@ -48,7 +77,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
     } else if (type === 'activity-slider') {
       newBlock.data = { title: '', activities: [] };
     } else if (type === 'dynamic-post-feed') {
-      newBlock.data = { category: '', limit: 3 };
+      newBlock.data = { category: null, limit: 3, sort_order: 'desc', selection_mode: 'dynamic', selected_post_ids: null };
     } else if (type === 'rich-text') {
       newBlock.data = { content: '' };
     } else if (type === 'contacts') {
@@ -236,19 +265,177 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
           </div>
         );
 
-      case 'dynamic-post-feed':
+      case 'dynamic-post-feed': {
+        const currentCat = POST_CATEGORIES.find(c => c.id === (block.data.category || 'all')) || POST_CATEGORIES[0];
+        const CurrentCatIcon = currentCat.icon;
+        const isManualMode = block.data.selection_mode === 'manual';
+        const selectedIds: number[] = block.data.selected_post_ids || [];
+
         return (
-          <div className="space-y-4">
-             <div>
-               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Category Filter</label>
-               <input type="text" placeholder="e.g. News, Updates (Empty for all)" value={block.data.category || ''} onChange={(e) => updateBlockData(block.id, 'category', e.target.value)} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm" />
-            </div>
+          <div className="space-y-5">
+            {/* Category Filter Dropdown */}
             <div>
-               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Limit (Number of posts)</label>
-               <input type="number" min="1" max="20" value={block.data.limit || 3} onChange={(e) => updateBlockData(block.id, 'limit', parseInt(e.target.value) || 3)} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm" />
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Filter Kategori</label>
+              <div className="relative">
+                <div className={`absolute left-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg ${currentCat.bg}`}>
+                  <CurrentCatIcon className={`w-4 h-4 ${currentCat.color}`} />
+                </div>
+                <select
+                  value={block.data.category || 'all'}
+                  onChange={(e) => {
+                    const val = e.target.value === 'all' ? null : e.target.value;
+                    updateBlockData(block.id, 'category', val);
+                  }}
+                  className="w-full pl-12 pr-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-bold text-zinc-800 appearance-none cursor-pointer hover:bg-zinc-100 transition-colors"
+                >
+                  {POST_CATEGORIES.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Limit */}
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Jumlah Post</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={block.data.limit || 3}
+                  onChange={(e) => updateBlockData(block.id, 'limit', parseInt(e.target.value) || 3)}
+                  className="w-full px-3 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-bold text-zinc-800 tabular-nums"
+                />
+              </div>
+
+              {/* Sort Order */}
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Urutan Post</label>
+                <div className="relative">
+                  <ArrowUpDown className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    value={block.data.sort_order || 'desc'}
+                    onChange={(e) => updateBlockData(block.id, 'sort_order', e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-bold text-zinc-800 appearance-none cursor-pointer hover:bg-zinc-100 transition-colors"
+                  >
+                    <option value="desc">Terbaru</option>
+                    <option value="asc">Terlama</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {/* Selection Mode */}
+            <div>
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Mode Seleksi</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => updateBlockData(block.id, 'selection_mode', 'dynamic')}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl border-2 transition-all text-left ${
+                    !isManualMode
+                      ? 'border-amber-400 bg-amber-50 shadow-sm'
+                      : 'border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${ !isManualMode ? 'bg-amber-100' : 'bg-zinc-100'}`}>
+                    <Zap className={`w-4 h-4 ${ !isManualMode ? 'text-amber-600' : 'text-zinc-400'}`} />
+                  </div>
+                  <div>
+                    <p className={`text-xs font-bold ${ !isManualMode ? 'text-amber-700' : 'text-zinc-700'}`}>Dinamis</p>
+                    <p className="text-[10px] text-zinc-400 font-medium leading-tight">Otomatis dari kategori</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateBlockData(block.id, 'selection_mode', 'manual');
+                    fetchPostsForPicker();
+                  }}
+                  className={`flex items-center gap-2.5 p-3 rounded-xl border-2 transition-all text-left ${
+                    isManualMode
+                      ? 'border-amber-400 bg-amber-50 shadow-sm'
+                      : 'border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${ isManualMode ? 'bg-amber-100' : 'bg-zinc-100'}`}>
+                    <ListChecks className={`w-4 h-4 ${ isManualMode ? 'text-amber-600' : 'text-zinc-400'}`} />
+                  </div>
+                  <div>
+                    <p className={`text-xs font-bold ${ isManualMode ? 'text-amber-700' : 'text-zinc-700'}`}>Pilih Manual</p>
+                    <p className="text-[10px] text-zinc-400 font-medium leading-tight">Pilih post tertentu</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Manual Post Picker */}
+            {isManualMode && (
+              <div className="animate-in slide-in-from-top-2 duration-200">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Pilih Post</label>
+                {loadingPosts ? (
+                  <div className="flex items-center justify-center py-6 bg-zinc-50 rounded-xl border border-zinc-100">
+                    <Loader2 className="w-5 h-5 text-amber-500 animate-spin" />
+                    <span className="ml-2 text-xs font-bold text-zinc-400">Memuat post...</span>
+                  </div>
+                ) : availablePosts.length === 0 ? (
+                  <div className="py-6 text-center bg-zinc-50 rounded-xl border border-zinc-100">
+                    <p className="text-xs font-bold text-zinc-400">Belum ada post yang tersedia.</p>
+                  </div>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50 divide-y divide-zinc-100">
+                    {availablePosts.map((post: any) => {
+                      const isSelected = selectedIds.includes(post.id);
+                      const catMeta = POST_CATEGORIES.find(c => c.id === post.category);
+                      return (
+                        <button
+                          key={post.id}
+                          type="button"
+                          onClick={() => {
+                            let newIds: number[];
+                            if (isSelected) {
+                              newIds = selectedIds.filter((id: number) => id !== post.id);
+                            } else {
+                              newIds = [...selectedIds, post.id];
+                            }
+                            updateBlockData(block.id, 'selected_post_ids', newIds.length > 0 ? newIds : null);
+                          }}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                            isSelected ? 'bg-amber-50' : 'hover:bg-zinc-100'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded flex-shrink-0 border-2 flex items-center justify-center transition-colors ${
+                            isSelected ? 'bg-amber-400 border-amber-400' : 'border-zinc-300 bg-white'
+                          }`}>
+                            {isSelected && <CheckSquare className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-xs font-bold truncate ${isSelected ? 'text-amber-700' : 'text-zinc-700'}`}>{post.title}</p>
+                            <p className="text-[10px] text-zinc-400 font-mono truncate">/{post.slug}</p>
+                          </div>
+                          {catMeta && (
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${catMeta.bg} ${catMeta.color} flex-shrink-0`}>
+                              {catMeta.label}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {selectedIds.length > 0 && (
+                  <p className="mt-2 text-[10px] font-bold text-amber-600">
+                    {selectedIds.length} post terpilih
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         );
+      }
 
       case 'rich-text':
         return (

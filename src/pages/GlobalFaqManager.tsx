@@ -198,8 +198,8 @@ export function GlobalFaqManager() {
                     <span className="flex-1">{faq.question}</span>
                  </h3>
                  <div 
-                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed break-words overflow-hidden"
-                   style={{ wordBreak: 'normal', overflowWrap: 'break-word', hyphens: 'none' }}
+                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed overflow-hidden"
+                   style={{ wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', hyphens: 'none' }}
                    dangerouslySetInnerHTML={{ __html: faq.answer }}
                  />
               </div>
