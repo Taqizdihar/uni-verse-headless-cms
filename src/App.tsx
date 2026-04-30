@@ -24,6 +24,8 @@ import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { TenantManagement } from './pages/TenantManagement';
 import { GlobalFaqManager } from './pages/GlobalFaqManager';
 import { InfrastructureMonitor } from './pages/InfrastructureMonitor';
+import { UpdateHistoryManager } from './pages/UpdateHistoryManager';
+import { SuperAdminSettings } from './pages/SuperAdminSettings';
 import { SuperAdminRoute } from './components/SuperAdminRoute';
 import { SearchProvider } from './context/SearchContext';
 import { CMSProvider } from './context/CMSContext';
@@ -86,6 +88,8 @@ export default function App() {
                      <Route path="/super-admin/tenants" element={<TenantManagement />} />
                      <Route path="/super-admin/faq" element={<GlobalFaqManager />} />
                      <Route path="/super-admin/infrastructure" element={<InfrastructureMonitor />} />
+                     <Route path="/super-admin/updates" element={<UpdateHistoryManager />} />
+                     <Route path="/super-admin/settings" element={<SuperAdminSettings />} />
                    </Route>
                 </Route>
               </Route>

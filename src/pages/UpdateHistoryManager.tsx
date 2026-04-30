@@ -350,7 +350,16 @@ export function UpdateHistoryManager() {
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Deskripsi (Release Notes)</label>
-                  <div className="rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors">
+                  <div className="update-editor-container rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                    <style>{`
+                      .update-editor-container .ql-editor {
+                        color: #000000 !important;
+                        min-height: 200px;
+                      }
+                      .update-editor-container .ql-toolbar {
+                        background: #f4f4f5;
+                      }
+                    `}</style>
                     <RichTextEditor 
                       value={formData.description} 
                       onChange={val => setFormData(p => ({ ...p, description: val }))} 

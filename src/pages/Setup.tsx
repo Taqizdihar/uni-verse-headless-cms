@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Globe, Type, AlignLeft, Rocket, ChevronRight, AlertCircle, Layout as LayoutIcon } from 'lucide-react';
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
 export function Setup() {
   const navigate = useNavigate();
@@ -64,11 +65,8 @@ export function Setup() {
   return (
     <div className="min-h-screen bg-[#09090b] flex flex-col justify-center items-center py-12 px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center gap-2 mb-8">
-          <div className="p-3 bg-amber-400 rounded-2xl text-black">
-              <LayoutIcon className="w-8 h-8" />
-          </div>
-          <span className="text-2xl font-black text-white tracking-tighter uppercase">Uni-Inside</span>
+        <div className="mb-8 flex justify-center">
+          <img src={universeLogo} alt="UNI-VERSE" className="h-12 w-auto object-contain" />
         </div>
         <h2 className="text-3xl font-black text-white tracking-tight">Pengaturan Awal</h2>
         <p className="mt-2 text-sm text-gray-500 font-medium tracking-wide">Konfigurasikan informasi dasar website Anda.</p>

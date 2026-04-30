@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
-import universeLogo from '../assets/logo/UNI-VERSE Logo.png';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
 export function PublicLanding() {
   const navigate = useNavigate();

@@ -277,7 +277,16 @@ export function GlobalFaqManager() {
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Jawaban Lengkap</label>
-                  <div className="rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors">
+                  <div className="faq-editor-container rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                    <style>{`
+                      .faq-editor-container .ql-editor {
+                        color: #000000 !important;
+                        min-height: 200px;
+                      }
+                      .faq-editor-container .ql-toolbar {
+                        background: #f4f4f5;
+                      }
+                    `}</style>
                     <RichTextEditor 
                       value={formData.answer} 
                       onChange={val => setFormData(p => ({ ...p, answer: val }))} 
