@@ -183,26 +183,27 @@ export function GlobalFaqManager() {
           </div>
         ) : (
           filteredFaqs.map((faq) => (
-            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all shadow-xl">
-              <div className="flex-1 space-y-4">
+            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all shadow-xl overflow-hidden">
+              <div className="flex-1 min-w-0 space-y-4 w-full">
                  <div className="flex flex-wrap items-center gap-3">
                     <span className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-[10px] font-black uppercase tracking-widest border border-zinc-700">
-                      {faq.category || 'Umum'}
+                       {faq.category || 'Umum'}
                     </span>
                     <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
-                      Prioritas: {faq.priority}
+                       Prioritas: {faq.priority}
                     </span>
                  </div>
-                 <h3 className="text-xl font-bold text-white flex items-start gap-3">
+                 <h3 className="text-xl font-bold text-white flex items-start gap-3 break-words">
                     <HelpCircle className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
-                    {faq.question}
+                    <span className="flex-1">{faq.question}</span>
                  </h3>
                  <div 
-                   className="prose prose-invert prose-sm max-w-none text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed"
+                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed break-words overflow-hidden"
+                   style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
                    dangerouslySetInnerHTML={{ __html: faq.answer }}
                  />
               </div>
-              <div className="flex items-center gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
+              <div className="flex flex-shrink-0 items-center gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
                  <button 
                    onClick={() => handleOpenModal(faq)}
                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-emerald-500 text-zinc-300 hover:text-black rounded-xl transition-colors font-bold text-xs"

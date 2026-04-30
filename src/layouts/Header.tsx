@@ -5,8 +5,6 @@ import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
-import universeLogo from '../assets/logo/UNI-VERSE Logo V2.png';
-
 interface HeaderProps {
   onMenuClick?: () => void;
 }
@@ -38,9 +36,11 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <div className="flex flex-col items-start leading-tight">
-          <img src={universeLogo} alt="UNI-VERSE" className="h-7 w-auto mb-0.5" />
+          <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate max-w-[150px] md:max-w-[200px]" title={settings?.site_name || 'Uni-Inside'}>
+            {settings?.site_name || 'Uni-Inside'}
+          </h1>
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
-            Uni-Inside <span className="text-amber-500">CMS</span>
+            PANEL <span className="text-zinc-400">ADMIN</span>
           </span>
         </div>
         {/* Search bar */}

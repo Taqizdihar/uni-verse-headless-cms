@@ -17,6 +17,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
 
@@ -45,9 +46,10 @@ export function Sidebar({ onClose }: SidebarProps) {
     <aside className="w-64 bg-zinc-900 text-white h-screen flex flex-col relative shadow-xl">
       <div className="p-8">
         <div className="flex items-center justify-between mb-2 md:block">
-          <h1 className="text-2xl font-black text-amber-400 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
-              {settings?.site_name || 'Uni-Inside'}
-          </h1>
+          <div className="flex flex-col items-start gap-1">
+            <img src={universeLogo} alt="UNI-VERSE" className="h-8 w-auto brightness-0 invert" />
+            <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] mt-1 opacity-90">UNI-INSIDE'S CMS</p>
+          </div>
           <button 
             onClick={onClose}
             className="p-2 md:hidden text-zinc-400 hover:text-white transition-colors"
@@ -55,7 +57,6 @@ export function Sidebar({ onClose }: SidebarProps) {
             <X className="w-6 h-6" />
           </button>
         </div>
-        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.3em] mt-1 ml-0.5 opacity-60">Konsol Admin</p>
       </div>
 
       <nav className="flex-1 px-4 pb-4 space-y-0.5 overflow-y-auto">
