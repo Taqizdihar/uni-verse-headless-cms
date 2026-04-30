@@ -64,6 +64,12 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ========================================================
+// HEALTH CHECK ENDPOINT (Public — no auth required)
+// ========================================================
+const healthRoutes = require('./server/routes/health');
+app.use('/api/v1/health', healthRoutes);
+
 // =============================================================
 // ★ PUBLIC PREVIEW ROUTE — MUST STAY BEFORE authenticateToken ★
 // Express runs app.use('/api', authMiddleware) on ALL /api/*
@@ -497,15 +503,7 @@ app.get('/', (req, res) => res.send('Server is running'));
 const dataRoutes = require('./server/routes/data');
 app.use('/api/v1/public', dataRoutes);
 
-// ========================================================
-// HEALTH CHECK ENDPOINT (Public — no auth required)
-// ========================================================
-const healthRoutes = require('./server/routes/health');
-app.use('/api/v1/health', healthRoutes);
-
-// ========================================================
-// PROTECTED ROUTES BELOW
-// ========================================================
+// Protected routes below
 app.use('/api', authenticateToken);
 
 // Override the hardcoded tenant_id = 1 dynamically based on req.user.tenant_id

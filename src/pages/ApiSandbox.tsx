@@ -252,7 +252,7 @@ export function ApiSandbox() {
 
         {/* ==================== LEFT: REQUEST PANE ==================== */}
         <div className="space-y-5">
-          <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-visible">
             {/* Section: API Key */}
             <div className="p-6 border-b border-zinc-100">
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
@@ -263,7 +263,7 @@ export function ApiSandbox() {
                   type={isKeyVisible ? 'text' : 'password'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full pl-4 pr-24 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all"
+                  className="w-full pl-4 pr-24 py-3.5 bg-white border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all shadow-sm"
                   placeholder="Masukkan API Key Anda..."
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
