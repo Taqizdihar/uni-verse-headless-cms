@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe } from 'lucide-react';
+import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter } from 'lucide-react';
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -19,6 +19,8 @@ export function Posts() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [confirmCategoryChange, setConfirmCategoryChange] = useState<{ isOpen: boolean, nextCategory: string | null }>({ isOpen: false, nextCategory: null });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Semua Kategori');
   
   const [toggling, setToggling] = useState<{ [key: number]: boolean }>({});
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -589,6 +591,12 @@ export function Posts() {
   };
 
 
+  const filteredPosts = posts?.filter((post: any) => {
+    const matchesSearch = post.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategoryFilter === 'Semua Kategori' || post.category === selectedCategoryFilter;
+    return matchesSearch && matchesCategory;
+  }) || [];
+
   return (
     <div className="animate-in fade-in duration-500 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -596,13 +604,48 @@ export function Posts() {
           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Posts</h2>
           <p className="text-zinc-500 text-sm mt-1 font-medium">Kelola konten dinamis secara kronologis.</p>
         </div>
-        <button 
-          onClick={() => openEditor()}
-          className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95"
-        >
-          <Plus className="w-5 h-5 stroke-[3]" />
-          Buat Konten
-        </button>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input 
+              type="text" 
+              placeholder="Cari judul post..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-sm font-medium transition-all"
+            />
+          </div>
+          
+          {/* Category Filter */}
+          <div className="relative w-full sm:w-48">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+            <select
+              value={selectedCategoryFilter}
+              onChange={e => setSelectedCategoryFilter(e.target.value)}
+              className="w-full pl-10 pr-8 py-2.5 bg-white border border-zinc-200 rounded-xl outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-sm font-medium appearance-none transition-all cursor-pointer"
+            >
+              <option value="Semua Kategori">Semua Kategori</option>
+              <option value="Artikel">Artikel</option>
+              <option value="Event">Event</option>
+              <option value="Produk">Produk</option>
+              <option value="Lowongan">Lowongan</option>
+              <option value="Pengumuman">Pengumuman</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => openEditor()}
+            className="flex items-center justify-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95 w-full sm:w-auto shrink-0"
+          >
+            <Plus className="w-5 h-5 stroke-[3]" />
+            Buat Konten
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden p-0">
@@ -620,7 +663,7 @@ export function Posts() {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 text-sm">
-                    {posts && posts.length > 0 ? posts.map((post, idx) => (
+                    {filteredPosts && filteredPosts.length > 0 ? filteredPosts.map((post, idx) => (
                         <tr key={idx} className="hover:bg-zinc-50/50 transition-colors group">
                             <td className="pl-8 pr-3 py-6 text-center">
                                 <span className="text-zinc-400 font-bold tabular-nums text-xs">{idx + 1}</span>

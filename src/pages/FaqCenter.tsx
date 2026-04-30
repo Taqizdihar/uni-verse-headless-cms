@@ -29,9 +29,17 @@ function FaqItem({ faq }: { faq: FAQ }) {
       </summary>
       
       <div className="p-6 border-t border-zinc-100 bg-white">
+        <style>{`
+          .faq-answer-content, .faq-answer-content * {
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            white-space: pre-wrap !important;
+            hyphens: none !important;
+          }
+        `}</style>
         <div 
-          className="prose prose-sm max-w-none text-zinc-600 leading-relaxed text-left"
-          style={{ overflowWrap: 'break-word', wordBreak: 'normal', hyphens: 'none' }}
+          className="faq-answer-content prose prose-sm max-w-none text-zinc-600 leading-relaxed text-left"
           dangerouslySetInnerHTML={{ __html: faq.answer }}
         />
         {faq.category && (

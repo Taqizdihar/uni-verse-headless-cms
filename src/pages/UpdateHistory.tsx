@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, History as HistoryIcon, Package } from 'lucide-react';
+import { Loader2, History as HistoryIcon, Package, X } from 'lucide-react';
 import superAdminAvatar from '../assets/logo/super-admin-profile.jpg';
 
 interface UpdateItem {
@@ -15,6 +15,7 @@ interface UpdateItem {
 export function UpdateHistory() {
   const [updates, setUpdates] = useState<UpdateItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUpdates = async () => {
@@ -29,7 +30,7 @@ export function UpdateHistory() {
           description: String(item.description || item.update_description || ''),
           version: String(item.version || item.update_version || ''),
           created_at: String(item.created_at || item.update_date || ''),
-          images: Array.isArray(item.images) ? item.images : []
+          images: Array.isArray(item.images) ? item.images.map((img: any) => typeof img === 'string' ? img : img.image_url) : []
         }));
 
         setUpdates(mappedData);
@@ -52,7 +53,29 @@ export function UpdateHistory() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500 w-full max-w-[1200px] py-8 px-4 md:px-12">
+    <>
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-5xl w-full max-h-[90vh] p-4 flex flex-col items-center justify-center">
+            <button 
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img 
+              src={selectedImage} 
+              alt="Enlarged screenshot" 
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+      <div className="animate-in fade-in duration-500 w-full max-w-[1200px] py-8 px-4 md:px-12">
       <div className="flex items-center gap-4 mb-12">
           <div className="p-3 bg-white rounded-2xl shadow-sm border border-zinc-200">
             <HistoryIcon className="w-6 h-6 text-zinc-900" />
@@ -120,7 +143,11 @@ export function UpdateHistory() {
                   {update.images && update.images.length > 0 && (
                     <div className={`mt-6 pt-6 border-t border-blue-200/50 ${update.images.length === 1 ? 'block' : 'grid grid-cols-2 lg:grid-cols-3 gap-4'}`}>
                       {update.images.map((img, i) => (
-                        <div key={i} className={`${update.images.length === 1 ? 'w-full' : 'aspect-video'} rounded-xl overflow-hidden border border-zinc-200 shadow-sm group/img cursor-pointer bg-zinc-50 hover:shadow-md transition-shadow duration-300`}>
+                        <div 
+                          key={i} 
+                          onClick={() => setSelectedImage(img)}
+                          className={`${update.images.length === 1 ? 'w-full' : 'aspect-video'} rounded-xl overflow-hidden border border-zinc-200 shadow-sm group/img cursor-pointer bg-zinc-50 hover:shadow-md transition-shadow duration-300`}
+                        >
                             <img 
                                 src={img} 
                                 alt={`Update Screenshot ${i+1}`} 
@@ -141,5 +168,6 @@ export function UpdateHistory() {
         </div>
       )}
     </div>
+    </>
   );
 }
