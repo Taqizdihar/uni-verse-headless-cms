@@ -38,7 +38,7 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
       <div className={cn("p-6 flex items-center mb-4 transition-all", isCollapsed ? "justify-center" : "justify-between")}>
         {!isCollapsed && (
           <div className="flex flex-col items-start gap-1">
-             <img src={universeLogo} alt="UNI-VERSE" className="h-8 w-auto" />
+             <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90">Super Admin</span>
           </div>
         )}
