@@ -9,7 +9,7 @@ export function SuperAdminSettings() {
          <p className="text-zinc-400 text-sm font-medium mt-1">Konfigurasi global platform Uni-Verse.</p>
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-8">
+      <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-8">
         <div className="flex items-center justify-center p-12 text-zinc-500 flex-col gap-4">
           <Settings className="w-12 h-12 animate-spin-slow" />
           <p className="font-bold">Modul Pengaturan Sistem sedang dalam tahap pengembangan.</p>

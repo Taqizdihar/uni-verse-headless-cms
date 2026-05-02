@@ -67,7 +67,7 @@ export function LayoutManager() {
                 </div>
                 <div className="p-8 space-y-4">
                     {blocks.map((block, index) => (
-                        <div key={`${block.type}-${index}`} className="flex items-center justify-between p-5 bg-white border border-zinc-100 rounded-2xl shadow-sm hover:border-amber-400 group transition-all">
+                        <div key={`${block.type}-${index}`} className="flex items-center justify-between p-5 bg-white border border-zinc-100 rounded-xl shadow-sm hover:border-amber-400 group transition-all">
                             <div className="flex items-center gap-4">
                                 <GripVertical className="w-5 h-5 text-zinc-300 group-hover:text-amber-400 transition-colors" />
                                 <div className="w-10 h-10 flex items-center justify-center bg-zinc-900 text-amber-400 font-bold rounded-xl text-xs">
@@ -88,7 +88,7 @@ export function LayoutManager() {
                         </div>
                     ))}
                     {blocks.length === 0 && (
-                        <div className="py-20 text-center border-2 border-dashed border-zinc-100 rounded-2xl">
+                        <div className="py-20 text-center border-2 border-dashed border-zinc-100 rounded-xl">
                              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-zinc-200" />
                              <p className="text-zinc-400 font-medium italic">Matriks tata letak saat ini kosong.</p>
                         </div>
@@ -98,7 +98,7 @@ export function LayoutManager() {
                     <button 
                         onClick={handleSave}
                         disabled={status === 'saving'}
-                        className="w-full flex justify-center items-center py-4 bg-zinc-900 text-amber-400 rounded-2xl font-bold hover:bg-black transition-all disabled:opacity-50 shadow-xl"
+                        className="w-full flex justify-center items-center py-4 bg-zinc-900 text-amber-400 rounded-xl font-bold hover:bg-black transition-all disabled:opacity-50 shadow-xl"
                     >
                         <Save className="w-5 h-5 mr-3" />
                         {status === 'saving' ? 'Memproses Perubahan...' : status === 'saved' ? 'Urutan Disimpan!' : 'Simpan Peta Urutan'}
@@ -113,12 +113,12 @@ export function LayoutManager() {
                 <div className="space-y-3">
                     <div className="h-8 w-full bg-zinc-100 rounded-full mb-6"></div>
                     {blocks.map((block, idx) => (
-                        <div key={idx} className="h-16 w-full bg-amber-400/5 border border-amber-400/20 rounded-2xl flex items-center justify-center relative overflow-hidden group">
+                        <div key={idx} className="h-16 w-full bg-amber-400/5 border border-amber-400/20 rounded-xl flex items-center justify-center relative overflow-hidden group">
                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 opacity-20"></div>
                            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest leading-none">[{block.type}]</span>
                         </div>
                     ))}
-                    <div className="h-16 w-full bg-zinc-50 border border-zinc-100 rounded-2xl border-dashed"></div>
+                    <div className="h-16 w-full bg-zinc-50 border border-zinc-100 rounded-xl border-dashed"></div>
                 </div>
             </Card>
         </div>

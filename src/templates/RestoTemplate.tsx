@@ -185,7 +185,7 @@ export default function RestoTemplate({
                 {posts.map((post) => (
                   <Link key={post.id} to={`/preview/${subdomain}/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                      <article style={{ textAlign: 'center' }} className="group">
-                        <div style={{ height: '550px', borderRadius: '5.5rem', overflow: 'hidden', marginBottom: '3.5rem', transition: 'all 0.4s' }} className="group-hover:rounded-[2rem]">
+                        <div style={{ height: '550px', borderRadius: '5.5rem', overflow: 'hidden', marginBottom: '3.5rem', transition: 'all 0.4s' }} className="group-hover:rounded-xl">
                            <img src={fixImg(post.content?.featured_image)} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'all 0.8s' }} className="group-hover:scale-110" />
                         </div>
                         <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2rem', marginBottom: '1.5rem', display: 'block' }}>{post.category}</span>

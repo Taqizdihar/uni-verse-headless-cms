@@ -92,7 +92,7 @@ export function FaqCenter() {
       </div>
 
       {faqs.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-[2rem] py-24 text-center">
+        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-xl py-24 text-center">
           <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <HelpCircle className="w-10 h-10 text-zinc-200" />
           </div>

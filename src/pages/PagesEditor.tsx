@@ -95,7 +95,7 @@ export function PagesEditor() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {pages.map((page, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all">
+          <div key={idx} className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-start justify-between mb-6">
               <div className="p-3 bg-amber-400/10 text-amber-600 rounded-xl">
                 <FileText className="w-6 h-6" />
@@ -173,12 +173,12 @@ export function PagesEditor() {
                     </div>
 
 
-                    <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
+                    <div className="p-6 bg-zinc-50 rounded-xl border border-zinc-100">
                         {renderDynamicInputs()}
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="flex items-center gap-2 bg-zinc-900 text-amber-400 px-8 py-3.5 rounded-2xl font-bold hover:bg-black shadow-xl active:scale-95 transition-all transition-duration-300">
+                        <button type="submit" className="flex items-center gap-2 bg-zinc-900 text-amber-400 px-8 py-3.5 rounded-xl font-bold hover:bg-black shadow-xl active:scale-95 transition-all transition-duration-300">
                             <Save className="w-5 h-5" />
                             Simpan Halaman
                         </button>

@@ -42,10 +42,10 @@ export function NotificationModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-sm bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="p-8 text-center">
           <div className="flex justify-center mb-6">
-            <div className={`p-4 rounded-2xl ${getBgColor()}`}>
+            <div className={`p-4 rounded-xl ${getBgColor()}`}>
               {getIcon()}
             </div>
           </div>
@@ -55,7 +55,7 @@ export function NotificationModal({
 
           <button
             onClick={onClose}
-            className="w-full px-6 py-3.5 rounded-2xl font-bold text-white bg-zinc-900 hover:bg-black shadow-lg shadow-zinc-900/20 transition-all active:scale-95"
+            className="w-full px-6 py-3.5 rounded-xl font-bold text-white bg-zinc-900 hover:bg-black shadow-lg shadow-zinc-900/20 transition-all active:scale-95"
           >
             Mengerti
           </button>

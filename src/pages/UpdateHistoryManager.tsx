@@ -187,9 +187,9 @@ export function UpdateHistoryManager() {
       </div>
 
       {/* Broadcast Section */}
-      <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-blue-500/30 p-8 shadow-xl">
+      <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-blue-500/30 p-8 shadow-xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-blue-500/10 rounded-2xl">
+          <div className="p-3 bg-blue-500/10 rounded-xl">
             <Megaphone className="w-6 h-6 text-blue-400" />
           </div>
           <h3 className="text-xl font-black text-white">Sistem Broadcast Global</h3>
@@ -202,14 +202,14 @@ export function UpdateHistoryManager() {
                 placeholder="Tulis pesan pengumuman penting (misal: Maintenance server pada pukul 00:00 WIB)..."
                 value={broadcastMsg}
                 onChange={e => setBroadcastMsg(e.target.value)}
-                className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
+                className="w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
               />
             </div>
             <div className="md:col-span-1">
               <select 
                 value={broadcastUrgency}
                 onChange={e => setBroadcastUrgency(e.target.value)}
-                className="w-full h-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-blue-500 transition-all text-sm appearance-none font-bold"
+                className="w-full h-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-blue-500 transition-all text-sm appearance-none font-bold"
               >
                 <option value="info">Info (Biru)</option>
                 <option value="warning">Warning (Kuning)</option>
@@ -233,7 +233,7 @@ export function UpdateHistoryManager() {
       {/* Update History Section */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-emerald-500/10 rounded-2xl">
+          <div className="p-3 bg-emerald-500/10 rounded-xl">
             <History className="w-6 h-6 text-emerald-400" />
           </div>
           <h3 className="text-xl font-black text-white">Changelog Sistem</h3>
@@ -248,12 +248,12 @@ export function UpdateHistoryManager() {
 
       <div className="space-y-4">
         {updates.length === 0 ? (
-          <div className="p-12 bg-zinc-900/50 rounded-[2rem] border border-zinc-800 text-center text-zinc-500 font-medium">
+          <div className="p-12 bg-zinc-900/50 rounded-xl border border-zinc-800 text-center text-zinc-500 font-medium">
             Belum ada histori update.
           </div>
         ) : (
           updates.map((update) => (
-            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-6 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all">
+            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all">
               <div className="flex-1 space-y-4 w-full">
                  <div className="flex items-center gap-3">
                     <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-black uppercase tracking-widest border border-emerald-500/20">
@@ -300,7 +300,7 @@ export function UpdateHistoryManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-[#09090b] border border-zinc-800 rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-[#09090b] border border-zinc-800 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             
             <div className="px-8 py-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
                <h3 className="text-xl font-black text-white">
@@ -321,7 +321,7 @@ export function UpdateHistoryManager() {
                       type="text" 
                       value={formData.title} 
                       onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium" 
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium" 
                     />
                   </div>
                   <div>
@@ -331,7 +331,7 @@ export function UpdateHistoryManager() {
                       type="text" 
                       value={formData.version} 
                       onChange={e => setFormData(p => ({ ...p, version: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium font-mono" 
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium font-mono" 
                       placeholder="e.g. 1.2.0"
                     />
                   </div>
@@ -344,13 +344,13 @@ export function UpdateHistoryManager() {
                     type="date" 
                     value={formData.date} 
                     onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
-                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium" 
                   />
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Deskripsi (Release Notes)</label>
-                  <div className="update-editor-container rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                  <div className="update-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
                     <style>{`
                       .update-editor-container .ql-editor {
                         color: #000000 !important;

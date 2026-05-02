@@ -9,6 +9,7 @@ import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
 import RichTextEditor from '../components/RichTextEditor';
 import { BlockBuilder, Block } from '../components/BlockBuilder';
+import { MediaPicker } from '../components/MediaPicker';
 import axios from 'axios';
 
 export function Pages() {
@@ -235,7 +236,7 @@ export function Pages() {
         </button>
       </div>
 
-      <Card className="bg-white border-zinc-200 shadow-sm rounded-2xl overflow-hidden">
+      <Card className="bg-white border-zinc-200 shadow-sm rounded-xl overflow-hidden">
          <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left border-collapse">
@@ -366,7 +367,7 @@ export function Pages() {
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200"
             onMouseDown={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false); }}
         >
-          <div className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 max-h-[90vh]">
+          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 max-h-[90vh]">
             {/* Modal Header */}
             <div className="p-8 border-b border-zinc-100 flex items-center justify-between shrink-0">
                 <h2 className="text-2xl font-bold text-zinc-900">{editingId ? 'Edit Halaman' : 'Buat Halaman Baru'}</h2>
@@ -398,10 +399,10 @@ export function Pages() {
             
             {/* Modal Footer (Sticky) */}
             <div className="p-6 border-t border-zinc-100 shrink-0 flex justify-end gap-3 bg-white rounded-b-[2rem] sticky bottom-0 z-10 w-full">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-2xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
                   Batal
                 </button>
-                <button type="submit" form="page-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
+                <button type="submit" form="page-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
                   <Send className="w-5 h-5" />
                   Simpan Halaman
                 </button>
@@ -411,97 +412,61 @@ export function Pages() {
       )}
 
       {/* Media Picker Modal */}
-      {isMediaPickerOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-zinc-900/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[80vh]">
-                <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-bold text-zinc-900">Galeri Media</h2>
-                        <p className="text-xs text-zinc-500 font-medium">Pilih aset untuk disisipkan ke dalam konteks JSON halaman.</p>
-                    </div>
-                    <button onClick={() => { setIsMediaPickerOpen(false); setPickerContext(null); }} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
-                </div>
-                <div className="p-6 flex-1 overflow-y-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {media?.map((m: any, idx: number) => (
-                            <div 
-                                key={idx} 
-                                onClick={() => {
-                                    if (pickerContext) {
-                                    const { blockId, field, index, subIndex } = pickerContext;
-                                    const mediaUrl = m.file_url || m.url;
-                                    
-                                    if (blockId) {
-                                        setBlocks(prev => prev.map(block => {
-                                            if (block.id !== blockId) return block;
-                                            
-                                            if (field === 'activities' && typeof index === 'number') {
-                                                const newActivities = [...block.data.activities];
-                                                newActivities[index] = { ...newActivities[index], image: mediaUrl };
-                                                return { ...block, data: { ...block.data, activities: newActivities } };
-                                            }
+      <MediaPicker
+        isOpen={isMediaPickerOpen}
+        onClose={() => { setIsMediaPickerOpen(false); setPickerContext(null); }}
+        onSelect={(mediaUrl) => {
+            if (pickerContext) {
+                const { blockId, field, index, subIndex } = pickerContext;
+                
+                if (blockId) {
+                    setBlocks(prev => prev.map(block => {
+                        if (block.id !== blockId) return block;
+                        
+                        if (field === 'activities' && typeof index === 'number') {
+                            const newActivities = [...block.data.activities];
+                            newActivities[index] = { ...newActivities[index], image: mediaUrl };
+                            return { ...block, data: { ...block.data, activities: newActivities } };
+                        }
 
-                                            if (field === 'features_icon' && typeof index === 'number') {
-                                                const newItems = [...(block.data.items || [])];
-                                                newItems[index] = { ...newItems[index], icon_url: mediaUrl };
-                                                return { ...block, data: { ...block.data, items: newItems } };
-                                            }
+                        if (field === 'features_icon' && typeof index === 'number') {
+                            const newItems = [...(block.data.items || [])];
+                            newItems[index] = { ...newItems[index], icon_url: mediaUrl };
+                            return { ...block, data: { ...block.data, items: newItems } };
+                        }
 
-                                            if (field === 'testimonial_image' && typeof index === 'number') {
-                                                const newItems = [...(block.data.items || [])];
-                                                newItems[index] = { ...newItems[index], author_image: mediaUrl };
-                                                return { ...block, data: { ...block.data, items: newItems } };
-                                            }
+                        if (field === 'testimonial_image' && typeof index === 'number') {
+                            const newItems = [...(block.data.items || [])];
+                            newItems[index] = { ...newItems[index], author_image: mediaUrl };
+                            return { ...block, data: { ...block.data, items: newItems } };
+                        }
 
-                                            if (field === 'partner_logo' && typeof index === 'number') {
-                                                const newLogos = [...(block.data.logos || [])];
-                                                newLogos[index] = { ...newLogos[index], logo_url: mediaUrl };
-                                                return { ...block, data: { ...block.data, logos: newLogos } };
-                                            }
+                        if (field === 'partner_logo' && typeof index === 'number') {
+                            const newLogos = [...(block.data.logos || [])];
+                            newLogos[index] = { ...newLogos[index], logo_url: mediaUrl };
+                            return { ...block, data: { ...block.data, logos: newLogos } };
+                        }
 
-                                            if (field === 'team_photo' && typeof index === 'number') {
-                                                const newMembers = [...(block.data.members || [])];
-                                                newMembers[index] = { ...newMembers[index], photo_url: mediaUrl };
-                                                return { ...block, data: { ...block.data, members: newMembers } };
-                                            }
+                        if (field === 'team_photo' && typeof index === 'number') {
+                            const newMembers = [...(block.data.members || [])];
+                            newMembers[index] = { ...newMembers[index], photo_url: mediaUrl };
+                            return { ...block, data: { ...block.data, members: newMembers } };
+                        }
 
-                                            if (field === 'gallery_image' && typeof index === 'number') {
-                                                const newImages = [...(block.data.images || [])];
-                                                newImages[index] = { ...newImages[index], url: mediaUrl };
-                                                return { ...block, data: { ...block.data, images: newImages } };
-                                            }
-                                            
-                                            return { ...block, data: { ...block.data, [field]: mediaUrl } };
-                                        }));
-                                    }
-                                }
-                                setIsMediaPickerOpen(false);
-                                setPickerContext(null);
-                            }}
-                                className="group cursor-pointer rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-400 transition-all relative aspect-square bg-zinc-50"
-                            >
-                                {(m.file_type || '').startsWith('image/') ? (
-                                    <img src={m.file_url || m.url} alt={m.filename} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">{m.filename}</span>
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="bg-amber-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-bold uppercase">Pilih</span>
-                                </div>
-                            </div>
-                        ))}
-                        {(!media || media.length === 0) && (
-                            <div className="col-span-full py-12 text-center text-zinc-400 text-sm font-medium italic">
-                                Belum ada aset media. Silakan unggah di halaman Media terlebih dahulu.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-      )}
+                        if (field === 'gallery_image' && typeof index === 'number') {
+                            const newImages = [...(block.data.images || [])];
+                            newImages[index] = { ...newImages[index], url: mediaUrl };
+                            return { ...block, data: { ...block.data, images: newImages } };
+                        }
+                        
+                        return { ...block, data: { ...block.data, [field]: mediaUrl } };
+                    }));
+                }
+            }
+            setIsMediaPickerOpen(false);
+            setPickerContext(null);
+        }}
+      />
 
       {/* Confirmation Modal */}
       <ConfirmModal 

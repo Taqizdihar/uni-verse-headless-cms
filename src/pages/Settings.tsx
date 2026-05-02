@@ -4,6 +4,7 @@ import { Save, Globe, Mail, CheckCircle2, Eye, EyeOff, X, Image as ImageIcon, La
 
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
+import { MediaPicker } from '../components/MediaPicker';
 
 export function Settings() {
   const { settings, updateSettings, fetchAllData, media } = useCMS();
@@ -347,7 +348,7 @@ export function Settings() {
                                 />
                             </div>
                             {formData.footer_config.google_maps_url && (
-                                <div className="mt-4 rounded-2xl overflow-hidden border border-zinc-100 h-48">
+                                <div className="mt-4 rounded-xl overflow-hidden border border-zinc-100 h-48">
                                     <iframe 
                                         src={resolveMapsUrl(formData.footer_config.google_maps_url)} 
                                         className="w-full h-full border-0" 
@@ -366,7 +367,7 @@ export function Settings() {
                             <Eye className="w-5 h-5 text-amber-500" />
                             Pratinjau Footer
                         </h3>
-                        <div className="bg-zinc-900 text-zinc-400 p-12 rounded-[2.5rem] text-xs space-y-4 font-mono shadow-xl overflow-hidden relative">
+                        <div className="bg-zinc-900 text-zinc-400 p-12 rounded-xl text-xs space-y-4 font-mono shadow-xl overflow-hidden relative">
                             <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-t border-zinc-800 pt-12 mt-12">
                                 <div>
                                     <h4 className="font-bold mb-4 text-sm text-amber-400">{formData.site_name || 'Logo / Judul'}</h4>
@@ -416,7 +417,7 @@ export function Settings() {
                     <button 
                         type="submit"
                         disabled={status === 'saving'}
-                        className="w-full py-4 bg-amber-400 text-zinc-950 rounded-2xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
+                        className="w-full py-4 bg-amber-400 text-zinc-950 rounded-xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
                     >
                         {status === 'saving' ? 'Memproses...' : 'Simpan Pengaturan'}
                     </button>
@@ -444,55 +445,22 @@ export function Settings() {
       </form>
 
       {/* Media Picker Modal */}
-      {isMediaPickerOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-              <div className="relative w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[80vh]">
-                  <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-                      <div>
-                          <h2 className="text-xl font-bold text-zinc-900">Galeri Media</h2>
-                          <p className="text-xs text-zinc-500 font-medium">Pilih aset untuk disisipkan.</p>
-                      </div>
-                      <button onClick={() => { setIsMediaPickerOpen(false); setPickerContext(null); }} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
-                  </div>
-                  <div className="p-6 flex-1 overflow-y-auto">
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                          {(media as any[])?.map((m: any, idx: number) => (
-                              <div 
-                                  key={idx} 
-                                  onClick={() => {
-                                      if (pickerContext) {
-                                          const { field, index } = pickerContext;
-                                          if (index !== undefined) {
-                                              handleInputChange(field, m.file_url || m.url);
-                                          } else {
-                                              handleInputChange(field, m.file_url || m.url);
-                                          }
-                                      }
-                                      setIsMediaPickerOpen(false);
-                                  }}
-                                  className="group aspect-square rounded-2xl border-2 border-zinc-100 overflow-hidden cursor-pointer hover:border-amber-400 focus:border-amber-400 transition-all shadow-sm hover:shadow-md relative bg-zinc-50 flex items-center justify-center"
-                              >
-                                  {m.file_type?.startsWith('image/') ? (
-                                      <img src={m.file_url || m.url} alt="Media" className="w-full h-full object-cover" />
-                                  ) : (
-                                      <div className="flex flex-col items-center justify-center p-4">
-                                          <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-zinc-200 flex items-center justify-center mb-3">
-                                              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{m.file_type?.split('/')[1] || 'FILE'}</span>
-                                          </div>
-                                      </div>
-                                  )}
-                              </div>
-                          ))}
-                          {(!media || (media as any[]).length === 0) && (
-                              <div className="col-span-full py-12 text-center text-zinc-500 text-sm">
-                                  Belum ada media. Silakan unggah di Pintu Kaca terlebih dahulu.
-                              </div>
-                          )}
-                      </div>
-                  </div>
-              </div>
-          </div>
-      )}
+      <MediaPicker
+        isOpen={isMediaPickerOpen}
+        onClose={() => { setIsMediaPickerOpen(false); setPickerContext(null); }}
+        onSelect={(mediaUrl) => {
+            if (pickerContext) {
+                const { field, index } = pickerContext;
+                if (index !== undefined) {
+                    handleInputChange(field, mediaUrl);
+                } else {
+                    handleInputChange(field, mediaUrl);
+                }
+            }
+            setIsMediaPickerOpen(false);
+            setPickerContext(null);
+        }}
+      />
       {/* Confirmation Modal */}
       <ConfirmModal 
         isOpen={isConfirmOpen}
@@ -509,5 +477,5 @@ export function Settings() {
 }
 
 function Card({ children, className = "" }: { children: React.ReactNode, className?: string }) {
-    return <div className={`bg-white rounded-[2rem] border border-zinc-200 shadow-sm ${className}`}>{children}</div>;
+    return <div className={`bg-white rounded-xl border border-zinc-200 shadow-md ${className}`}>{children}</div>;
 }

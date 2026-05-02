@@ -243,7 +243,7 @@ export function ApiIntegration() {
         
         <div className="lg:col-span-2 space-y-6">
           {/* Base URL Card */}
-          <div className="bg-zinc-900 rounded-[2rem] p-8 border border-zinc-800 shadow-xl text-white">
+          <div className="bg-zinc-900 rounded-xl p-8 border border-zinc-800 shadow-xl text-white">
             <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
               <Key className="w-5 h-5 text-amber-500" />
               URL Dasar API Publik
@@ -290,7 +290,7 @@ export function ApiIntegration() {
   .then(data => console.log(data));`;
 
               return (
-                <div key={idx} className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden">
+                <div key={idx} className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
                   <div className="p-6 border-b border-zinc-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider ${
@@ -376,7 +376,7 @@ export function ApiIntegration() {
 
         {/* Sidebar Controls */}
         <div className="space-y-6">
-          <div className="bg-white rounded-[2rem] border border-zinc-200 p-6 shadow-sm sticky top-8">
+          <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm sticky top-8">
             <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
                 <Key className="w-4 h-4 text-amber-500" />
                 Manajemen API Key

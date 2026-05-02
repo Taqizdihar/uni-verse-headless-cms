@@ -68,7 +68,7 @@ export function LandingPagePreview() {
     if (!content) return null;
     return (
       <section className={sectionClasses}>
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 p-12 ${template === 'creative' ? 'bg-zinc-900 border border-zinc-800' : template === 'corporate' ? 'bg-blue-900 text-white rounded-2xl' : 'bg-gray-50 rounded-3xl'}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 p-12 ${template === 'creative' ? 'bg-zinc-900 border border-zinc-800' : template === 'corporate' ? 'bg-blue-900 text-white rounded-xl' : 'bg-gray-50 rounded-3xl'}`}>
           <div>
             <h2 className="text-3xl font-bold mb-4">Hubungi Kami</h2>
             <p className="opacity-70 mb-8">Kami siap membantu Anda meningkatkan kehadiran digital.</p>
@@ -155,7 +155,7 @@ export function LandingPagePreview() {
             {d.subtitle && <p className="text-gray-500 mb-8">{d.subtitle}</p>}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {(d.items || []).map((item: any, i: number) => (
-                <div key={i} className="p-6 rounded-2xl border border-gray-200 text-center">
+                <div key={i} className="p-6 rounded-xl border border-gray-200 text-center">
                   {item.icon_url && <img src={item.icon_url} alt="" className="w-12 h-12 mx-auto mb-4 object-contain" />}
                   <h3 className="font-bold mb-2">{item.title || 'Feature'}</h3>
                   <p className="text-sm text-gray-500">{item.description}</p>
@@ -187,7 +187,7 @@ export function LandingPagePreview() {
             <h2 className="text-3xl font-bold mb-8">{d.title || 'Testimonials'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(d.items || []).map((item: any, i: number) => (
-                <div key={i} className="p-6 rounded-2xl border border-gray-200">
+                <div key={i} className="p-6 rounded-xl border border-gray-200">
                   <p className="text-sm italic text-gray-600 mb-4">"{item.content}"</p>
                   <div className="flex items-center gap-3">
                     {item.author_image && <img src={item.author_image} alt="" className="w-10 h-10 rounded-full object-cover" />}

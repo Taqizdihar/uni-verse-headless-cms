@@ -806,7 +806,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
     <div className="space-y-6">
       <div className="space-y-4">
         {(blocks || []).map((block, index) => (
-          <div key={block.id} className="border border-zinc-200 rounded-2xl bg-white shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+          <div key={block.id} className="border border-zinc-200 rounded-xl bg-white shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2">
             {/* Block Header */}
             <div className="flex items-center justify-between px-4 py-3 bg-zinc-50 border-b border-zinc-100">
               <div className="flex items-center gap-3">
@@ -873,7 +873,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                     key={type.id}
                     type="button"
                     onClick={() => addBlock(type.id as any)}
-                    className="flex flex-col items-center p-4 text-center border-2 border-zinc-100 hover:border-amber-400 hover:bg-amber-50 rounded-2xl transition-all group"
+                    className="flex flex-col items-center p-4 text-center border-2 border-zinc-100 hover:border-amber-400 hover:bg-amber-50 rounded-xl transition-all group"
                   >
                     <div className="w-14 h-14 bg-zinc-100 group-hover:bg-amber-100 rounded-xl flex items-center justify-center mb-3 transition-colors">
                       {getBlockIcon(type.id)}

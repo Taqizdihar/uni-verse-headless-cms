@@ -5,6 +5,7 @@ import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
 import RichTextEditor from '../components/RichTextEditor';
+import { MediaPicker } from '../components/MediaPicker';
 
 const CATEGORIES = [
   { id: 'Artikel', label: 'Artikel', icon: Newspaper, color: 'text-blue-500', bg: 'bg-blue-50', badge: 'bg-blue-100 text-blue-700 border-blue-200', description: 'Berita atau artikel informatif' },
@@ -293,14 +294,14 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tags (Pisahkan dengan koma)</label>
                 <div className="relative">
                   <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                  <input type="text" value={formData.tags || ''} onChange={e => handleInputChange('tags', e.target.value)} placeholder="Misal: Teknologi, Edukasi" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  <input type="text" value={formData.tags || ''} onChange={e => handleInputChange('tags', e.target.value)} placeholder="Misal: Teknologi, Edukasi" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Estimasi Waktu Baca</label>
                 <div className="relative">
                   <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                  <input type="text" value={formData.reading_time || ''} onChange={e => handleInputChange('reading_time', e.target.value)} placeholder="Misal: 5 Menit" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  <input type="text" value={formData.reading_time || ''} onChange={e => handleInputChange('reading_time', e.target.value)} placeholder="Misal: 5 Menit" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
             </div>
@@ -310,7 +311,7 @@ export function Posts() {
                 value={formData.author_note || ''} 
                 onChange={e => handleInputChange('author_note', e.target.value)} 
                 placeholder="Berikan catatan tambahan jika perlu..." 
-                className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
+                className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
               />
             </div>
           </div>
@@ -327,7 +328,7 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Label Kategori (Pisahkan dengan koma)</label>
                 <div className="relative">
                   <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                  <input type="text" value={(formData.event_labels || []).join(', ')} onChange={e => handleInputChange('event_labels', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} placeholder="Misal: Kuliner, F&B" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  <input type="text" value={(formData.event_labels || []).join(', ')} onChange={e => handleInputChange('event_labels', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} placeholder="Misal: Kuliner, F&B" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               
@@ -345,21 +346,21 @@ export function Posts() {
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tanggal Acara</label>
                   <div className="relative">
                       <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="date" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="date" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Jam Mulai</label>
                   <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="time" value={formData.start_time || ''} onChange={e => handleInputChange('start_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="time" value={formData.start_time || ''} onChange={e => handleInputChange('start_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Jam Selesai</label>
                   <div className="relative">
                       <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="time" value={formData.end_time || ''} onChange={e => handleInputChange('end_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="time" value={formData.end_time || ''} onChange={e => handleInputChange('end_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
               </div>
@@ -369,14 +370,14 @@ export function Posts() {
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Nama Lokasi</label>
                   <div className="relative">
                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="text" value={formData.location_name || ''} onChange={e => handleInputChange('location_name', e.target.value)} placeholder="Misal: Aula Utama" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="text" value={formData.location_name || ''} onChange={e => handleInputChange('location_name', e.target.value)} placeholder="Misal: Aula Utama" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Kapasitas / Quota</label>
                   <div className="relative">
                       <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="text" value={formData.quota || ''} onChange={e => handleInputChange('quota', e.target.value)} placeholder="Misal: 100 Orang" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="text" value={formData.quota || ''} onChange={e => handleInputChange('quota', e.target.value)} placeholder="Misal: 100 Orang" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
               </div>
@@ -386,19 +387,19 @@ export function Posts() {
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">URL Google Maps</label>
                   <div className="relative">
                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 opacity-50" />
-                      <input type="url" value={formData.Maps_url || ''} onChange={e => handleInputChange('Maps_url', e.target.value)} placeholder="https://maps.google.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="url" value={formData.Maps_url || ''} onChange={e => handleInputChange('Maps_url', e.target.value)} placeholder="https://maps.google.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Link Pendaftaran</label>
                   <div className="relative">
                       <ArrowRight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                      <input type="url" value={formData.registration_link || ''} onChange={e => handleInputChange('registration_link', e.target.value)} placeholder="https://forms.gle/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                      <input type="url" value={formData.registration_link || ''} onChange={e => handleInputChange('registration_link', e.target.value)} placeholder="https://forms.gle/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-5 bg-zinc-50 rounded-2xl border border-zinc-100">
+              <div className="flex items-center gap-3 p-5 bg-zinc-50 rounded-xl border border-zinc-100">
                   <input 
                       type="checkbox" 
                       id="is_online"
@@ -416,7 +417,7 @@ export function Posts() {
             <div className="space-y-6 pt-4">
               <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Agenda & Pembicara</h4>
               
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+              <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <h5 className="text-xs font-bold text-zinc-800">Rundown Acara</h5>
                   <button type="button" onClick={addAgendaItem} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH AGENDA</button>
@@ -446,7 +447,7 @@ export function Posts() {
                 </div>
               </div>
 
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+              <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <h5 className="text-xs font-bold text-zinc-800">Profil Pembicara</h5>
                   <button type="button" onClick={addSpeaker} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH PEMBICARA</button>
@@ -487,7 +488,7 @@ export function Posts() {
             <div className="space-y-6 pt-4">
               <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Media Tambahan</h4>
               
-              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+              <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm">
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h5 className="text-xs font-bold text-zinc-800">Galeri Event Singkat</h5>
@@ -498,7 +499,7 @@ export function Posts() {
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {(formData.event_gallery || []).map((img: any, idx: number) => (
-                        <div key={idx} className="relative group aspect-[4/3] rounded-2xl bg-zinc-50 border border-zinc-200 overflow-hidden flex flex-col">
+                        <div key={idx} className="relative group aspect-[4/3] rounded-xl bg-zinc-50 border border-zinc-200 overflow-hidden flex flex-col">
                             <div className="flex-1 relative cursor-pointer" onClick={() => openMediaPicker('event_gallery', idx, 'url')}>
                               {img.url ? (
                                   <img src={img.url} className="w-full h-full absolute inset-0 object-cover" alt="Gallery" />
@@ -536,20 +537,20 @@ export function Posts() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1">
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Mata Uang</label>
-                <input type="text" value={formData.currency || 'IDR'} onChange={e => handleInputChange('currency', e.target.value)} placeholder="Misal: IDR" className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                <input type="text" value={formData.currency || 'IDR'} onChange={e => handleInputChange('currency', e.target.value)} placeholder="Misal: IDR" className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Harga Normal</label>
                 <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="number" value={formData.base_price || ''} onChange={e => handleInputChange('base_price', e.target.value)} placeholder="0" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="number" value={formData.base_price || ''} onChange={e => handleInputChange('base_price', e.target.value)} placeholder="0" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Harga Diskon</label>
                 <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="number" value={formData.discounted_price || ''} onChange={e => handleInputChange('discounted_price', e.target.value)} placeholder="0" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="number" value={formData.discounted_price || ''} onChange={e => handleInputChange('discounted_price', e.target.value)} placeholder="0" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
             </div>
@@ -560,7 +561,7 @@ export function Posts() {
                     <select 
                         value={formData.stock_status || 'In Stock'} 
                         onChange={e => handleInputChange('stock_status', e.target.value)}
-                        className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
+                        className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
                     >
                         <option value="In Stock">In Stock (Tersedia)</option>
                         <option value="Out of Stock">Out of Stock (Habis)</option>
@@ -571,7 +572,7 @@ export function Posts() {
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">URL Pembelian</label>
                     <div className="relative">
                         <ArrowRight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                        <input type="url" value={formData.buy_url || ''} onChange={e => handleInputChange('buy_url', e.target.value)} placeholder="https://marketplace.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                        <input type="url" value={formData.buy_url || ''} onChange={e => handleInputChange('buy_url', e.target.value)} placeholder="https://marketplace.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                     </div>
                 </div>
             </div>
@@ -611,7 +612,7 @@ export function Posts() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
                     {(formData.product_gallery || []).map((img: string, idx: number) => (
-                        <div key={idx} className="relative group aspect-square rounded-2xl bg-zinc-50 border border-zinc-100 overflow-hidden">
+                        <div key={idx} className="relative group aspect-square rounded-xl bg-zinc-50 border border-zinc-100 overflow-hidden">
                             {img ? (
                                 <img src={img} className="w-full h-full object-cover" alt={`Gallery ${idx}`} />
                             ) : (
@@ -642,7 +643,7 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Posisi Jabatan</label>
                 <div className="relative">
                     <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="text" value={formData.job_role || ''} onChange={e => handleInputChange('job_role', e.target.value)} placeholder="Misal: Senior Developer" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="text" value={formData.job_role || ''} onChange={e => handleInputChange('job_role', e.target.value)} placeholder="Misal: Senior Developer" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               <div>
@@ -650,7 +651,7 @@ export function Posts() {
                 <select 
                     value={formData.job_type || 'Full-time'} 
                     onChange={e => handleInputChange('job_type', e.target.value)}
-                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
+                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
                 >
                     <option value="Full-time">Full-time</option>
                     <option value="Part-time">Part-time</option>
@@ -665,14 +666,14 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Range Gaji</label>
                 <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="text" value={formData.salary_range || ''} onChange={e => handleInputChange('salary_range', e.target.value)} placeholder="Misal: 10jt - 15jt" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="text" value={formData.salary_range || ''} onChange={e => handleInputChange('salary_range', e.target.value)} placeholder="Misal: 10jt - 15jt" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Batas Akhir (Deadline)</label>
                 <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="date" value={formData.deadline_date || ''} onChange={e => handleInputChange('deadline_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="date" value={formData.deadline_date || ''} onChange={e => handleInputChange('deadline_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
             </div>
@@ -690,7 +691,7 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Link atau Email Lamaran</label>
                 <div className="relative">
                     <Send className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="text" value={formData.apply_email_or_link || ''} onChange={e => handleInputChange('apply_email_or_link', e.target.value)} placeholder="Misal: career@company.com atau link form" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="text" value={formData.apply_email_or_link || ''} onChange={e => handleInputChange('apply_email_or_link', e.target.value)} placeholder="Misal: career@company.com atau link form" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
             </div>
           </div>
@@ -705,7 +706,7 @@ export function Posts() {
                     <select 
                         value={formData.urgency_level || 'Medium'} 
                         onChange={e => handleInputChange('urgency_level', e.target.value)}
-                        className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
+                        className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all appearance-none"
                     >
                         <option value="Low">Low (Informasi Biasa)</option>
                         <option value="Medium">Medium (Penting)</option>
@@ -716,7 +717,7 @@ export function Posts() {
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tanggal Kedaluwarsa</label>
                     <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                        <input type="date" value={formData.expiry_date || ''} onChange={e => handleInputChange('expiry_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                        <input type="date" value={formData.expiry_date || ''} onChange={e => handleInputChange('expiry_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                     </div>
                 </div>
             </div>
@@ -727,7 +728,7 @@ export function Posts() {
                     value={formData.alert_message || ''} 
                     onChange={e => handleInputChange('alert_message', e.target.value)} 
                     placeholder="Tuliskan isi pengumuman penting di sini..."
-                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[120px] resize-none transition-all"
+                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[120px] resize-none transition-all"
                 />
             </div>
 
@@ -735,7 +736,7 @@ export function Posts() {
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Link Aksi (Optional)</label>
                 <div className="relative">
                     <ArrowRight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="url" value={formData.action_link || ''} onChange={e => handleInputChange('action_link', e.target.value)} placeholder="https://domain.com/baca-selengkapnya" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                    <input type="url" value={formData.action_link || ''} onChange={e => handleInputChange('action_link', e.target.value)} placeholder="https://domain.com/baca-selengkapnya" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
             </div>
           </div>
@@ -809,7 +810,7 @@ export function Posts() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-hidden p-0">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden p-0">
         <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
                 <thead className="bg-zinc-50/50 text-zinc-400 text-[10px] font-black uppercase tracking-[0.2em] border-b border-zinc-100">
@@ -908,7 +909,7 @@ export function Posts() {
           onClick={() => setIsModalOpen(false)}
         >
           <div 
-            className="relative w-full max-w-3xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Sticky Header */}
@@ -917,7 +918,7 @@ export function Posts() {
                 <h2 className="text-2xl font-black text-zinc-900 tracking-tight">{editingId ? 'Edit Post' : 'Buat Post Baru'}</h2>
                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-0.5">{category || 'News'} Format</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
+              <button onClick={() => setIsModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-xl transition-all"><X className="w-6 h-6" /></button>
             </div>
             
             {/* Scrollable Content Container */}
@@ -927,11 +928,11 @@ export function Posts() {
                   <div className="md:col-span-2 space-y-6">
                     <div>
                       <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Judul Post</label>
-                      <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" placeholder="Misal: Seminar Tahunan" />
+                      <input type="text" required value={title} onChange={e => setTitle(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" placeholder="Misal: Seminar Tahunan" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Slug (URL)</label>
-                      <input type="text" value={slug} onChange={e => setSlug(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold text-xs text-amber-600 transition-all" placeholder="seminar-tahunan" />
+                      <input type="text" value={slug} onChange={e => setSlug(e.target.value)} className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold text-xs text-amber-600 transition-all" placeholder="seminar-tahunan" />
                     </div>
                   </div>
                   
@@ -939,7 +940,7 @@ export function Posts() {
                     <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Gambar Utama (Featured)</label>
                     <div 
                       onClick={() => openMediaPicker('featured_image')}
-                      className="group relative aspect-[4/3] rounded-2xl bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-amber-400 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center p-2"
+                      className="group relative aspect-[4/3] rounded-xl bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-amber-400 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center p-2"
                     >
                       {formData.featured_image ? (
                         <>
@@ -965,7 +966,7 @@ export function Posts() {
                     <button 
                         type="button"
                         onClick={() => setIsCategoryModalOpen(true)}
-                        className="w-full flex items-center justify-between px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl hover:border-amber-400 transition-all group"
+                        className="w-full flex items-center justify-between px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl hover:border-amber-400 transition-all group"
                     >
                         <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-xl ${CATEGORIES.find(c => c.id === category)?.bg || 'bg-zinc-100'}`}>
@@ -988,7 +989,7 @@ export function Posts() {
                     value={formData.excerpt || ''} 
                     onChange={e => handleInputChange('excerpt', e.target.value)} 
                     placeholder="Berikan ringkasan singkat untuk tampilan list..." 
-                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
+                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
                   />
                 </div>
 
@@ -1001,10 +1002,10 @@ export function Posts() {
             
             {/* Modal Footer (Sticky) */}
             <div className="p-6 border-t border-zinc-100 shrink-0 flex justify-end gap-3 bg-white rounded-b-[2.5rem] sticky bottom-0 z-10 w-full">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-2xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3.5 rounded-xl font-bold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all bg-white border border-zinc-200">
                   Batal
                 </button>
-                <button type="submit" form="post-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-2xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
+                <button type="submit" form="post-edit-form" className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-8 py-3.5 rounded-xl font-bold hover:bg-amber-500 shadow-xl shadow-amber-400/20 transition-all active:scale-95">
                   <Send className="w-5 h-5" />
                   Simpan Perubahan
                 </button>
@@ -1020,7 +1021,7 @@ export function Posts() {
           onMouseDown={(e) => { if (e.target === e.currentTarget) setIsCategoryModalOpen(false); }}
         >
           <div 
-            className="relative w-full max-w-3xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 p-8"
+            className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-8">
@@ -1028,7 +1029,7 @@ export function Posts() {
                 <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Pilih Kategori Konten</h3>
                 <p className="text-sm text-zinc-500 font-bold mt-1 uppercase tracking-wider opacity-60">Pilih format konten yang sesuai</p>
               </div>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-2xl transition-all">
+              <button onClick={() => setIsCategoryModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-xl transition-all">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -1038,11 +1039,11 @@ export function Posts() {
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id)}
-                  className={`flex flex-col items-center p-6 text-center border-2 rounded-[2rem] transition-all group relative overflow-hidden ${
+                  className={`flex flex-col items-center p-6 text-center border-2 rounded-xl transition-all group relative overflow-hidden ${
                     category === cat.id ? 'border-amber-400 bg-amber-50/50 shadow-lg shadow-amber-400/10' : 'border-zinc-100 hover:border-amber-200 hover:bg-zinc-50'
                   }`}
                 >
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 duration-500 ${cat.bg}`}>
+                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 duration-500 ${cat.bg}`}>
                     {React.createElement(cat.icon, { className: `w-8 h-8 ${cat.color}` })}
                   </div>
                   <span className="text-sm font-black text-zinc-900 uppercase tracking-widest mb-1">{cat.label}</span>
@@ -1072,72 +1073,31 @@ export function Posts() {
       />
 
       {/* Media Picker Modal */}
-      {isMediaPickerOpen && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-6 bg-zinc-950/80 backdrop-blur-xl animate-in fade-in duration-200">
-            <div className="relative w-full max-w-5xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[85vh]">
-                <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
-                    <div>
-                        <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Pilih Media</h2>
-                        <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider mt-1 opacity-60">Asset Library</p>
-                    </div>
-                    <button onClick={() => { setIsMediaPickerOpen(false); setPickerContext(null); }} className="p-3 text-zinc-400 hover:bg-zinc-200 hover:text-zinc-900 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
-                </div>
-                <div className="p-8 flex-1 overflow-y-auto">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {media?.map((m: any, idx: number) => (
-                            <div 
-                                key={idx} 
-                                onClick={() => {
-                                    if (pickerContext) {
-                                        const { field, index, subField } = pickerContext;
-                                        const mediaUrl = m.file_url || m.url;
+      <MediaPicker
+        isOpen={isMediaPickerOpen}
+        onClose={() => { setIsMediaPickerOpen(false); setPickerContext(null); }}
+        onSelect={(mediaUrl) => {
+            if (pickerContext) {
+                const { field, index, subField } = pickerContext;
 
-                                        if (field) {
-                                            if (index !== undefined && subField) {
-                                                const currentArr = [...(formData[field] || [])];
-                                                currentArr[index] = { ...currentArr[index], [subField]: mediaUrl };
-                                                handleInputChange(field, currentArr);
-                                            } else if (index !== undefined) {
-                                                const currentArr = [...(formData[field] || [])];
-                                                currentArr[index] = mediaUrl;
-                                                handleInputChange(field, currentArr);
-                                            } else {
-                                                handleInputChange(field, mediaUrl);
-                                            }
-                                        }
-                                    }
-                                    setIsMediaPickerOpen(false);
-                                    setPickerContext(null);
-                                }}
-                                className="group cursor-pointer rounded-2xl overflow-hidden border-4 border-transparent hover:border-amber-400 transition-all relative aspect-square bg-zinc-100 ring-offset-2 hover:ring-2 hover:ring-amber-400/20 shadow-sm"
-                            >
-                                {(m.file_type || '').startsWith('image/') ? (
-                                    <img src={m.file_url || m.url} alt={m.filename} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                                        <ImageIcon className="w-8 h-8 text-zinc-300 mb-2" />
-                                        <span className="text-[10px] font-bold text-zinc-400 uppercase text-center truncate w-full">{m.filename}</span>
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                                    <span className="bg-amber-400 text-zinc-950 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl">Gunakan</span>
-                                </div>
-                            </div>
-                        ))}
-                        {(!media || media.length === 0) && (
-                            <div className="col-span-full py-24 text-center">
-                                <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-zinc-200">
-                                    <ImageIcon className="w-8 h-8 text-zinc-300" />
-                                </div>
-                                <p className="text-zinc-400 font-bold uppercase tracking-[0.2em] text-xs">Library Kosong</p>
-                                <p className="text-zinc-500 text-sm mt-1">Unggah media melalui menu Media terlebih dahulu.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-      )}
+                if (field) {
+                    if (index !== undefined && subField) {
+                        const currentArr = [...(formData[field] || [])];
+                        currentArr[index] = { ...currentArr[index], [subField]: mediaUrl };
+                        handleInputChange(field, currentArr);
+                    } else if (index !== undefined) {
+                        const currentArr = [...(formData[field] || [])];
+                        currentArr[index] = mediaUrl;
+                        handleInputChange(field, currentArr);
+                    } else {
+                        handleInputChange(field, mediaUrl);
+                    }
+                }
+            }
+            setIsMediaPickerOpen(false);
+            setPickerContext(null);
+        }}
+      />
       {/* Confirmation Modal */}
       <ConfirmModal 
         isOpen={confirmDelete.isOpen}

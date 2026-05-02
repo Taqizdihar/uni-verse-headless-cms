@@ -61,10 +61,10 @@ export function Register() {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[440px]">
-        <div className="bg-zinc-900/50 backdrop-blur-xl py-10 px-8 border border-zinc-800 rounded-[2.5rem] shadow-2xl">
+        <div className="bg-zinc-900/50 backdrop-blur-xl py-10 px-8 border border-zinc-800 rounded-xl shadow-2xl">
           <form className="space-y-6" onSubmit={handleRegister}>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-xs font-bold p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+              <div className="bg-red-500/10 border border-red-500/50 text-red-400 text-xs font-bold p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 {error}
               </div>
@@ -78,7 +78,7 @@ export function Register() {
                   type="text" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
-                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
+                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
                   placeholder="Misal: Budi Santoso"
                 />
                 <User className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-amber-400 transition-colors" />
@@ -93,7 +93,7 @@ export function Register() {
                   type="email" 
                   value={email} 
                   onChange={e => setEmail(e.target.value)} 
-                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
+                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
                   placeholder="admin@uniinside.com"
                 />
                 <Mail className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-amber-400 transition-colors" />
@@ -108,7 +108,7 @@ export function Register() {
                   type="password" 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
-                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
+                  className="appearance-none block w-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl placeholder-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium pl-12" 
                   placeholder="••••••••"
                 />
                 <Lock className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-amber-400 transition-colors" />
@@ -119,7 +119,7 @@ export function Register() {
               <button 
                 disabled={loading}
                 type="submit" 
-                className="group w-full flex justify-center items-center gap-2 py-4 px-4 bg-amber-400 text-black text-sm font-black rounded-2xl hover:bg-amber-300 transition-all shadow-xl shadow-amber-400/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group w-full flex justify-center items-center gap-2 py-4 px-4 bg-amber-400 text-black text-sm font-black rounded-xl hover:bg-amber-300 transition-all shadow-xl shadow-amber-400/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Memproses...' : 'Selesaikan Pendaftaran'}
                 {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}

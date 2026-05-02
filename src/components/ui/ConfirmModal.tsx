@@ -28,10 +28,10 @@ export function ConfirmModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
-            <div className={`p-3 rounded-2xl ${isDanger ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
+            <div className={`p-3 rounded-xl ${isDanger ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
               <AlertCircle className="w-6 h-6" />
             </div>
             <button 
@@ -48,7 +48,7 @@ export function ConfirmModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-zinc-500 bg-zinc-50 hover:bg-zinc-100 transition-all border border-zinc-100"
+              className="flex-1 px-6 py-3.5 rounded-xl font-bold text-zinc-500 bg-zinc-50 hover:bg-zinc-100 transition-all border border-zinc-100"
             >
               {cancelLabel}
             </button>
@@ -57,7 +57,7 @@ export function ConfirmModal({
                 onConfirm();
                 onClose();
               }}
-              className={`flex-1 px-6 py-3.5 rounded-2xl font-bold text-white shadow-lg transition-all active:scale-95 ${
+              className={`flex-1 px-6 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 ${
                 isDanger 
                   ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' 
                   : 'bg-zinc-900 hover:bg-black shadow-zinc-900/20'

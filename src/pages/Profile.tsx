@@ -118,7 +118,7 @@ export function Profile() {
       </div>
 
       {message.text && (
-        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm ${
+        <div className={`p-4 rounded-xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm ${
           message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
         }`}>
           {message.type === 'success' ? <ShieldCheck className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
@@ -129,11 +129,11 @@ export function Profile() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Row 1: Left (Photo) & Right (Identity) */}
         {/* Profile Card */}
-        <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem] flex flex-col">
+        <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-xl flex flex-col">
           <div className="h-32 bg-amber-400 relative">
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-[2.5rem] bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
+                  <div className="w-32 h-32 rounded-xl bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                     {profile.profile_picture_url ? (
                       <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
@@ -145,7 +145,7 @@ export function Profile() {
                       </div>
                     )}
                   </div>
-                  <label className="absolute bottom-0 right-0 p-2.5 bg-zinc-900 text-white rounded-2xl shadow-lg cursor-pointer hover:bg-zinc-800 transition-all border-2 border-white group-hover:scale-110">
+                  <label className="absolute bottom-0 right-0 p-2.5 bg-zinc-900 text-white rounded-xl shadow-lg cursor-pointer hover:bg-zinc-800 transition-all border-2 border-white group-hover:scale-110">
                     <Camera className="w-5 h-5" />
                     <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploading} />
                   </label>
@@ -164,7 +164,7 @@ export function Profile() {
         </Card>
 
         {/* Edit Form - Basic Identity */}
-        <Card className="lg:col-span-2 border-none shadow-2xl bg-white rounded-[2.5rem] flex flex-col">
+        <Card className="lg:col-span-2 border-none shadow-2xl bg-white rounded-xl flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5 text-amber-500" /> Identitas Dasar
@@ -182,7 +182,7 @@ export function Profile() {
                       type="text" 
                       value={profile.name}
                       onChange={e => setProfile({...profile, name: e.target.value})}
-                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
                       placeholder="Nama Anda"
                     />
                   </div>
@@ -195,7 +195,7 @@ export function Profile() {
                       type="email" 
                       value={profile.email}
                       onChange={e => setProfile({...profile, email: e.target.value})}
-                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
                       placeholder="email@contoh.com"
                     />
                   </div>
@@ -205,7 +205,7 @@ export function Profile() {
                 <button 
                   disabled={isSaving}
                   type="submit" 
-                  className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-2xl font-black text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white rounded-xl font-black text-sm hover:bg-zinc-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
                 >
                   {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Simpan Perubahan
@@ -216,7 +216,7 @@ export function Profile() {
         </Card>
 
         {/* Row 2: Account Security (Full Width) */}
-        <Card className="lg:col-span-3 border-none shadow-2xl bg-white overflow-hidden rounded-[2.5rem]">
+        <Card className="lg:col-span-3 border-none shadow-2xl bg-white overflow-hidden rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-6">
             <div>
               <CardTitle className="flex items-center gap-2 font-black">
@@ -233,7 +233,7 @@ export function Profile() {
           </CardHeader>
           {showPassForm && (
             <CardContent className="pt-0 animate-in fade-in slide-in-from-top-4">
-              <form onSubmit={handlePasswordChange} className="p-6 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 space-y-6">
+              <form onSubmit={handlePasswordChange} className="p-6 bg-zinc-50 rounded-xl border border-zinc-100 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] ml-1">Sandi Saat Ini</label>
@@ -270,7 +270,7 @@ export function Profile() {
                     <button 
                       disabled={isChangingPass}
                       type="submit" 
-                      className="flex items-center gap-2 px-8 py-3 bg-amber-400 text-zinc-950 rounded-2xl font-black text-sm hover:bg-amber-300 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-8 py-3 bg-amber-400 text-zinc-950 rounded-xl font-black text-sm hover:bg-amber-300 transition-all shadow-lg active:scale-95 disabled:opacity-50"
                     >
                       {isChangingPass ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
                       Konfirmasi Perubahan Sandi

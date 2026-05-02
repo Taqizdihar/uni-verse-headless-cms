@@ -123,13 +123,13 @@ export function TenantManagement() {
             placeholder="Cari subdomain atau nama admin..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-2xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium text-sm"
+            className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium text-sm"
           />
           <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
         </div>
       </div>
 
-      <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 shadow-xl overflow-hidden">
+      <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 shadow-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

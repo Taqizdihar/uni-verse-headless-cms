@@ -77,7 +77,7 @@ export function UpdateHistory() {
       )}
       <div className="animate-in fade-in duration-500 w-full max-w-[1200px] py-8 px-4 md:px-12">
       <div className="flex items-center gap-4 mb-12">
-          <div className="p-3 bg-white rounded-2xl shadow-sm border border-zinc-200">
+          <div className="p-3 bg-white rounded-xl shadow-sm border border-zinc-200">
             <HistoryIcon className="w-6 h-6 text-zinc-900" />
           </div>
           <div>
@@ -87,7 +87,7 @@ export function UpdateHistory() {
       </div>
 
       {updates.length === 0 ? (
-        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-[2.5rem] py-24 text-center">
+        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-xl py-24 text-center">
             <Package className="w-12 h-12 text-zinc-200 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-zinc-900">Belum ada histori update</h3>
             <p className="text-zinc-500 mt-2 font-medium italic">Semua rilis sistem akan muncul di sini.</p>
@@ -114,7 +114,7 @@ export function UpdateHistory() {
 
                 {/* Chat Bubble Container */}
                 <div className="flex-1 min-w-0">
-                  <div className="bg-blue-50/80 backdrop-blur-sm rounded-[2rem] rounded-tl-none border border-blue-100 p-8 shadow-sm hover:shadow-md transition-shadow w-full">
+                  <div className="bg-blue-50/80 backdrop-blur-sm rounded-xl rounded-tl-none border border-blue-100 p-8 shadow-sm hover:shadow-md transition-shadow w-full">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                       <div className="min-w-0">
                           <h3 className="text-lg font-black text-zinc-900 leading-tight break-words">

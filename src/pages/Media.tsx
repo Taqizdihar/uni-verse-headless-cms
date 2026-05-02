@@ -258,7 +258,7 @@ export function Media() {
           </div>
 
           {/* Search & Filters */}
-          <div className="flex flex-col lg:flex-row items-center gap-3 bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm">
+          <div className="flex flex-col lg:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-zinc-200 shadow-sm">
              <div className="relative flex-1 w-full">
                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
                  <input 
@@ -322,7 +322,7 @@ export function Media() {
 
       {/* File Queue Section */}
       {fileQueue.length > 0 && (
-        <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 md:p-6 mb-8 animate-in slide-in-from-top-4">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 md:p-6 mb-8 animate-in slide-in-from-top-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-zinc-900 flex items-center gap-2">
               <UploadCloud className="w-5 h-5 text-amber-500" />
@@ -403,7 +403,7 @@ export function Media() {
               : "flex flex-col gap-2"
           }>
               {filteredMedia.map((m: any, idx) => (
-                <div key={m.id || idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+                <div key={m.id || idx} className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
                   <div 
                     className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 cursor-pointer group/preview`}
                     onClick={() => window.open(m.file_url || m.url, '_blank')}
@@ -515,7 +515,7 @@ export function Media() {
             ))}
           </div>
         ) : (
-          <div className="bg-white border border-zinc-200 rounded-2xl py-16 text-center shadow-sm">
+          <div className="bg-white border border-zinc-200 rounded-xl py-16 text-center shadow-sm">
               <Search className="w-10 h-10 text-zinc-300 mx-auto mb-4" />
               <h3 className="text-lg font-bold text-zinc-900">Aset tidak ditemukan</h3>
               <p className="text-zinc-500 mt-1 text-sm font-medium">Coba sesuaikan kata kunci atau filter Anda.</p>
@@ -528,7 +528,7 @@ export function Media() {
           </div>
         )
       ) : (
-        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-[2rem] py-24 text-center">
+        <div className="bg-white border-2 border-dashed border-zinc-200 rounded-xl py-24 text-center">
             <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <ImageIcon className="w-10 h-10 text-zinc-200" />
             </div>

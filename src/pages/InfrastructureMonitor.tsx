@@ -100,10 +100,10 @@ export function InfrastructureMonitor() {
         
         {/* Database Health Overview */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-8 shadow-xl">
+          <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-8 shadow-xl">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-500/10 rounded-2xl">
+                <div className="p-3 bg-blue-500/10 rounded-xl">
                   <Database className="w-6 h-6 text-blue-400" />
                 </div>
                 <h3 className="text-lg font-black text-white">Database Health</h3>
@@ -117,21 +117,21 @@ export function InfrastructureMonitor() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-xl border border-zinc-800/50">
                 <div className="flex items-center gap-3">
                    <FileText className="w-5 h-5 text-zinc-500" />
                    <span className="text-sm font-bold text-zinc-300">Total Posts</span>
                 </div>
                 <span className="text-xl font-black text-white tabular-nums">{stats.rowCounts.posts.toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-xl border border-zinc-800/50">
                 <div className="flex items-center gap-3">
                    <LayoutTemplate className="w-5 h-5 text-zinc-500" />
                    <span className="text-sm font-bold text-zinc-300">Total Pages</span>
                 </div>
                 <span className="text-xl font-black text-white tabular-nums">{stats.rowCounts.pages.toLocaleString()}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+              <div className="flex items-center justify-between p-4 bg-zinc-950/50 rounded-xl border border-zinc-800/50">
                 <div className="flex items-center gap-3">
                    <ImageIcon className="w-5 h-5 text-zinc-500" />
                    <span className="text-sm font-bold text-zinc-300">Media Assets</span>
@@ -144,9 +144,9 @@ export function InfrastructureMonitor() {
 
         {/* Storage Analytics */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-8 shadow-xl">
+          <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-8 shadow-xl">
              <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-purple-500/10 rounded-2xl">
+                <div className="p-3 bg-purple-500/10 rounded-xl">
                   <HardDrive className="w-6 h-6 text-purple-400" />
                 </div>
                 <h3 className="text-lg font-black text-white">Storage Usage Analytics</h3>
@@ -185,7 +185,7 @@ export function InfrastructureMonitor() {
                 </h4>
                 <div className="space-y-3">
                   {stats.storage.top_consumers.length === 0 ? (
-                    <div className="p-6 text-center text-zinc-500 font-medium bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+                    <div className="p-6 text-center text-zinc-500 font-medium bg-zinc-950/50 rounded-xl border border-zinc-800/50">
                       Belum ada data penggunaan media.
                     </div>
                   ) : (
@@ -195,7 +195,7 @@ export function InfrastructureMonitor() {
                       const relativePercentage = Math.max(5, Math.round((consumer.total_size_mb / maxConsumerSize) * 100));
 
                       return (
-                        <div key={consumer.tenant_id} className="relative p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50 overflow-hidden group">
+                        <div key={consumer.tenant_id} className="relative p-4 bg-zinc-950/50 rounded-xl border border-zinc-800/50 overflow-hidden group">
                            {/* Background Bar */}
                            <div 
                              className="absolute top-0 left-0 h-full bg-zinc-800/30 transition-all duration-500 z-0"

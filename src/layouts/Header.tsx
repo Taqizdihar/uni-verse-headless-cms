@@ -81,7 +81,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => navigate('/profile')}
           >
-            <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm">
+            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm">
                 {user?.profile_picture_url ? (
                     <img src={user.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
                 ) : (

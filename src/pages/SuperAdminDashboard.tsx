@@ -73,9 +73,9 @@ export function SuperAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Card 1: Tenants */}
-        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[2rem] border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-emerald-500/50 transition-all">
+        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-emerald-500/50 transition-all">
           <div className="flex items-center justify-between mb-4">
-             <div className="p-3 bg-emerald-500/10 rounded-2xl group-hover:bg-emerald-500/20 transition-colors">
+             <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
                <Server className="w-6 h-6 text-emerald-400" />
              </div>
              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
@@ -90,9 +90,9 @@ export function SuperAdminDashboard() {
         </div>
 
         {/* Card 2: Users */}
-        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[2rem] border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-cyan-500/50 transition-all">
+        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-cyan-500/50 transition-all">
           <div className="flex items-center justify-between mb-4">
-             <div className="p-3 bg-cyan-500/10 rounded-2xl group-hover:bg-cyan-500/20 transition-colors">
+             <div className="p-3 bg-cyan-500/10 rounded-xl group-hover:bg-cyan-500/20 transition-colors">
                <Users className="w-6 h-6 text-cyan-400" />
              </div>
           </div>
@@ -103,9 +103,9 @@ export function SuperAdminDashboard() {
         </div>
 
         {/* Card 3: Storage */}
-        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-[2rem] border border-slate-800 shadow-xl flex flex-col justify-between lg:col-span-2 group hover:border-blue-500/50 transition-all">
+        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between lg:col-span-2 group hover:border-blue-500/50 transition-all">
           <div className="flex items-center justify-between mb-4">
-             <div className="p-3 bg-blue-500/10 rounded-2xl group-hover:bg-blue-500/20 transition-colors">
+             <div className="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-colors">
                <HardDrive className="w-6 h-6 text-blue-400" />
              </div>
              <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{storageUsed} MB / 1 GB</span>
@@ -127,7 +127,7 @@ export function SuperAdminDashboard() {
       </div>
 
       {/* Super Admin Hub Card (GitHub Link) */}
-      <div className="bg-gradient-to-br from-zinc-900/80 to-[#020617] backdrop-blur-xl p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-zinc-900/80 to-[#020617] backdrop-blur-xl p-8 rounded-xl border border-slate-800 shadow-2xl relative overflow-hidden">
          {/* Decorative Background Elements */}
          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -138,7 +138,7 @@ export function SuperAdminDashboard() {
                <p className="text-zinc-400 text-sm font-medium">Akses source code utama UNI-VERSE CMS. Harap berhati-hati saat melakukan force push.</p>
             </div>
             
-            <div className="flex items-center gap-3 bg-black/40 border border-zinc-800/80 p-2 pl-5 rounded-2xl w-full md:w-auto">
+            <div className="flex items-center gap-3 bg-black/40 border border-zinc-800/80 p-2 pl-5 rounded-xl w-full md:w-auto">
                <Github className="w-5 h-5 text-zinc-400 flex-shrink-0" />
                <span className="text-xs font-mono text-zinc-300 truncate max-w-[200px] md:max-w-none">
                   https://github.com/Taqizdihar/uni-verse-headless-cms.git

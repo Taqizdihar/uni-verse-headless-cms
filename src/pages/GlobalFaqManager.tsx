@@ -163,13 +163,13 @@ export function GlobalFaqManager() {
               placeholder="Cari pertanyaan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-2xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-all font-medium text-sm"
+              className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-all font-medium text-sm"
             />
             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <button 
             onClick={() => handleOpenModal()}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-2xl font-black text-sm transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
           >
             <Plus className="w-5 h-5" /> Tambah FAQ
           </button>
@@ -178,12 +178,12 @@ export function GlobalFaqManager() {
 
       <div className="grid grid-cols-1 gap-4">
         {filteredFaqs.length === 0 ? (
-          <div className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-12 text-center text-zinc-500 font-medium">
+          <div className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-12 text-center text-zinc-500 font-medium">
              Tidak ada FAQ yang ditemukan.
           </div>
         ) : (
           filteredFaqs.map((faq) => (
-            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-[2rem] border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all shadow-xl overflow-hidden">
+            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all shadow-xl overflow-hidden">
               <div className="flex-1 min-w-0 space-y-4 w-full">
                  <div className="flex flex-wrap items-center gap-3">
                     <span className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-[10px] font-black uppercase tracking-widest border border-zinc-700">
@@ -226,7 +226,7 @@ export function GlobalFaqManager() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleCloseModal} />
-          <div className="relative bg-[#09090b] border border-zinc-800 rounded-[2.5rem] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-[#09090b] border border-zinc-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             
             <div className="px-8 py-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
                <h3 className="text-xl font-black text-white">
@@ -246,7 +246,7 @@ export function GlobalFaqManager() {
                     type="text" 
                     value={formData.question} 
                     onChange={e => setFormData(p => ({ ...p, question: e.target.value }))}
-                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium" 
+                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium" 
                     placeholder="Contoh: Bagaimana cara mengatur domain kustom?"
                   />
                 </div>
@@ -257,7 +257,7 @@ export function GlobalFaqManager() {
                     <select 
                       value={formData.category}
                       onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none"
                     >
                       {CATEGORIES.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -270,7 +270,7 @@ export function GlobalFaqManager() {
                       type="number" 
                       value={formData.priority}
                       onChange={e => setFormData(p => ({ ...p, priority: parseInt(e.target.value) || 0 }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-2xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium tabular-nums" 
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium tabular-nums" 
                       min="0"
                     />
                   </div>
@@ -278,7 +278,7 @@ export function GlobalFaqManager() {
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Jawaban Lengkap</label>
-                  <div className="faq-editor-container rounded-2xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                  <div className="faq-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
                     <style>{`
                       .faq-editor-container .ql-editor {
                         color: #000000 !important;

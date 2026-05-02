@@ -252,7 +252,7 @@ export function ApiSandbox() {
 
         {/* ==================== LEFT: REQUEST PANE ==================== */}
         <div className="space-y-5">
-          <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm overflow-visible">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-visible">
             {/* Section: API Key */}
             <div className="p-6 border-b border-zinc-100">
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
@@ -305,7 +305,7 @@ export function ApiSandbox() {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute z-50 top-full mt-2 w-full bg-white rounded-2xl border border-zinc-200 shadow-2xl shadow-zinc-200/50 py-2 max-h-72 overflow-y-auto">
+                  <div className="absolute z-50 top-full mt-2 w-full bg-white rounded-xl border border-zinc-200 shadow-2xl shadow-zinc-200/50 py-2 max-h-72 overflow-y-auto">
                     {ENDPOINT_OPTIONS.map((ep, idx) => (
                       <button
                         key={idx}
@@ -377,7 +377,7 @@ export function ApiSandbox() {
                 type="button"
                 onClick={handleExecute}
                 disabled={isLoading}
-                className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-violet-500/25 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
+                className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-violet-500/25 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
               >
                 {isLoading ? (
                   <>
@@ -395,7 +395,7 @@ export function ApiSandbox() {
           </div>
 
           {/* Info Box */}
-          <div className="bg-white rounded-[2rem] border border-zinc-200 shadow-sm p-6">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6">
             <div className="flex items-start gap-3">
               <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
               <div>
@@ -411,7 +411,7 @@ export function ApiSandbox() {
 
         {/* ==================== RIGHT: RESPONSE PANE ==================== */}
         <div ref={responseRef}>
-          <div className="bg-zinc-900 rounded-[2rem] border border-zinc-800 shadow-xl overflow-hidden sticky top-8">
+          <div className="bg-zinc-900 rounded-xl border border-zinc-800 shadow-xl overflow-hidden sticky top-8">
             {/* Terminal Title Bar */}
             <div className="px-5 py-3.5 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -464,7 +464,7 @@ export function ApiSandbox() {
               {/* Loading State */}
               {isLoading && (
                 <div className="flex flex-col items-center justify-center h-[420px] text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-5 animate-pulse">
+                  <div className="w-16 h-16 rounded-xl bg-violet-500/10 flex items-center justify-center mb-5 animate-pulse">
                     <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
                   </div>
                   <h4 className="text-base font-bold text-zinc-300 mb-1">Mengirim Permintaan...</h4>
@@ -475,7 +475,7 @@ export function ApiSandbox() {
               {/* Error without response (validation errors) */}
               {error && !response && !isLoading && (
                 <div className="flex flex-col items-center justify-center h-[420px] text-center px-8">
-                  <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-5">
+                  <div className="w-16 h-16 rounded-xl bg-red-500/10 flex items-center justify-center mb-5">
                     <AlertTriangle className="w-8 h-8 text-red-400" />
                   </div>
                   <h4 className="text-base font-bold text-red-400 mb-2">Validasi Gagal</h4>
