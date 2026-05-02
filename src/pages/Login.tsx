@@ -41,14 +41,15 @@ export function Login() {
       
       const { token, user } = res.data;
       
+      // Task 2: Clear ALL old session data before setting new values
+      localStorage.clear();
+      
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      // Set default active workspace from login response
-      if (user.tenant_id) {
-        localStorage.setItem('active_tenant_id', String(user.tenant_id));
-        localStorage.setItem('active_role', user.role || 'admin');
-      }
+      // Always set active workspace from login response (primary tenant)
+      localStorage.setItem('active_tenant_id', String(user.tenant_id || ''));
+      localStorage.setItem('active_role', user.role || 'admin');
       
       setToken(token);
       setUser(user);

@@ -499,9 +499,10 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('active_tenant_id', String(tenantId));
     localStorage.setItem('active_role', role);
 
-    // 4. Wait 1.5s for overlay animation, then force full page reload
+    // 4. Wait 1.5s for overlay animation, then hard redirect to /dashboard
+    // Using href instead of reload() forces the entire React app to re-initialize
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = '/dashboard';
     }, 1500);
   };
 

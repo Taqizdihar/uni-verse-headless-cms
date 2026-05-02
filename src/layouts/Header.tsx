@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { user, setUser, setToken, settings, activeRole } = useCMS();
+  const { user, setUser, setToken, settings, activeRole, activeTenantId } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
@@ -114,10 +114,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('active_tenant_id');
-    localStorage.removeItem('active_role');
+    // Task 1: Total localStorage reset to prevent cross-session contamination
+    localStorage.clear();
     setUser(null);
     setToken(null);
     navigate('/login');
@@ -153,7 +151,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
               {settings?.site_name || 'Uni-Inside'}
             </h1>
-            {activeRole && activeRole !== 'admin' && activeRole !== 'super_admin' && (
+            {activeTenantId && user?.tenant_id && activeTenantId !== user.tenant_id && (
               <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400 text-zinc-950 rounded-sm text-[9px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0">
                 <Handshake className="w-3 h-3" />
                 TIM MITRA

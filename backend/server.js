@@ -832,6 +832,18 @@ const validateTenantAccess = async (req, res, next) => {
 const { router: authRoutes } = require('./server/routes/auth');
 app.use('/api/settings', authRoutes);
 
+// Task 5: Apply tenant access validation globally for all /api routes
+// Exempts: user profile, notifications, workspaces (not tenant-scoped)
+app.use('/api', (req, res, next) => {
+    // Skip validation for non-tenant routes
+    const exemptPaths = ['/api/user/', '/api/notifications', '/api/auth/'];
+    if (exemptPaths.some(p => req.originalUrl.startsWith(p))) return next();
+    // Skip for super_admin
+    if (req.user && req.user.role === 'super_admin') return next();
+    // Run async validation
+    validateTenantAccess(req, res, next);
+});
+
 // --- Settings ---
 app.get('/api/settings', async (req, res) => {
     try {
