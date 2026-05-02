@@ -56,36 +56,36 @@ export function Posts() {
   
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [pickerContext, setPickerContext] = useState<{ field: string, index?: number } | null>(null);
+  const [pickerContext, setPickerContext] = useState<{ field: string, index?: number, subField?: string } | null>(null);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const openMediaPicker = (field: string, index?: number) => {
-    setPickerContext({ field, index });
+  const openMediaPicker = (field: string, index?: number, subField?: string) => {
+    setPickerContext({ field, index, subField });
     setIsMediaPickerOpen(true);
   };
 
   const addAgendaItem = () => {
-    const current = formData.agenda || [];
-    handleInputChange('agenda', [...current, { time: '', activity: '' }]);
+    const current = formData.rundown || [];
+    handleInputChange('rundown', [...current, { time: '', activity: '' }]);
   };
 
   const removeAgendaItem = (index: number) => {
-    const current = formData.agenda || [];
-    handleInputChange('agenda', current.filter((_: any, i: number) => i !== index));
+    const current = formData.rundown || [];
+    handleInputChange('rundown', current.filter((_: any, i: number) => i !== index));
   };
 
   const updateAgendaItem = (index: number, field: string, value: string) => {
-    const current = [...(formData.agenda || [])];
+    const current = [...(formData.rundown || [])];
     current[index][field] = value;
-    handleInputChange('agenda', current);
+    handleInputChange('rundown', current);
   };
 
   const addSpeaker = () => {
     const current = formData.speakers || [];
-    handleInputChange('speakers', [...current, { name: '', role: '' }]);
+    handleInputChange('speakers', [...current, { name: '', position: '', bio: '', photo_url: '' }]);
   };
 
   const removeSpeaker = (index: number) => {
@@ -97,6 +97,22 @@ export function Posts() {
     const current = [...(formData.speakers || [])];
     current[index][field] = value;
     handleInputChange('speakers', current);
+  };
+
+  const addEventGalleryImage = () => {
+    const current = formData.event_gallery || [];
+    handleInputChange('event_gallery', [...current, { url: '', caption: '', alt_text: '' }]);
+  };
+
+  const removeEventGalleryImage = (index: number) => {
+    const current = formData.event_gallery || [];
+    handleInputChange('event_gallery', current.filter((_: any, i: number) => i !== index));
+  };
+
+  const updateEventGalleryImage = (index: number, subField: string, value: string) => {
+    const current = [...(formData.event_gallery || [])];
+    current[index][subField] = value;
+    handleInputChange('event_gallery', current);
   };
 
   const addSpec = () => {
@@ -302,69 +318,214 @@ export function Posts() {
       
       case 'Event':
         return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-8">
+            {/* 1. Informasi Dasar */}
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Informasi Dasar</h4>
+              
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Waktu Mulai</label>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Label Kategori (Pisahkan dengan koma)</label>
                 <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="datetime-local" value={formData.start_date || ''} onChange={e => handleInputChange('start_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                  <input type="text" value={(formData.event_labels || []).join(', ')} onChange={e => handleInputChange('event_labels', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} placeholder="Misal: Kuliner, F&B" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
+              
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Waktu Selesai</label>
-                <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="datetime-local" value={formData.end_date || ''} onChange={e => handleInputChange('end_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Nama Lokasi</label>
-                <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="text" value={formData.location_name || ''} onChange={e => handleInputChange('location_name', e.target.value)} placeholder="Misal: Aula Utama" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Kapasitas / Quota</label>
-                <div className="relative">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="text" value={formData.quota || ''} onChange={e => handleInputChange('quota', e.target.value)} placeholder="Misal: 100 Orang" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">URL Google Maps</label>
-                <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 opacity-50" />
-                    <input type="url" value={formData.Maps_url || ''} onChange={e => handleInputChange('Maps_url', e.target.value)} placeholder="https://maps.google.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Link Pendaftaran</label>
-                <div className="relative">
-                    <ArrowRight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                    <input type="url" value={formData.registration_link || ''} onChange={e => handleInputChange('registration_link', e.target.value)} placeholder="https://forms.gle/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-5 bg-zinc-50 rounded-2xl border border-zinc-100">
-                <input 
-                    type="checkbox" 
-                    id="is_online"
-                    checked={formData.is_online || false} 
-                    onChange={e => handleInputChange('is_online', e.target.checked)} 
-                    className="w-5 h-5 rounded border-zinc-300 text-amber-500 focus:ring-amber-500"
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Deskripsi Acara</label>
+                <RichTextEditor 
+                  value={formData.event_description || ''} 
+                  onChange={val => handleInputChange('event_description', val)} 
+                  placeholder="Tulis detail lengkap acara di sini..."
                 />
-                <label htmlFor="is_online" className="text-sm font-bold text-zinc-700 cursor-pointer flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-zinc-400" /> Acara Online (Zoom / G-Meet)
-                </label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tanggal Acara</label>
+                  <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="date" value={formData.event_date || ''} onChange={e => handleInputChange('event_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Jam Mulai</label>
+                  <div className="relative">
+                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="time" value={formData.start_time || ''} onChange={e => handleInputChange('start_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Jam Selesai</label>
+                  <div className="relative">
+                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="time" value={formData.end_time || ''} onChange={e => handleInputChange('end_time', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Nama Lokasi</label>
+                  <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="text" value={formData.location_name || ''} onChange={e => handleInputChange('location_name', e.target.value)} placeholder="Misal: Aula Utama" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Kapasitas / Quota</label>
+                  <div className="relative">
+                      <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="text" value={formData.quota || ''} onChange={e => handleInputChange('quota', e.target.value)} placeholder="Misal: 100 Orang" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">URL Google Maps</label>
+                  <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 opacity-50" />
+                      <input type="url" value={formData.Maps_url || ''} onChange={e => handleInputChange('Maps_url', e.target.value)} placeholder="https://maps.google.com/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Link Pendaftaran</label>
+                  <div className="relative">
+                      <ArrowRight className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                      <input type="url" value={formData.registration_link || ''} onChange={e => handleInputChange('registration_link', e.target.value)} placeholder="https://forms.gle/..." className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-2xl outline-none focus:border-amber-400 font-bold transition-all" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-5 bg-zinc-50 rounded-2xl border border-zinc-100">
+                  <input 
+                      type="checkbox" 
+                      id="is_online"
+                      checked={formData.is_online || false} 
+                      onChange={e => handleInputChange('is_online', e.target.checked)} 
+                      className="w-5 h-5 rounded border-zinc-300 text-amber-500 focus:ring-amber-500"
+                  />
+                  <label htmlFor="is_online" className="text-sm font-bold text-zinc-700 cursor-pointer flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-zinc-400" /> Acara Online (Zoom / G-Meet)
+                  </label>
+              </div>
+            </div>
+
+            {/* 2. Agenda & Pembicara */}
+            <div className="space-y-6 pt-4">
+              <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Agenda & Pembicara</h4>
+              
+              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <h5 className="text-xs font-bold text-zinc-800">Rundown Acara</h5>
+                  <button type="button" onClick={addAgendaItem} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH AGENDA</button>
+                </div>
+                <div className="space-y-3">
+                  {(formData.rundown || []).map((item: any, idx: number) => (
+                    <div key={idx} className="flex gap-3 items-start animate-in slide-in-from-right-2 duration-300">
+                      <input 
+                          type="time" 
+                          value={item.time || ''} 
+                          onChange={e => updateAgendaItem(idx, 'time', e.target.value)}
+                          className="w-1/3 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                      />
+                      <input 
+                          type="text" 
+                          placeholder="Keterangan Agenda" 
+                          value={item.activity || ''} 
+                          onChange={e => updateAgendaItem(idx, 'activity', e.target.value)}
+                          className="flex-1 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                      />
+                      <button type="button" onClick={() => removeAgendaItem(idx)} className="p-3 text-red-400 hover:bg-red-50 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  {(!formData.rundown || formData.rundown.length === 0) && (
+                    <p className="text-xs text-zinc-400 font-medium italic">Belum ada agenda yang ditambahkan.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <h5 className="text-xs font-bold text-zinc-800">Profil Pembicara</h5>
+                  <button type="button" onClick={addSpeaker} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH PEMBICARA</button>
+                </div>
+                <div className="space-y-4">
+                  {(formData.speakers || []).map((speaker: any, idx: number) => (
+                    <div key={idx} className="flex flex-col sm:flex-row gap-4 items-start p-4 bg-zinc-50 rounded-xl border border-zinc-100 relative group animate-in slide-in-from-right-2 duration-300">
+                      <button type="button" onClick={() => removeSpeaker(idx)} className="absolute top-2 right-2 p-1.5 text-red-400 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-4 h-4" /></button>
+                      
+                      <div className="w-24 h-24 shrink-0 rounded-xl bg-white border border-zinc-200 overflow-hidden cursor-pointer hover:border-amber-400 transition-colors" onClick={() => openMediaPicker('speakers', idx, 'photo_url')}>
+                        {speaker.photo_url ? (
+                          <img src={speaker.photo_url} alt="Speaker" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center">
+                            <ImageIcon className="w-6 h-6 text-zinc-300 mb-1" />
+                            <span className="text-[8px] font-bold text-zinc-400 uppercase">Pilih Foto</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 w-full space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <input type="text" placeholder="Nama Pembicara" value={speaker.name || ''} onChange={e => updateSpeaker(idx, 'name', e.target.value)} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg outline-none focus:border-amber-400 text-xs font-bold" />
+                          <input type="text" placeholder="Gelar / Posisi" value={speaker.position || ''} onChange={e => updateSpeaker(idx, 'position', e.target.value)} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg outline-none focus:border-amber-400 text-xs" />
+                        </div>
+                        <textarea placeholder="Deskripsi Singkat..." value={speaker.bio || ''} onChange={e => updateSpeaker(idx, 'bio', e.target.value)} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg outline-none focus:border-amber-400 text-xs min-h-[60px] resize-none" />
+                      </div>
+                    </div>
+                  ))}
+                  {(!formData.speakers || formData.speakers.length === 0) && (
+                    <p className="text-xs text-zinc-400 font-medium italic">Belum ada pembicara yang ditambahkan.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Media Tambahan */}
+            <div className="space-y-6 pt-4">
+              <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Media Tambahan</h4>
+              
+              <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h5 className="text-xs font-bold text-zinc-800">Galeri Event Singkat</h5>
+                    <p className="text-[10px] text-zinc-500 mt-0.5">Media tambahan tanpa detail lengkap</p>
+                  </div>
+                  <button type="button" onClick={addEventGalleryImage} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH FOTO</button>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {(formData.event_gallery || []).map((img: any, idx: number) => (
+                        <div key={idx} className="relative group aspect-[4/3] rounded-2xl bg-zinc-50 border border-zinc-200 overflow-hidden flex flex-col">
+                            <div className="flex-1 relative cursor-pointer" onClick={() => openMediaPicker('event_gallery', idx, 'url')}>
+                              {img.url ? (
+                                  <img src={img.url} className="w-full h-full absolute inset-0 object-cover" alt="Gallery" />
+                              ) : (
+                                  <div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center hover:bg-zinc-100 transition-colors">
+                                      <ImageIcon className="w-6 h-6 text-zinc-300" />
+                                      <span className="text-[8px] font-black text-zinc-400 uppercase mt-2">Pilih Foto</span>
+                                  </div>
+                              )}
+                            </div>
+                            <div className="h-8 border-t border-zinc-200 bg-white">
+                                <input type="text" placeholder="Caption..." value={img.caption || ''} onChange={e => updateEventGalleryImage(idx, 'caption', e.target.value)} className="w-full h-full px-2 text-[10px] font-medium outline-none focus:bg-amber-50" />
+                            </div>
+                            <button 
+                                type="button" 
+                                onClick={() => removeEventGalleryImage(idx)}
+                                className="absolute top-2 right-2 p-1 bg-white/90 text-red-500 rounded flex opacity-0 group-hover:opacity-100 transition-opacity shadow-sm border border-zinc-200"
+                            >
+                                <Trash2 className="w-3 h-3" />
+                            </button>
+                        </div>
+                    ))}
+                    {(!formData.event_gallery || formData.event_gallery.length === 0) && (
+                      <div className="col-span-full text-xs text-zinc-400 font-medium italic">Belum ada foto galeri event yang ditambahkan.</div>
+                    )}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -928,11 +1089,15 @@ export function Posts() {
                                 key={idx} 
                                 onClick={() => {
                                     if (pickerContext) {
-                                        const { field, index } = pickerContext;
+                                        const { field, index, subField } = pickerContext;
                                         const mediaUrl = m.file_url || m.url;
 
                                         if (field) {
-                                            if (index !== undefined) {
+                                            if (index !== undefined && subField) {
+                                                const currentArr = [...(formData[field] || [])];
+                                                currentArr[index] = { ...currentArr[index], [subField]: mediaUrl };
+                                                handleInputChange(field, currentArr);
+                                            } else if (index !== undefined) {
                                                 const currentArr = [...(formData[field] || [])];
                                                 currentArr[index] = mediaUrl;
                                                 handleInputChange(field, currentArr);
