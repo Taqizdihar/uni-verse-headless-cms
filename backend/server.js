@@ -680,7 +680,7 @@ app.post('/api/auth/login', async (req, res) => {
         
         // 3. Retrieve tenant_id and role from tenant_users where status is active
         const [tenantUsers] = await db.execute(
-            "SELECT tenant_id, role FROM tenant_users WHERE user_id = ? AND status = 'active' ORDER BY id ASC LIMIT 1", 
+            "SELECT tenant_id, role FROM tenant_users WHERE user_id = ? AND status = 'active' ORDER BY tenant_id ASC LIMIT 1", 
             [user.id]
         );
         let tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
