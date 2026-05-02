@@ -678,8 +678,11 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(401).json({ error: 'Kredensial tidak valid' });
         }
         
-        // 3. Retrieve tenant_id and role from tenant_users
-        const [tenantUsers] = await db.execute('SELECT tenant_id, role FROM tenant_users WHERE user_id = ?', [user.id]);
+        // 3. Retrieve tenant_id and role from tenant_users where status is active
+        const [tenantUsers] = await db.execute(
+            "SELECT tenant_id, role FROM tenant_users WHERE user_id = ? AND status = 'active' ORDER BY id ASC LIMIT 1", 
+            [user.id]
+        );
         let tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
         let role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
 
@@ -1545,8 +1548,8 @@ app.post('/api/tenant/invite', async (req, res) => {
         const roleLabel = finalRole === 'admin' ? 'Admin' : finalRole === 'content_creative' ? 'Content Creative' : 'Guest';
         const notifMessage = `Anda diundang bergabung ke "${tenantName}" sebagai ${roleLabel}.`;
         await db.execute(
-            "INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, 'invitation', ?, ?, ?)",
-            [targetUser.id, 'Undangan Bergabung', notifMessage, JSON.stringify({ tenant_id: tid, tenant_name: tenantName, role: finalRole, invited_by: inviterUserId })]
+            "INSERT INTO notifications (user_id, tenant_id, type, message) VALUES (?, ?, 'invitation', ?)",
+            [targetUser.id, tid, notifMessage]
         );
 
         console.log(`[INVITE] User ${email} invited to tenant ${tid} as ${finalRole}`);
@@ -1594,18 +1597,10 @@ app.get('/api/user/workspaces', async (req, res) => {
 app.get('/api/notifications', async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [rows] = await db.execute(
+        const [notifications] = await db.execute(
             'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
             [userId]
         );
-        // Parse metadata JSON for each notification
-        const notifications = rows.map(n => {
-            let metadata = {};
-            if (n.metadata) {
-                try { metadata = typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata; } catch(e) {}
-            }
-            return { ...n, metadata };
-        });
         res.json(notifications);
     } catch (error) {
         console.error('[API ERROR] Get notifications:', error);
@@ -1649,11 +1644,7 @@ app.post('/api/notifications/respond', async (req, res) => {
         }
 
         const notif = notifs[0];
-        let metadata = {};
-        if (notif.metadata) {
-            try { metadata = typeof notif.metadata === 'string' ? JSON.parse(notif.metadata) : notif.metadata; } catch(e) {}
-        }
-        const tenantId = metadata.tenant_id;
+        const tenantId = notif.tenant_id;
 
         if (!tenantId) {
             return res.status(400).json({ error: 'Data undangan tidak valid (tenant_id missing).' });
@@ -2281,10 +2272,9 @@ app.listen(PORT, '0.0.0.0', async () => {
                 CREATE TABLE notifications (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id INT NOT NULL,
+                    tenant_id INT,
                     type VARCHAR(50) DEFAULT 'info',
-                    title VARCHAR(255) DEFAULT '',
                     message TEXT NOT NULL,
-                    metadata JSON DEFAULT NULL,
                     is_read TINYINT(1) DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     INDEX idx_notif_user (user_id, is_read)

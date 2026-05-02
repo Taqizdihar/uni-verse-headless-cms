@@ -8,10 +8,9 @@ import { NotificationModal } from '../components/ui/NotificationModal';
 interface Notification {
   id: number;
   user_id: number;
+  tenant_id: number | null;
   type: string;
-  title: string;
   message: string;
-  metadata: any;
   is_read: number;
   created_at: string;
 }
@@ -84,7 +83,13 @@ export function Header({ onMenuClick }: HeaderProps) {
         body: JSON.stringify({ notification_id: notifId, action })
       });
       if (res.ok) {
-        await fetchNotifications();
+        if (action === 'accept') {
+          // If accepted, force a full page reload so the new workspace appears
+          // and the user context updates seamlessly.
+          window.location.reload();
+        } else {
+          await fetchNotifications();
+        }
       } else {
         const data = await res.json();
         alert(data.error || 'Gagal merespon undangan.');
@@ -231,7 +236,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <p className="text-xs font-black text-zinc-900 uppercase tracking-wider truncate">{notif.title}</p>
+                            <p className="text-xs font-black text-zinc-900 uppercase tracking-wider truncate">
+                              {notif.type === 'invitation' ? 'Undangan Bergabung' : 'Notifikasi'}
+                            </p>
                             {!notif.is_read && (
                               <span className="w-2 h-2 bg-amber-400 rounded-full flex-shrink-0" />
                             )}
