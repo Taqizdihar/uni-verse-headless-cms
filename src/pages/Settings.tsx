@@ -142,7 +142,7 @@ export function Settings() {
     <div className="animate-in fade-in duration-500 space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900 uppercase tracking-tight">Konfigurasi Sistem</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Konfigurasi Sistem</h2>
           <p className="text-zinc-500 mt-1 font-medium">Kelola branding dasar, penempatan desain, dan informasi kontak.</p>
         </div>
         
