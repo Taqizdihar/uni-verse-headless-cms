@@ -70,13 +70,8 @@ export function Profile() {
   };
 
   const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'admin': return 'Admin';
-      case 'content_creative': return 'Content Creative';
-      case 'guest': return 'Guest';
-      case 'super_admin': return 'Super Admin';
-      default: return role;
-    }
+    if (!role) return '';
+    return role.replace(/_/g, ' ').toUpperCase();
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {

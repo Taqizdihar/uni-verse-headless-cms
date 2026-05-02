@@ -563,9 +563,9 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('active_role', role);
 
     // 4. Wait 1.5s for overlay animation, then hard redirect to /dashboard
-    // Using href instead of reload() forces the entire React app to re-initialize
+    // Using replace() is more aggressive and discards previous page state entirely
     setTimeout(() => {
-      window.location.href = '/dashboard';
+      window.location.replace('/dashboard');
     }, 1500);
   };
 

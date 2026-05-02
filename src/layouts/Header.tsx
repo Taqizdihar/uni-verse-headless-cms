@@ -118,7 +118,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     localStorage.clear();
     setUser(null);
     setToken(null);
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   const formatTimeAgo = (dateStr: string) => {
@@ -151,7 +151,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
               {settings?.site_name || 'Uni-Inside'}
             </h1>
-            {activeTenantId && user?.tenant_id && activeTenantId !== user.tenant_id && (
+            {activeTenantId && user?.tenant_id && Number(activeTenantId) !== Number(user.tenant_id) && (
               <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400 text-zinc-950 rounded-sm text-[9px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0">
                 <Handshake className="w-3 h-3" />
                 TIM MITRA
@@ -159,7 +159,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             )}
           </div>
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
-            PANEL <span className="text-zinc-400">ADMIN</span>
+            PANEL <span className="text-zinc-400">{activeRole ? activeRole.replace(/_/g, ' ').toUpperCase() : 'ADMIN'}</span>
           </span>
         </div>
 
