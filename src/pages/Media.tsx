@@ -44,6 +44,24 @@ export function Media() {
   // Confirmation State
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: number | null }>({ isOpen: false, id: null });
   
+  // Filter & Search State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<'date' | 'size' | 'name'>('date');
+  const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'image' | 'video' | 'document'>('all');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const renameRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (editingId && renameRef.current && !renameRef.current.contains(event.target as Node)) {
+        setEditingId(null);
+        setEditingName("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [editingId]);
+  
   // Real Data Fetching
   useEffect(() => {
     const fetchMedia = async () => {
@@ -183,46 +201,123 @@ export function Media() {
     );
   }
 
+  const filteredMedia = (media || []).filter((m: any) => {
+    const filename = (m.file_name || m.filename || '').toLowerCase();
+    if (searchTerm && !filename.includes(searchTerm.toLowerCase())) return false;
+
+    if (fileTypeFilter !== 'all') {
+      const type = (m.file_type || '').toLowerCase();
+      if (fileTypeFilter === 'image' && !type.startsWith('image/')) return false;
+      if (fileTypeFilter === 'video' && !type.startsWith('video/')) return false;
+      if (fileTypeFilter === 'document' && (type.startsWith('image/') || type.startsWith('video/'))) return false;
+    }
+    return true;
+  }).sort((a: any, b: any) => {
+    let comparison = 0;
+    if (sortBy === 'name') {
+      const nameA = (a.file_name || a.filename || '').toLowerCase();
+      const nameB = (b.file_name || b.filename || '').toLowerCase();
+      comparison = nameA.localeCompare(nameB);
+    } else if (sortBy === 'size') {
+      const sizeA = a.file_size || 0;
+      const sizeB = b.file_size || 0;
+      comparison = sizeA - sizeB;
+    } else if (sortBy === 'date') {
+      const dateA = new Date(a.created_at || a.date || 0).getTime();
+      const dateB = new Date(b.created_at || b.date || 0).getTime();
+      comparison = dateA - dateB;
+    }
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
   return (
     <div className="animate-in fade-in duration-500 space-y-8 max-w-[1200px]">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Media</h2>
-          <p className="text-zinc-500 text-sm mt-1 font-medium">Unggah dan kelola aset multimedia untuk website Anda.</p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-            {/* Grid/List Toggle */}
-            <div className="flex bg-white border border-zinc-200 p-1 rounded-xl shadow-sm">
-                <button 
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'}`}
-                >
-                    <LayoutGrid className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'}`}
-                >
-                    <List className="w-4 h-4" />
-                </button>
+      <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Media</h2>
+              <p className="text-zinc-500 text-sm mt-1 font-medium">Unggah dan kelola aset multimedia untuk website Anda.</p>
             </div>
-
-            <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
-            <div className="relative group">
-                <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
-                >
-                <Plus className="w-5 h-5 stroke-[3]" />
-                Pilih File
-                </button>
-                <div className="absolute top-full right-0 mt-2 w-max max-w-xs p-2 bg-zinc-900 text-white text-xs font-medium rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                Batas Unggah: Gambar (Maks 5MB - Auto Compress ke 2MB), Video & Dokumen (Maks 10MB)
+            
+            <div className="flex items-center gap-4">
+                <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <div className="relative group">
+                    <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-3 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
+                    >
+                    <Plus className="w-5 h-5 stroke-[3]" />
+                    Pilih File
+                    </button>
+                    <div className="absolute top-full right-0 mt-2 w-max max-w-xs p-2 bg-zinc-900 text-white text-xs font-medium rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                    Batas Unggah: Gambar (Maks 5MB - Auto Compress ke 2MB), Video & Dokumen (Maks 10MB)
+                    </div>
                 </div>
             </div>
-        </div>
+          </div>
+
+          {/* Search & Filters */}
+          <div className="flex flex-col lg:flex-row items-center gap-3 bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm">
+             <div className="relative flex-1 w-full">
+                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                 <input 
+                     type="text" 
+                     placeholder="Cari aset..." 
+                     value={searchTerm}
+                     onChange={(e) => setSearchTerm(e.target.value)}
+                     className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/20 focus:border-amber-400 transition-all font-medium placeholder:font-normal"
+                 />
+             </div>
+             <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0 hide-scrollbar">
+                 <select 
+                     value={fileTypeFilter}
+                     onChange={(e) => setFileTypeFilter(e.target.value as any)}
+                     className="px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 whitespace-nowrap cursor-pointer hover:bg-zinc-100 transition-colors"
+                 >
+                     <option value="all">Pilih Jenis File: Semua</option>
+                     <option value="image">Gambar (PNG, JPG, SVG, WEBP)</option>
+                     <option value="video">Video (MP4, WEBM)</option>
+                     <option value="document">Dokumen (PDF, DOCX, XLSX)</option>
+                 </select>
+                 
+                 <select 
+                     value={sortBy}
+                     onChange={(e) => setSortBy(e.target.value as any)}
+                     className="px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-400/20 whitespace-nowrap cursor-pointer hover:bg-zinc-100 transition-colors"
+                 >
+                     <option value="date">Urutkan: Tanggal Diunggah</option>
+                     <option value="size">Urutkan: Ukuran File</option>
+                     <option value="name">Urutkan: Nama Aset</option>
+                 </select>
+
+                 <button 
+                     onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                     className="p-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-600 hover:bg-zinc-100 transition-colors flex-shrink-0 flex items-center justify-center min-w-[42px]"
+                     title={sortOrder === 'asc' ? 'Ascending (A-Z, Terkecil, Terlama)' : 'Descending (Z-A, Terbesar, Terbaru)'}
+                 >
+                     {sortOrder === 'asc' ? <span className="font-bold text-sm">↑</span> : <span className="font-bold text-sm">↓</span>}
+                 </button>
+
+                 <div className="h-8 w-px bg-zinc-200 mx-1 flex-shrink-0"></div>
+
+                 {/* Grid/List Toggle */}
+                 <div className="flex bg-zinc-50 border border-zinc-200 p-1 rounded-xl flex-shrink-0">
+                     <button 
+                       onClick={() => setViewMode('grid')}
+                       className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'}`}
+                     >
+                         <LayoutGrid className="w-4 h-4" />
+                     </button>
+                     <button 
+                       onClick={() => setViewMode('list')}
+                       className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'}`}
+                     >
+                         <List className="w-4 h-4" />
+                     </button>
+                 </div>
+             </div>
+          </div>
       </div>
 
       {/* File Queue Section */}
@@ -302,66 +397,77 @@ export function Media() {
 
       {/* Media Grid */}
       {media && media.length > 0 ? (
-        <div className={viewMode === 'grid' 
-            ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
-            : "flex flex-col gap-2"
-        }>
-            {media.map((m: any, idx) => (
-              <div key={m.id || idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
-                <div 
-                  className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 cursor-pointer group/preview`}
-                  onClick={() => window.open(m.file_url || m.url, '_blank')}
-                >
-                  {(m.file_type || '').startsWith('image/') ? (
-                    <img 
-                      src={m.file_url || m.url} 
-                      alt={m.file_name || m.filename} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" 
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Corrupt+Asset';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <FileIcon className="w-10 h-10 text-zinc-200" />
-                    </div>
-                  )}
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
-                      <Eye className="w-6 h-6 mb-1" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+        filteredMedia.length > 0 ? (
+          <div className={viewMode === 'grid' 
+              ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"
+              : "flex flex-col gap-2"
+          }>
+              {filteredMedia.map((m: any, idx) => (
+                <div key={m.id || idx} className={`bg-white rounded-2xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+                  <div 
+                    className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 cursor-pointer group/preview`}
+                    onClick={() => window.open(m.file_url || m.url, '_blank')}
+                  >
+                    {(m.file_type || '').startsWith('image/') ? (
+                      <img 
+                        src={m.file_url || m.url} 
+                        alt={m.file_name || m.filename} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400?text=Corrupt+Asset';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FileIcon className="w-10 h-10 text-zinc-200" />
+                      </div>
+                    )}
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
+                        <Eye className="w-6 h-6 mb-1" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex-1 min-w-0 transition-opacity duration-300 group-hover:opacity-90">
-                  <div className="flex items-center justify-between gap-2">
-                    {editingId === m.id ? (
-                      <div className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1">
-                        <input 
-                          autoFocus
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onKeyDown={(e) => {
-                             if (e.key === 'Enter') handleRename(m.id);
-                             if (e.key === 'Escape') setEditingId(null);
-                          }}
-                          className="flex-1 text-xs font-bold px-2 py-1 border border-amber-400 rounded-lg outline-none bg-amber-50"
-                        />
-                        <button 
-                          onClick={() => handleRename(m.id)}
-                          disabled={isRenaming}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded-lg"
-                        >
-                          {isRenaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                        </button>
-                        <button onClick={() => setEditingId(null)} className="p-1 text-zinc-400 hover:bg-zinc-50 rounded-lg">
-                           <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : (
+                  
+                  <div className="flex-1 min-w-0 transition-opacity duration-300 group-hover:opacity-90">
+                    <div className="flex items-center justify-between gap-2">
+                      {editingId === m.id ? (
+                        <div ref={renameRef} className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1 relative">
+                          <input 
+                            autoFocus
+                            type="text"
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            onKeyDown={(e) => {
+                               if (e.key === 'Enter') handleRename(m.id);
+                               if (e.key === 'Escape') {
+                                   setEditingId(null);
+                                   setEditingName("");
+                               }
+                            }}
+                            className="flex-1 min-w-0 text-xs font-bold px-2 py-1.5 border border-amber-400 rounded-md outline-none bg-white focus:ring-2 focus:ring-amber-400/20 transition-all"
+                          />
+                          <div className="flex items-center gap-0.5 flex-shrink-0">
+                              <button 
+                                onClick={() => handleRename(m.id)}
+                                disabled={isRenaming}
+                                title="Simpan Perubahan"
+                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                              >
+                                {isRenaming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                              </button>
+                              <button 
+                                onClick={() => { setEditingId(null); setEditingName(""); }} 
+                                title="Batal"
+                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                              >
+                                 <X className="w-3.5 h-3.5 stroke-[3]" />
+                              </button>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="flex items-center gap-1 w-full group/name min-w-0">
                         <p className="text-sm font-bold text-zinc-900 truncate tracking-tight flex-1" title={m.file_name || m.filename}>
                           {m.file_name || m.filename || 'Aset Media'}
@@ -407,7 +513,20 @@ export function Media() {
                 </div>
               </div>
             ))}
-        </div>
+          </div>
+        ) : (
+          <div className="bg-white border border-zinc-200 rounded-2xl py-16 text-center shadow-sm">
+              <Search className="w-10 h-10 text-zinc-300 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-zinc-900">Aset tidak ditemukan</h3>
+              <p className="text-zinc-500 mt-1 text-sm font-medium">Coba sesuaikan kata kunci atau filter Anda.</p>
+              <button 
+                  onClick={() => { setSearchTerm(''); setFileTypeFilter('all'); setSortBy('date'); setSortOrder('desc'); }}
+                  className="mt-6 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-bold rounded-xl transition-colors"
+              >
+                  Hapus Filter
+              </button>
+          </div>
+        )
       ) : (
         <div className="bg-white border-2 border-dashed border-zinc-200 rounded-[2rem] py-24 text-center">
             <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
