@@ -687,7 +687,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Images</label>
-                <button type="button" onClick={() => { const images = block.data.images || []; updateBlockData(block.id, 'images', [...images, { url: null, caption: null, alt_text: null, category: null, image_title: null, description: null, location: null, time: null }]); }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Image</button>
+                <button type="button" onClick={() => { const images = block.data.images || []; updateBlockData(block.id, 'images', [...images, { url: null, caption: null, alt_text: null, category: null, image_title: null, description: null, location: null, time: null, button_label: null, button_url: null }]); }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Image</button>
               </div>
               {(block.data.images || []).map((img: any, i: number) => (
                 <div key={i} className="mb-4 p-3 border border-zinc-100 rounded-xl bg-zinc-50/50 space-y-3 relative">
@@ -729,6 +729,16 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                         <div>
                           <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Waktu</label>
                           <input type="text" placeholder="e.g. 22 Februari 2025, 12:00 WIB" value={img.time || ''} onChange={(e) => { const images = [...(block.data.images || [])]; images[i] = { ...images[i], time: e.target.value || null }; updateBlockData(block.id, 'images', images); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Label Tombol</label>
+                          <input type="text" placeholder="e.g. Daftar Sekarang" value={img.button_label || ''} onChange={(e) => { const images = [...(block.data.images || [])]; images[i] = { ...images[i], button_label: e.target.value || null }; updateBlockData(block.id, 'images', images); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">URL Tombol</label>
+                          <input type="text" placeholder="e.g. https://google.com" value={img.button_url || ''} onChange={(e) => { const images = [...(block.data.images || [])]; images[i] = { ...images[i], button_url: e.target.value || null }; updateBlockData(block.id, 'images', images); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
                         </div>
                       </div>
                     </div>
