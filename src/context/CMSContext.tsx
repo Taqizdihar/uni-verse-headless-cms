@@ -162,11 +162,23 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   // Helper for headers
   const getHeaders = () => {
      const t = token || localStorage.getItem('token');
-     const tid = activeTenantId || localStorage.getItem('active_tenant_id');
+     let tid = activeTenantId || localStorage.getItem('active_tenant_id');
+     
+     // Fallback to user's primary tenant if missing
+     if (!tid) {
+       const storedUser = localStorage.getItem('user');
+       if (storedUser) {
+         try {
+           const parsedUser = JSON.parse(storedUser);
+           tid = parsedUser.tenant_id;
+         } catch (e) {}
+       }
+     }
+     
      return {
         'Content-Type': 'application/json',
         ...(t ? { 'Authorization': `Bearer ${t}` } : {}),
-        ...(tid ? { 'X-Active-Tenant': String(tid) } : {})
+        ...(tid ? { 'x-active-tenant': String(tid) } : {})
      };
   };
 
@@ -185,6 +197,16 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         fetch(`${import.meta.env.VITE_API_URL}/api/plugins`, options),
         fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats`, options)
       ]);
+
+      // Check for 403 Forbidden on any response
+      const hasForbidden = responses.some(res => res.status === 403);
+      if (hasForbidden) {
+         console.warn('[CMSContext] 403 Forbidden detected. Clearing invalid tenant state and redirecting...');
+         localStorage.removeItem('active_tenant_id');
+         localStorage.removeItem('active_role');
+         window.location.href = '/dashboard';
+         return;
+      }
 
       const [settingsRes, pagesRes, layoutRes, postsRes, mediaRes, usersRes, pluginsRes, dashboardRes] = await Promise.all(
         responses.map(res => res.ok ? res.json() : null)
