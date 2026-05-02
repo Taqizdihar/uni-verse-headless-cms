@@ -1,19 +1,112 @@
-import React, { useState } from 'react';
-import { Bell, UserCircle, LogOut, Menu, History, BookOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Bell, UserCircle, LogOut, Menu, History, BookOpen, Check, X, Loader2, Mail as MailIcon } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
+
+interface Notification {
+  id: number;
+  user_id: number;
+  type: string;
+  title: string;
+  message: string;
+  metadata: any;
+  is_read: number;
+  created_at: string;
+}
+
 interface HeaderProps {
   onMenuClick?: () => void;
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-
   const { user, setUser, setToken, settings } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+
+  // Notification state
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [respondingId, setRespondingId] = useState<number | null>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const getHeaders = useCallback(() => {
+    const t = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(t ? { Authorization: `Bearer ${t}` } : {})
+    };
+  }, []);
+
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications`, { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(Array.isArray(data) ? data : []);
+      }
+    } catch (e) {
+      console.error('[Header] Failed to fetch notifications:', e);
+    }
+  }, [getHeaders]);
+
+  // Poll notifications every 30 seconds
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  // Click-outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    if (isNotifOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isNotifOpen]);
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const handleRespond = async (notifId: number, action: 'accept' | 'reject') => {
+    setRespondingId(notifId);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/respond`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ notification_id: notifId, action })
+      });
+      if (res.ok) {
+        await fetchNotifications();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal merespon undangan.');
+      }
+    } catch (e) {
+      console.error('[Header] Respond error:', e);
+    } finally {
+      setRespondingId(null);
+    }
+  };
+
+  const handleMarkRead = async (notifId: number) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/${notifId}/read`, {
+        method: 'PATCH',
+        headers: getHeaders()
+      });
+      setNotifications(prev => prev.map(n => n.id === notifId ? { ...n, is_read: 1 } : n));
+    } catch (e) {
+      console.error('[Header] Mark read error:', e);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -21,6 +114,20 @@ export function Header({ onMenuClick }: HeaderProps) {
     setUser(null);
     setToken(null);
     navigate('/login');
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Baru saja';
+    if (diffMins < 60) return `${diffMins} menit lalu`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays} hari lalu`;
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -73,9 +180,107 @@ export function Header({ onMenuClick }: HeaderProps) {
           <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Panduan</span>
         </button>
 
-        <button className="relative p-2.5 text-zinc-500 hover:text-amber-400 transition-colors rounded-full hover:bg-zinc-50 border border-transparent">
-          <Bell className="w-5 h-5" />
-        </button>
+        {/* Notification Bell */}
+        <div className="relative" ref={notifRef}>
+          <button 
+            onClick={() => setIsNotifOpen(!isNotifOpen)}
+            className="relative p-2.5 text-zinc-500 hover:text-amber-500 transition-colors rounded-full hover:bg-zinc-50 border border-transparent"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-white animate-pulse" />
+            )}
+          </button>
+
+          {/* Notification Dropdown */}
+          {isNotifOpen && (
+            <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Header */}
+              <div className="px-5 py-4 bg-zinc-900 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Notifikasi</h3>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="bg-amber-400 text-zinc-900 text-[10px] font-black px-2 py-0.5 rounded-full">
+                    {unreadCount} baru
+                  </span>
+                )}
+              </div>
+
+              {/* List */}
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="px-5 py-10 text-center">
+                    <Bell className="w-8 h-8 text-zinc-200 mx-auto mb-3" />
+                    <p className="text-sm text-zinc-400 font-medium">Tidak ada notifikasi.</p>
+                  </div>
+                ) : (
+                  notifications.map(notif => (
+                    <div
+                      key={notif.id}
+                      className={`px-5 py-4 border-b border-zinc-100 last:border-b-0 transition-colors ${
+                        !notif.is_read ? 'bg-amber-50/50' : 'bg-white hover:bg-zinc-50/50'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          notif.type === 'invitation' ? 'bg-amber-100 text-amber-600' : 'bg-zinc-100 text-zinc-500'
+                        }`}>
+                          <MailIcon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <p className="text-xs font-black text-zinc-900 uppercase tracking-wider truncate">{notif.title}</p>
+                            {!notif.is_read && (
+                              <span className="w-2 h-2 bg-amber-400 rounded-full flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-600 leading-relaxed mb-2">{notif.message}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-400 font-medium">{formatTimeAgo(notif.created_at)}</span>
+
+                            {/* Invitation action buttons */}
+                            {notif.type === 'invitation' && !notif.is_read && (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleRespond(notif.id, 'accept')}
+                                  disabled={respondingId === notif.id}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-amber-400 text-zinc-900 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-amber-500 transition-all disabled:opacity-50 shadow-sm"
+                                >
+                                  {respondingId === notif.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                  Terima
+                                </button>
+                                <button
+                                  onClick={() => handleRespond(notif.id, 'reject')}
+                                  disabled={respondingId === notif.id}
+                                  className="flex items-center gap-1 px-3 py-1.5 border border-red-300 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-50 transition-all disabled:opacity-50"
+                                >
+                                  <X className="w-3 h-3" />
+                                  Tolak
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Mark as read for non-invitation unread */}
+                            {notif.type !== 'invitation' && !notif.is_read && (
+                              <button
+                                onClick={() => handleMarkRead(notif.id)}
+                                className="text-[10px] text-amber-600 font-bold hover:underline"
+                              >
+                                Tandai dibaca
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
         
         <div className="flex items-center gap-4 pl-6 border-l border-zinc-200">
           <div 

@@ -1473,28 +1473,79 @@ app.get('/api/users', async (req, res) => {
     try {
         const tid = getTenantId(req);
         const [rows] = await db.execute(`
-            SELECT u.id as user_id, u.name, u.email, tu.role 
+            SELECT u.id as user_id, u.name, u.email, u.profile_picture_url, tu.role,
+                   IFNULL(tu.status, 'active') as status
             FROM tenant_users tu
             JOIN users u ON tu.user_id = u.id
             WHERE tu.tenant_id = ?
+            ORDER BY tu.role ASC, u.name ASC
         `, [tid]);
         res.json(rows);
     } catch (error) {
+        console.error('[API ERROR] Get tenant users:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.post('/api/users', async (req, res) => {
-    const { user_id, role } = req.body;
+// --- Invite User to Tenant ---
+app.post('/api/tenant/invite', async (req, res) => {
+    const { email, role } = req.body;
     const tid = getTenantId(req);
+    const inviterUserId = req.user.userId;
+
+    if (!email || !email.trim()) {
+        return res.status(400).json({ error: 'Email wajib diisi.' });
+    }
+    const validRoles = ['admin', 'content_creative', 'guest'];
+    const finalRole = validRoles.includes(role) ? role : 'guest';
+
     try {
-        await db.execute(
-            'INSERT INTO tenant_users (tenant_id, user_id, role) VALUES (?, ?, ?)',
-            [tid, user_id, role || 'Guest']
+        // 1. Check if user exists
+        const [users] = await db.execute('SELECT id, name FROM users WHERE email = ?', [email.trim()]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User tidak ditemukan. Pastikan email sudah terdaftar di sistem.' });
+        }
+        const targetUser = users[0];
+
+        // 2. Cannot invite yourself
+        if (targetUser.id === inviterUserId) {
+            return res.status(400).json({ error: 'Anda tidak dapat mengundang diri sendiri.' });
+        }
+
+        // 3. Check if already a member of this tenant
+        const [existing] = await db.execute(
+            'SELECT user_id, status FROM tenant_users WHERE tenant_id = ? AND user_id = ?',
+            [tid, targetUser.id]
         );
-        res.status(201).json({ message: 'User added successfully' });
+        if (existing.length > 0) {
+            const st = existing[0].status || 'active';
+            if (st === 'active') return res.status(400).json({ error: 'Pengguna sudah menjadi anggota tenant ini.' });
+            if (st === 'pending') return res.status(400).json({ error: 'Undangan sudah terkirim dan menunggu respons.' });
+        }
+
+        // 4. Get tenant name for notification message
+        const [tenantRows] = await db.execute('SELECT name FROM tenants WHERE id = ?', [tid]);
+        const tenantName = tenantRows.length > 0 ? tenantRows[0].name : 'Tenant';
+
+        // 5. Insert tenant_users with status 'pending'
+        await db.execute(
+            "INSERT INTO tenant_users (tenant_id, user_id, role, status) VALUES (?, ?, ?, 'pending')",
+            [tid, targetUser.id, finalRole]
+        );
+
+        // 6. Create notification for the invited user
+        const roleLabel = finalRole === 'admin' ? 'Admin' : finalRole === 'content_creative' ? 'Content Creative' : 'Guest';
+        const notifMessage = `Anda diundang bergabung ke "${tenantName}" sebagai ${roleLabel}.`;
+        await db.execute(
+            "INSERT INTO notifications (user_id, type, title, message, metadata) VALUES (?, 'invitation', ?, ?, ?)",
+            [targetUser.id, 'Undangan Bergabung', notifMessage, JSON.stringify({ tenant_id: tid, tenant_name: tenantName, role: finalRole, invited_by: inviterUserId })]
+        );
+
+        console.log(`[INVITE] User ${email} invited to tenant ${tid} as ${finalRole}`);
+        res.status(201).json({ message: `Undangan berhasil dikirim ke ${email}.` });
     } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('[API ERROR] Invite user:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
     }
 });
 
@@ -1506,6 +1557,112 @@ app.delete('/api/users/:user_id', async (req, res) => {
         res.json({ message: 'User removed successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
+// ★ NOTIFICATION SYSTEM ★
+// =============================================================
+
+// GET /api/notifications — Fetch all notifications for logged-in user
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const [rows] = await db.execute(
+            'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+            [userId]
+        );
+        // Parse metadata JSON for each notification
+        const notifications = rows.map(n => {
+            let metadata = {};
+            if (n.metadata) {
+                try { metadata = typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata; } catch(e) {}
+            }
+            return { ...n, metadata };
+        });
+        res.json(notifications);
+    } catch (error) {
+        console.error('[API ERROR] Get notifications:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// PATCH /api/notifications/:id/read — Mark notification as read
+app.patch('/api/notifications/:id/read', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { id } = req.params;
+        await db.execute(
+            'UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?',
+            [id, userId]
+        );
+        res.json({ message: 'Notification marked as read.' });
+    } catch (error) {
+        console.error('[API ERROR] Mark notification read:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// POST /api/notifications/respond — Accept or Reject invitation
+app.post('/api/notifications/respond', async (req, res) => {
+    const { notification_id, action } = req.body;
+    const userId = req.user.userId;
+
+    if (!notification_id || !['accept', 'reject'].includes(action)) {
+        return res.status(400).json({ error: 'notification_id dan action (accept/reject) wajib diisi.' });
+    }
+
+    try {
+        // 1. Fetch the notification
+        const [notifs] = await db.execute(
+            "SELECT * FROM notifications WHERE id = ? AND user_id = ? AND type = 'invitation'",
+            [notification_id, userId]
+        );
+        if (notifs.length === 0) {
+            return res.status(404).json({ error: 'Notifikasi tidak ditemukan.' });
+        }
+
+        const notif = notifs[0];
+        let metadata = {};
+        if (notif.metadata) {
+            try { metadata = typeof notif.metadata === 'string' ? JSON.parse(notif.metadata) : notif.metadata; } catch(e) {}
+        }
+        const tenantId = metadata.tenant_id;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Data undangan tidak valid (tenant_id missing).' });
+        }
+
+        if (action === 'accept') {
+            // Update tenant_users status to 'active'
+            await db.execute(
+                "UPDATE tenant_users SET status = 'active' WHERE tenant_id = ? AND user_id = ?",
+                [tenantId, userId]
+            );
+            // Update notification
+            await db.execute(
+                "UPDATE notifications SET is_read = 1, message = CONCAT(message, ' — Diterima.') WHERE id = ?",
+                [notification_id]
+            );
+            console.log(`[INVITE] User ${userId} ACCEPTED invitation to tenant ${tenantId}`);
+            res.json({ message: 'Undangan berhasil diterima. Anda sekarang anggota tenant ini.' });
+        } else {
+            // Reject: delete the tenant_users record
+            await db.execute(
+                'DELETE FROM tenant_users WHERE tenant_id = ? AND user_id = ?',
+                [tenantId, userId]
+            );
+            // Update notification
+            await db.execute(
+                "UPDATE notifications SET is_read = 1, message = CONCAT(message, ' — Ditolak.') WHERE id = ?",
+                [notification_id]
+            );
+            console.log(`[INVITE] User ${userId} REJECTED invitation to tenant ${tenantId}`);
+            res.json({ message: 'Undangan ditolak.' });
+        }
+    } catch (error) {
+        console.error('[API ERROR] Respond to notification:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
     }
 });
 
@@ -2087,5 +2244,41 @@ app.listen(PORT, '0.0.0.0', async () => {
         }
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not create plugins table:', e.message);
+    }
+
+    // Auto-migration for notifications table
+    try {
+        const [tables] = await db.execute("SHOW TABLES LIKE 'notifications'");
+        if (tables.length === 0) {
+            console.log('[MIGRATION] Creating notifications table...');
+            await db.execute(`
+                CREATE TABLE notifications (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    type VARCHAR(50) DEFAULT 'info',
+                    title VARCHAR(255) DEFAULT '',
+                    message TEXT NOT NULL,
+                    metadata JSON DEFAULT NULL,
+                    is_read TINYINT(1) DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_notif_user (user_id, is_read)
+                )
+            `);
+            console.log('[MIGRATION] ✓ notifications table created.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not create notifications table:', e.message);
+    }
+
+    // Auto-migration for tenant_users.status column
+    try {
+        const [columns] = await db.execute("SHOW COLUMNS FROM tenant_users LIKE 'status'");
+        if (columns.length === 0) {
+            console.log('[MIGRATION] Adding status column to tenant_users table...');
+            await db.execute("ALTER TABLE tenant_users ADD COLUMN `status` VARCHAR(20) DEFAULT 'active'");
+            console.log('[MIGRATION] ✓ tenant_users.status column added.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not add status column to tenant_users:', e.message);
     }
 });
