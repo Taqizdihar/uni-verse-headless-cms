@@ -3,6 +3,7 @@ import { User, Mail, Lock, Camera, Save, Key, ShieldCheck, Loader2 } from 'lucid
 import { useCMS } from '../context/CMSContext';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
 export function Profile() {
   const { user, setUser, token } = useCMS();
@@ -130,8 +131,9 @@ export function Profile() {
         {/* Row 1: Left (Photo) & Right (Identity) */}
         {/* Profile Card */}
         <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-xl flex flex-col">
-          <div className="h-32 bg-amber-400 relative">
-             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
+          <div className="h-32 bg-[#0B0B0B] relative flex items-center justify-center">
+             <img src={universeLogo} alt="UNI-VERSE" className="w-64 opacity-[0.15] object-contain z-0 pointer-events-none" />
+             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-10">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-xl bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                     {profile.profile_picture_url ? (

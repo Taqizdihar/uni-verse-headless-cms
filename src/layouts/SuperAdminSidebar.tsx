@@ -7,8 +7,8 @@ import {
   History, 
   HardDrive, 
   Settings,
-  Menu,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
@@ -42,7 +42,7 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
              <span className="text-[10px] text-amber-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90">Super Admin</span>
           </div>
         )}
-        {isCollapsed && <img src={universeLogo} alt="Logo" className="w-8 h-8 object-contain" />}
+        {isCollapsed && <img src="/favicon.png" alt="Favicon" className="w-10 h-10 object-contain scale-110" />}
         
         {/* Mobile close button is separate from collapse */}
         <button 
@@ -81,17 +81,24 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
       </nav>
 
       {/* Collapse Toggle Button (Desktop Only) */}
-      <div className="hidden md:flex p-4 border-t border-zinc-800">
-          <button 
-             onClick={toggleCollapse}
-             className={cn(
-                 "w-full flex items-center p-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all",
-                 isCollapsed ? "justify-center" : "justify-between"
-             )}
-          >
-              {!isCollapsed && <span className="text-xs font-bold uppercase tracking-widest">Collapse</span>}
-              <Menu className="w-5 h-5" />
-          </button>
+      <div className={cn("hidden md:block p-4 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-2" : "px-4")}>
+          <div className={cn("bg-zinc-800/50 rounded-xl transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-3 flex-col gap-3" : "p-4")}>
+              <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)] shrink-0"></div>
+                  {!isCollapsed && (
+                      <div className="flex flex-col gap-0.5 overflow-hidden">
+                        <span className="text-xs font-bold text-zinc-300 whitespace-nowrap">Sistem Online</span>
+                      </div>
+                  )}
+              </div>
+              <button 
+                  onClick={toggleCollapse}
+                  className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                  {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+              </button>
+          </div>
       </div>
     </aside>
   );
