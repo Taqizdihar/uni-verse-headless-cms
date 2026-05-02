@@ -797,6 +797,7 @@ app.use('/api', authenticateToken);
 
 // Override the hardcoded tenant_id = 1 dynamically based on req.user.tenant_id
 // Supports workspace switching via X-Active-Tenant header
+// Task 4: Validates that user has active membership in the requested tenant
 const getTenantId = (req) => {
     const override = req.headers['x-active-tenant'];
     if (override) {
@@ -804,6 +805,25 @@ const getTenantId = (req) => {
         if (!isNaN(parsed) && parsed > 0) return parsed;
     }
     return req.user.tenant_id;
+};
+
+// Async tenant access validator middleware (used on sensitive write routes)
+const validateTenantAccess = async (req, res, next) => {
+    try {
+        const tid = getTenantId(req);
+        const userId = req.user.userId;
+        const [rows] = await db.execute(
+            "SELECT status FROM tenant_users WHERE tenant_id = ? AND user_id = ? AND status = 'active'",
+            [tid, userId]
+        );
+        if (rows.length === 0) {
+            return res.status(403).json({ error: 'Anda tidak memiliki akses aktif ke workspace ini.' });
+        }
+        next();
+    } catch (err) {
+        console.error('[AUTH] Tenant access validation error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
 // ========================================================

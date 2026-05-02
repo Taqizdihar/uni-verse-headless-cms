@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
 export interface PageItem {
   id: number;
@@ -156,6 +157,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [activeRole, setActiveRole] = useState<string | null>(() => {
     return localStorage.getItem('active_role') || null;
   });
+  const [isSwitchingWorkspace, setIsSwitchingWorkspace] = useState(false);
 
   // Helper for headers
   const getHeaders = () => {
@@ -476,12 +478,31 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   const switchWorkspace = (tenantId: number, role: string) => {
+    // 1. Show branded loading overlay
+    setIsSwitchingWorkspace(true);
+
+    // 2. Clear ALL tenant-specific React state for a clean slate
+    setPages([]);
+    setPosts([]);
+    setMedia([]);
+    setComments([]);
+    setLayoutBlocks([]);
+    setUsers([]);
+    setPlugins([]);
+    setSettings({});
+    setActivities([]);
+    setTotalUsers(0);
+
+    // 3. Update active workspace in both React state and localStorage
     setActiveTenantId(tenantId);
     setActiveRole(role);
     localStorage.setItem('active_tenant_id', String(tenantId));
     localStorage.setItem('active_role', role);
-    // Trigger full data re-fetch by reloading the page
-    window.location.reload();
+
+    // 4. Wait 1.5s for overlay animation, then force full page reload
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
   };
 
   const isAuthenticated = !!token || !!localStorage.getItem('token');
@@ -501,6 +522,36 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       togglePageStatus, togglePostStatus,
       addActivity 
     }}>
+      {/* Task 2: Branded Full-Screen Loading Overlay */}
+      {isSwitchingWorkspace && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(11,11,11,0.92)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          gap: '24px'
+        }}>
+          <style>{`
+            @keyframes universe-pulse {
+              0%, 100% { transform: scale(1); opacity: 0.85; }
+              50% { transform: scale(1.1); opacity: 1; }
+            }
+          `}</style>
+          <img
+            src={universeLogo}
+            alt="UNI-VERSE"
+            style={{
+              height: '64px', width: 'auto',
+              animation: 'universe-pulse 1.5s ease-in-out infinite'
+            }}
+          />
+          <p style={{
+            color: '#FAD02C', fontSize: '12px',
+            fontWeight: 800, letterSpacing: '0.15em',
+            textTransform: 'uppercase'
+          }}>Menyiapkan Workspace...</p>
+        </div>
+      )}
       {children}
     </CMSContext.Provider>
   );

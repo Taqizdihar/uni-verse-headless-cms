@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, UserCircle, LogOut, Menu, History, BookOpen, Check, X, Loader2, Mail as MailIcon } from 'lucide-react';
+import { Bell, UserCircle, LogOut, Menu, History, BookOpen, Check, X, Loader2, Mail as MailIcon, Handshake } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { user, setUser, setToken, settings } = useCMS();
+  const { user, setUser, setToken, settings, activeRole } = useCMS();
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
@@ -116,6 +116,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('active_tenant_id');
+    localStorage.removeItem('active_role');
     setUser(null);
     setToken(null);
     navigate('/login');
@@ -147,9 +149,17 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
-          <h1 className="w-full text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
-            {settings?.site_name || 'Uni-Inside'}
-          </h1>
+          <div className="flex items-center gap-2 w-full">
+            <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
+              {settings?.site_name || 'Uni-Inside'}
+            </h1>
+            {activeRole && activeRole !== 'admin' && activeRole !== 'super_admin' && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400 text-zinc-950 rounded-sm text-[9px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0">
+                <Handshake className="w-3 h-3" />
+                TIM MITRA
+              </span>
+            )}
+          </div>
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
             PANEL <span className="text-zinc-400">ADMIN</span>
           </span>

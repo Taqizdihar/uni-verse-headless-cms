@@ -67,18 +67,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
             {!isCollapsed && (
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] opacity-90 whitespace-nowrap">UNI-INSIDE'S CMS</p>
-                  {!isOwnWorkspace && (
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-400/20 text-amber-400 rounded text-[8px] font-black uppercase tracking-widest border border-amber-400/30 whitespace-nowrap">
-                      <Handshake className="w-2.5 h-2.5" />
-                      TIM MITRA
-                    </span>
-                  )}
                 </div>
-            )}
-            {isCollapsed && !isOwnWorkspace && (
-              <span className="mt-1 px-1 py-0.5 bg-amber-400/20 text-amber-400 rounded text-[7px] font-black uppercase tracking-wider border border-amber-400/30" title="Tim Mitra">
-                MITRA
-              </span>
             )}
           </div>
           <button 
