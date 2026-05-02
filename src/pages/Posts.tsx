@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter } from 'lucide-react';
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';

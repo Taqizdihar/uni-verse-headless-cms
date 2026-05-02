@@ -42,7 +42,7 @@ export function Plugins() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPlugins.length > 0 ? (
-          plugins.map((plugin) => {
+          filteredPlugins.map((plugin) => {
             const Icon = iconMap[plugin.iconName || ''] || Settings;
             const isActive = !!plugin.is_active;
 

@@ -2055,4 +2055,37 @@ app.listen(PORT, '0.0.0.0', async () => {
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not verify/add is_in_navbar column to pages:', e.message);
     }
+
+    // Auto-migration for plugins table
+    try {
+        const [tables] = await db.execute("SHOW TABLES LIKE 'plugins'");
+        if (tables.length === 0) {
+            console.log('[MIGRATION] Creating plugins table...');
+            await db.execute(`
+                CREATE TABLE plugins (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    tenant_id INT NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    is_active TINYINT(1) DEFAULT 0,
+                    config TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            // Seed initial plugins for existing tenants
+            const [tenants] = await db.execute('SELECT id FROM tenants');
+            for (const tenant of tenants) {
+                await db.execute(`
+                    INSERT INTO plugins (tenant_id, name, description, is_active) VALUES 
+                    (?, 'API Webhooks', 'Kirim notifikasi otomatis ke URL eksternal saat konten berubah.', 0),
+                    (?, 'Google Analytics', 'Pantau statistik pengunjung langsung dari dashboard.', 0),
+                    (?, 'SEO Optimizer', 'Optimasi meta tag dan sitemap secara otomatis.', 1)
+                `, [tenant.id, tenant.id, tenant.id]);
+            }
+            console.log('[MIGRATION] ✓ plugins table created and seeded.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not create plugins table:', e.message);
+    }
 });
