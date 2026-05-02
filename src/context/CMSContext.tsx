@@ -215,9 +215,40 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (token || localStorage.getItem('token')) {
-       fetchAllData();
-    }
+    const initializeSession = async () => {
+      const currentToken = token || localStorage.getItem('token');
+      if (!currentToken) return;
+
+      try {
+        // Fetch full list of workspaces to verify identity
+        const wsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/workspaces`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (wsRes.ok) {
+          const workspaces = await wsRes.json();
+          const currentTenantId = activeTenantId || parseInt(localStorage.getItem('active_tenant_id') || '0', 10);
+          
+          // Verify if active_tenant_id exists and is active in the fetched list
+          const isValid = workspaces.find((w: any) => w.tenant_id === currentTenantId && w.status === 'active');
+          
+          if (!isValid && workspaces.length > 0) {
+            // Fallback to primary admin workspace
+            const primary = workspaces.find((w: any) => w.role === 'admin') || workspaces[0];
+            setActiveTenantId(primary.tenant_id);
+            setActiveRole(primary.role);
+            localStorage.setItem('active_tenant_id', String(primary.tenant_id));
+            localStorage.setItem('active_role', primary.role);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to verify workspaces on init:', err);
+      }
+
+      // Fetch the data after verifying the tenant context
+      fetchAllData();
+    };
+
+    initializeSession();
   }, [token]);
 
   // API Call abstractions
@@ -481,7 +512,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     // 1. Show branded loading overlay
     setIsSwitchingWorkspace(true);
 
-    // 2. Clear ALL tenant-specific React state for a clean slate
+    // 2. Clear ALL tenant-specific React state and localStorage cache for a clean slate
     setPages([]);
     setPosts([]);
     setMedia([]);
@@ -492,6 +523,16 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setSettings({});
     setActivities([]);
     setTotalUsers(0);
+
+    // Clear potential cached data in localStorage except auth and user identity
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && !['token', 'user', 'active_tenant_id', 'active_role'].includes(key)) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
 
     // 3. Update active workspace in both React state and localStorage
     setActiveTenantId(tenantId);
