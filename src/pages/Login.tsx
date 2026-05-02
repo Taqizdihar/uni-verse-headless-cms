@@ -51,6 +51,9 @@ export function Login() {
       localStorage.setItem('active_tenant_id', String(user.tenant_id || ''));
       localStorage.setItem('active_role', user.role || 'admin');
       
+      // Store primary tenant ID for TIM MITRA badge logic
+      localStorage.setItem('primary_tenant_id', String(res.data.primary_tenant_id || user.tenant_id || ''));
+      
       setToken(token);
       setUser(user);
       

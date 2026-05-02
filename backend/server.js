@@ -686,6 +686,13 @@ app.post('/api/auth/login', async (req, res) => {
         let tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
         let role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
 
+        // 3b. Identify primary tenant (the first admin workspace, i.e. the one created during registration)
+        const [adminTenants] = await db.execute(
+            "SELECT tenant_id FROM tenant_users WHERE user_id = ? AND role = 'admin' AND status = 'active' ORDER BY tenant_id ASC LIMIT 1",
+            [user.id]
+        );
+        const primary_tenant_id = adminTenants.length > 0 ? adminTenants[0].tenant_id : tenant_id;
+
         // Super Admin Hardcode Override
         if (user.id === 1 || user.email === 'm.taqizdihar@gmail.com') {
             role = 'super_admin';
@@ -699,16 +706,16 @@ app.post('/api/auth/login', async (req, res) => {
             }
         }
 
-        // 4. Fetch site_name for frontend redirection logic
+        // 4. Fetch site_name for frontend redirection logic (from PRIMARY tenant)
         let site_name = 'My Site';
-        if (tenant_id) {
-            const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
+        if (primary_tenant_id) {
+            const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [primary_tenant_id]);
             if (settings && settings.length > 0) {
                 site_name = settings[0].site_name;
             }
         }
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id: primary_tenant_id, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
         
         console.log(`[AUTH] Login successful for ${email}. Tenant: ${tenant_id || 'NONE'}`);
 
@@ -720,11 +727,12 @@ app.post('/api/auth/login', async (req, res) => {
                 name: user.name, 
                 email: user.email, 
                 profile_picture_url: user.profile_picture_url,
-                tenant_id, 
-                role, 
+                tenant_id: primary_tenant_id, 
+                role: 'admin', 
                 site_name 
             },
-            tenant_id 
+            tenant_id: primary_tenant_id,
+            primary_tenant_id 
         });
 
     } catch (error) {

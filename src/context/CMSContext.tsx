@@ -261,6 +261,14 @@ export function CMSProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('active_tenant_id', String(primary.tenant_id));
             localStorage.setItem('active_role', primary.role);
           }
+
+          // Backfill primary_tenant_id if missing (for existing sessions before this update)
+          if (!localStorage.getItem('primary_tenant_id')) {
+            const adminWs = workspaces.find((w: any) => w.role === 'admin');
+            if (adminWs) {
+              localStorage.setItem('primary_tenant_id', String(adminWs.tenant_id));
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to verify workspaces on init:', err);
@@ -550,7 +558,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && !['token', 'user', 'active_tenant_id', 'active_role'].includes(key)) {
+      if (key && !['token', 'user', 'active_tenant_id', 'active_role', 'primary_tenant_id'].includes(key)) {
         keysToRemove.push(key);
       }
     }

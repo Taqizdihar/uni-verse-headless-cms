@@ -151,15 +151,24 @@ export function Header({ onMenuClick }: HeaderProps) {
             <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
               {settings?.site_name || 'Uni-Inside'}
             </h1>
-            {activeTenantId && user?.tenant_id && Number(activeTenantId) !== Number(user.tenant_id) && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400 text-zinc-950 rounded-sm text-[9px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0">
-                <Handshake className="w-3 h-3" />
-                TIM MITRA
-              </span>
-            )}
+            {(() => {
+              const primaryTenantId = localStorage.getItem('primary_tenant_id');
+              const isGuest = primaryTenantId && activeTenantId && String(activeTenantId) !== String(primaryTenantId);
+              return isGuest ? (
+                <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-400 text-zinc-950 rounded-sm text-[9px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0">
+                  <Handshake className="w-3 h-3" />
+                  TIM MITRA
+                </span>
+              ) : null;
+            })()}
           </div>
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
-            PANEL <span className="text-zinc-400">{activeRole ? activeRole.replace(/_/g, ' ').toUpperCase() : 'ADMIN'}</span>
+            PANEL <span className="text-zinc-400">{(() => {
+              const primaryTenantId = localStorage.getItem('primary_tenant_id');
+              const isPrimary = !primaryTenantId || !activeTenantId || String(activeTenantId) === String(primaryTenantId);
+              if (isPrimary) return 'ADMIN';
+              return activeRole ? activeRole.replace(/_/g, ' ').toUpperCase() : 'ADMIN';
+            })()}</span>
           </span>
         </div>
 
@@ -303,7 +312,12 @@ export function Header({ onMenuClick }: HeaderProps) {
             onClick={() => navigate('/profile')}
           >
             <p className="text-sm font-bold text-zinc-900 leading-none hover:text-amber-500 transition-colors">{user?.name || 'Admin User'}</p>
-            <p className="text-[11px] text-zinc-500 font-medium mt-1 uppercase tracking-wider">{user?.role || 'Superadmin'}</p>
+            <p className="text-[11px] text-zinc-500 font-medium mt-1 uppercase tracking-wider">{(() => {
+              const primaryTenantId = localStorage.getItem('primary_tenant_id');
+              const isPrimary = !primaryTenantId || !activeTenantId || String(activeTenantId) === String(primaryTenantId);
+              if (isPrimary) return 'ADMIN';
+              return activeRole ? activeRole.replace(/_/g, ' ').toUpperCase() : 'ADMIN';
+            })()}</p>
           </div>
           <div 
             className="flex items-center gap-2 cursor-pointer group"
