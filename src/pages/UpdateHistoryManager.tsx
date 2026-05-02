@@ -183,7 +183,7 @@ export function UpdateHistoryManager() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -243,14 +243,14 @@ export function UpdateHistoryManager() {
       {/* Update History Section */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-emerald-500/10 rounded-xl">
-            <History className="w-6 h-6 text-emerald-400" />
+          <div className="p-3 bg-amber-500/10 rounded-xl">
+            <History className="w-6 h-6 text-amber-400" />
           </div>
           <h3 className="text-xl font-black text-white">Changelog Sistem</h3>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all"
+          className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-black text-sm transition-all"
         >
           <Plus className="w-5 h-5" /> Rilis Update Baru
         </button>
@@ -263,10 +263,10 @@ export function UpdateHistoryManager() {
           </div>
         ) : (
           updates.map((update) => (
-            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all">
+            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-amber-500/30 transition-all">
               <div className="flex-1 space-y-4 w-full">
                  <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-black uppercase tracking-widest border border-emerald-500/20">
+                    <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-black uppercase tracking-widest border border-amber-500/20">
                       v{update.version}
                     </span>
                     <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">
@@ -290,7 +290,7 @@ export function UpdateHistoryManager() {
               <div className="flex items-center gap-3 w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-zinc-800">
                  <button 
                    onClick={() => handleOpenModal(update)}
-                   className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-emerald-500 text-zinc-300 hover:text-black rounded-xl transition-colors font-bold text-xs"
+                   className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-amber-500 text-zinc-300 hover:text-black rounded-xl transition-colors font-bold text-xs"
                  >
                    <Edit2 className="w-4 h-4" /> Edit
                  </button>
@@ -331,7 +331,7 @@ export function UpdateHistoryManager() {
                       type="text" 
                       value={formData.title} 
                       onChange={e => setFormData(p => ({ ...p, title: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium" 
+                       className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 transition-all font-medium" 
                     />
                   </div>
                   <div>
@@ -341,7 +341,7 @@ export function UpdateHistoryManager() {
                       type="text" 
                       value={formData.version} 
                       onChange={e => setFormData(p => ({ ...p, version: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium font-mono" 
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 transition-all font-medium font-mono" 
                       placeholder="e.g. 1.2.0"
                     />
                   </div>
@@ -354,13 +354,13 @@ export function UpdateHistoryManager() {
                     type="date" 
                     value={formData.date} 
                     onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
-                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 transition-all font-medium" 
+                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 transition-all font-medium" 
                   />
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Deskripsi (Release Notes)</label>
-                  <div className="update-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                  <div className="update-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-amber-500 transition-colors bg-white">
                     <style>{`
                       .update-editor-container .ql-editor {
                         color: #000000 !important;
@@ -386,7 +386,7 @@ export function UpdateHistoryManager() {
                       placeholder="https://... URL Gambar"
                       value={imageUrlInput}
                       onChange={e => setImageUrlInput(e.target.value)}
-                      className="flex-1 px-5 py-3 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 text-sm"
+                      className="flex-1 px-5 py-3 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 text-sm"
                     />
                     <button type="button" onClick={handleAddImage} className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center gap-2">
                       <Plus className="w-4 h-4" /> Tambah
@@ -415,7 +415,7 @@ export function UpdateHistoryManager() {
 
             <div className="px-8 py-6 border-t border-zinc-800 flex items-center justify-end gap-4 bg-zinc-900/50">
                <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 text-zinc-400 font-bold text-sm hover:text-white">Batal</button>
-               <button type="submit" form="update-form" disabled={isSubmitting} className="flex items-center gap-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all disabled:opacity-50">
+               <button type="submit" form="update-form" disabled={isSubmitting} className="flex items-center gap-2 px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-black text-sm transition-all disabled:opacity-50">
                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} Simpan
                </button>
             </div>

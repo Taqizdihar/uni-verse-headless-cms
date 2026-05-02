@@ -8,7 +8,7 @@ export function SuperAdminLayout() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#020617] text-zinc-100 font-sans selection:bg-emerald-500 selection:text-black overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#020617] text-zinc-100 font-sans selection:bg-amber-500 selection:text-black overflow-x-hidden">
       {/* Sidebar - Responsive */}
       <div className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 ease-in-out`}>
         <SuperAdminSidebar 

@@ -102,7 +102,7 @@ export function TenantManagement() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-zinc-500 font-bold uppercase tracking-widest text-xs">Memuat Data Tenant...</p>
       </div>
     );
@@ -123,9 +123,9 @@ export function TenantManagement() {
             placeholder="Cari subdomain atau nama admin..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium text-sm"
+            className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium text-sm"
           />
-          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-amber-500 transition-colors" />
         </div>
       </div>
 
@@ -153,8 +153,8 @@ export function TenantManagement() {
                   <tr key={tenant.tenant_id} className="hover:bg-zinc-800/20 transition-colors group">
                     <td className="px-8 py-6">
                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 bg-emerald-500/10 rounded-xl">
-                             <Globe className="w-5 h-5 text-emerald-500" />
+                          <div className="p-2.5 bg-amber-500/10 rounded-xl">
+                             <Globe className="w-5 h-5 text-amber-500" />
                           </div>
                           <div>
                              <p className="font-bold text-white mb-0.5">{tenant.subdomain}</p>
@@ -177,7 +177,7 @@ export function TenantManagement() {
                     <td className="px-8 py-6">
                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                          tenant.status === 'active' 
-                           ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                           ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
                            : 'bg-red-500/10 text-red-400 border-red-500/20'
                        }`}>
                          {tenant.status === 'active' ? (
@@ -210,7 +210,7 @@ export function TenantManagement() {
                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 ${
                              tenant.status === 'active' 
                                ? 'bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white' 
-                               : 'bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white'
+                               : 'bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white'
                            }`}
                          >
                            {actionLoading === tenant.tenant_id ? (

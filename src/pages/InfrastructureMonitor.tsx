@@ -59,7 +59,7 @@ export function InfrastructureMonitor() {
   if (loading || !stats) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-zinc-500 font-bold uppercase tracking-widest text-xs">Memeriksa Infrastruktur...</p>
       </div>
     );
@@ -69,10 +69,10 @@ export function InfrastructureMonitor() {
   const percentage = Math.min(100, Math.round((stats.storage.total_used_mb / stats.storage.quota_mb) * 100));
   
   // Determine Color
-  let progressColor = 'bg-emerald-500';
-  let textColor = 'text-emerald-400';
-  let bgColor = 'bg-emerald-500/10';
-  let borderColor = 'border-emerald-500/20';
+  let progressColor = 'bg-amber-500';
+  let textColor = 'text-amber-400';
+  let bgColor = 'bg-amber-500/10';
+  let borderColor = 'border-amber-500/20';
 
   if (percentage >= 90) {
     progressColor = 'bg-red-500';
@@ -109,7 +109,7 @@ export function InfrastructureMonitor() {
                 <h3 className="text-lg font-black text-white">Database Health</h3>
               </div>
               <div className={`px-3 py-1.5 rounded-full flex items-center gap-2 border text-[10px] font-black uppercase tracking-widest ${
-                isDbConnected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
+                isDbConnected ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
               }`}>
                 {isDbConnected ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
                 {isDbConnected ? 'Connected' : 'Disconnected'}

@@ -58,7 +58,7 @@ export function SuperAdminHeader({ onMenuClick }: SuperAdminHeaderProps) {
         <div className="flex items-center gap-4 pl-6 border-l border-zinc-800">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-bold text-white leading-none">{user?.name || 'Administrator'}</p>
-            <div className="flex items-center gap-1 mt-1 justify-end text-emerald-400">
+            <div className="flex items-center gap-1 mt-1 justify-end text-amber-400">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <p className="text-[10px] font-black uppercase tracking-wider">Super Admin</p>
             </div>

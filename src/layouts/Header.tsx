@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, UserCircle, LogOut, Menu, History } from 'lucide-react';
+import { Bell, UserCircle, LogOut, Menu, History, BookOpen } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -34,8 +34,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu className="w-6 h-6" />
         </button>
 
-        <div className="flex flex-col items-start leading-tight">
-          <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate max-w-[150px] md:max-w-[200px]" title={settings?.site_name || 'Uni-Inside'}>
+        <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
+          <h1 className="w-full text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
             {settings?.site_name || 'Uni-Inside'}
           </h1>
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest pl-0.5">
@@ -64,6 +64,14 @@ export function Header({ onMenuClick }: HeaderProps) {
           <History className="w-5 h-5 text-zinc-500" />
           <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Histori Update</span>
         </div>
+
+        <button 
+          onClick={() => window.open('https://drive.google.com/file/d/1ZaUlAvkTbGGBH8zTmLKxSJhAPoPO7ik7/view?usp=sharing', '_blank')}
+          className="flex items-center gap-2 hover:bg-zinc-50 p-2 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300"
+        >
+          <BookOpen className="w-5 h-5 text-zinc-500" />
+          <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Panduan</span>
+        </button>
 
         <button className="relative p-2.5 text-zinc-500 hover:text-amber-400 transition-colors rounded-full hover:bg-zinc-50 border border-transparent">
           <Bell className="w-5 h-5" />

@@ -39,7 +39,7 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
         {!isCollapsed && (
           <div className="flex flex-col items-start gap-1">
              <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
-             <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90">Super Admin</span>
+             <span className="text-[10px] text-amber-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90">Super Admin</span>
           </div>
         )}
         {isCollapsed && <img src={universeLogo} alt="Logo" className="w-8 h-8 object-contain" />}
@@ -66,7 +66,7 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
                 cn(
                   "flex items-center gap-3 px-3 py-3 rounded-xl transition-all font-bold text-sm group",
                   isActive 
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" 
                     : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200 border border-transparent",
                   isCollapsed ? "justify-center" : "justify-start"
                 )

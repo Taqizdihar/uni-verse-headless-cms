@@ -55,7 +55,7 @@ export function SuperAdminDashboard() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-zinc-500 font-bold uppercase tracking-widest text-xs">Memuat Metrik Sistem...</p>
       </div>
     );
@@ -73,12 +73,12 @@ export function SuperAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Card 1: Tenants */}
-        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-emerald-500/50 transition-all">
+        <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between group hover:border-amber-500/50 transition-all">
           <div className="flex items-center justify-between mb-4">
-             <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
-               <Server className="w-6 h-6 text-emerald-400" />
+             <div className="p-3 bg-amber-500/10 rounded-xl group-hover:bg-amber-500/20 transition-colors">
+               <Server className="w-6 h-6 text-amber-400" />
              </div>
-             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
+             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 font-bold text-[10px] uppercase tracking-wider">
                <TrendingUp className="w-3 h-3" />
                +12%
              </div>
@@ -129,7 +129,7 @@ export function SuperAdminDashboard() {
       {/* Super Admin Hub Card (GitHub Link) */}
       <div className="bg-gradient-to-br from-zinc-900/80 to-[#020617] backdrop-blur-xl p-8 rounded-xl border border-slate-800 shadow-2xl relative overflow-hidden">
          {/* Decorative Background Elements */}
-         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
          
          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -145,7 +145,7 @@ export function SuperAdminDashboard() {
                </span>
                <button 
                  onClick={copyToClipboard}
-                 className="flex items-center justify-center p-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] active:scale-95 group"
+                 className="flex items-center justify-center p-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all shadow-[0_0_15px_rgba(250,208,44,0.3)] hover:shadow-[0_0_20px_rgba(250,208,44,0.5)] active:scale-95 group"
                  title="Copy Repository Link"
                >
                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />}

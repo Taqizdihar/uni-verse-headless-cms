@@ -151,7 +151,7 @@ export function GlobalFaqManager() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
         <p className="mt-4 text-zinc-500 font-bold uppercase tracking-widest text-xs">Memuat Data FAQ...</p>
       </div>
     );
@@ -173,13 +173,13 @@ export function GlobalFaqManager() {
               placeholder="Cari pertanyaan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-all font-medium text-sm"
+              className="w-full px-5 py-3 pl-12 bg-zinc-900 border border-zinc-800 text-white rounded-xl placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition-all font-medium text-sm"
             />
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-amber-500 transition-colors" />
           </div>
           <button 
             onClick={() => handleOpenModal()}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(250,208,44,0.2)] active:scale-95"
           >
             <Plus className="w-5 h-5" /> Tambah FAQ
           </button>
@@ -193,22 +193,22 @@ export function GlobalFaqManager() {
           </div>
         ) : (
           filteredFaqs.map((faq) => (
-            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-emerald-500/30 transition-all shadow-xl overflow-hidden">
+            <div key={faq.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start group hover:border-amber-500/30 transition-all shadow-xl overflow-hidden">
               <div className="flex-1 min-w-0 space-y-4 w-full">
                  <div className="flex flex-wrap items-center gap-3">
                     <span className="px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-[10px] font-black uppercase tracking-widest border border-zinc-700">
                        {faq.category || 'Umum'}
                     </span>
-                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                    <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
                        Prioritas: {faq.priority}
                     </span>
                  </div>
                  <h3 className="text-xl font-bold text-white flex items-start gap-3 break-words">
-                    <HelpCircle className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <HelpCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
                     <span className="flex-1">{faq.question}</span>
                  </h3>
                  <div 
-                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-emerald-400 prose-p:leading-relaxed overflow-hidden"
+                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-a:text-amber-400 prose-p:leading-relaxed overflow-hidden"
                    style={{ wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', hyphens: 'none' }}
                    dangerouslySetInnerHTML={{ __html: faq.answer }}
                  />
@@ -216,7 +216,7 @@ export function GlobalFaqManager() {
               <div className="flex flex-shrink-0 items-center gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-zinc-800/50">
                  <button 
                    onClick={() => handleOpenModal(faq)}
-                   className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-emerald-500 text-zinc-300 hover:text-black rounded-xl transition-colors font-bold text-xs"
+                   className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-amber-500 text-zinc-300 hover:text-black rounded-xl transition-colors font-bold text-xs"
                  >
                    <Edit2 className="w-4 h-4" /> Edit
                  </button>
@@ -256,7 +256,7 @@ export function GlobalFaqManager() {
                     type="text" 
                     value={formData.question} 
                     onChange={e => setFormData(p => ({ ...p, question: e.target.value }))}
-                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium" 
+                    className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium" 
                     placeholder="Contoh: Bagaimana cara mengatur domain kustom?"
                   />
                 </div>
@@ -267,7 +267,7 @@ export function GlobalFaqManager() {
                     <select 
                       value={formData.category}
                       onChange={e => setFormData(p => ({ ...p, category: e.target.value }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium appearance-none"
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium appearance-none"
                     >
                       {CATEGORIES.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -280,7 +280,7 @@ export function GlobalFaqManager() {
                       type="number" 
                       value={formData.priority}
                       onChange={e => setFormData(p => ({ ...p, priority: parseInt(e.target.value) || 0 }))}
-                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium tabular-nums" 
+                      className="w-full px-6 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-medium tabular-nums" 
                       min="0"
                     />
                   </div>
@@ -288,7 +288,7 @@ export function GlobalFaqManager() {
 
                 <div>
                   <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 ml-2">Jawaban Lengkap</label>
-                  <div className="faq-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-emerald-500 transition-colors bg-white">
+                  <div className="faq-editor-container rounded-xl overflow-hidden border border-zinc-800 focus-within:border-amber-500 transition-colors bg-white">
                     <style>{`
                       .faq-editor-container .ql-editor {
                         color: #000000 !important;
@@ -320,7 +320,7 @@ export function GlobalFaqManager() {
                  type="submit"
                  form="faq-form"
                  disabled={isSubmitting}
-                 className="flex items-center gap-2 px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95 disabled:opacity-50"
+                 className="flex items-center gap-2 px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(250,208,44,0.2)] active:scale-95 disabled:opacity-50"
                >
                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                  Simpan FAQ
