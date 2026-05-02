@@ -98,12 +98,15 @@ interface CMSContextType {
   user: any;
   token: string | null;
   isAuthenticated: boolean;
+  activeTenantId: number | null;
+  activeRole: string | null;
   setUser: (u: any) => void;
   setToken: (t: string | null) => void;
   setPages: (p: PageItem[]) => void;
   setPosts: (p: PostItem[]) => void;
   setMedia: (m: MediaItem[]) => void;
   fetchAllData: () => Promise<void>;
+  switchWorkspace: (tenantId: number, role: string) => void;
   
   savePage: (pageData: any) => Promise<void>;
   deletePage: (id: number) => Promise<void>;
@@ -146,13 +149,22 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [activeTenantId, setActiveTenantId] = useState<number | null>(() => {
+    const stored = localStorage.getItem('active_tenant_id');
+    return stored ? parseInt(stored, 10) : null;
+  });
+  const [activeRole, setActiveRole] = useState<string | null>(() => {
+    return localStorage.getItem('active_role') || null;
+  });
 
   // Helper for headers
   const getHeaders = () => {
      const t = token || localStorage.getItem('token');
+     const tid = activeTenantId || localStorage.getItem('active_tenant_id');
      return {
         'Content-Type': 'application/json',
-        ...(t ? { 'Authorization': `Bearer ${t}` } : {})
+        ...(t ? { 'Authorization': `Bearer ${t}` } : {}),
+        ...(tid ? { 'X-Active-Tenant': String(tid) } : {})
      };
   };
 
@@ -463,14 +475,23 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setComments(prev => prev.filter(c => c.id !== id));
   };
 
+  const switchWorkspace = (tenantId: number, role: string) => {
+    setActiveTenantId(tenantId);
+    setActiveRole(role);
+    localStorage.setItem('active_tenant_id', String(tenantId));
+    localStorage.setItem('active_role', role);
+    // Trigger full data re-fetch by reloading the page
+    window.location.reload();
+  };
+
   const isAuthenticated = !!token || !!localStorage.getItem('token');
 
   return (
     <CMSContext.Provider value={{ 
       pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers,
-      user, token, isAuthenticated, setUser, setToken, 
+      user, token, isAuthenticated, activeTenantId, activeRole, setUser, setToken, 
       setPages, setPosts, setMedia,
-      fetchAllData,
+      fetchAllData, switchWorkspace,
       savePage, deletePage, 
       savePost, deletePost, 
       addMedia, deleteMedia, 

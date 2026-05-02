@@ -44,6 +44,12 @@ export function Login() {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
+      // Set default active workspace from login response
+      if (user.tenant_id) {
+        localStorage.setItem('active_tenant_id', String(user.tenant_id));
+        localStorage.setItem('active_role', user.role || 'admin');
+      }
+      
       setToken(token);
       setUser(user);
       

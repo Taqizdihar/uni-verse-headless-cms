@@ -620,7 +620,7 @@ app.post('/api/auth/register', async (req, res) => {
         const userId = result.insertId;
 
         console.log(`[AUTH] Linking user and tenant`);
-        await db.execute('INSERT INTO tenant_users (tenant_id, user_id, role) VALUES (?, ?, ?)', [tenantId, userId, 'admin']);
+        await db.execute("INSERT INTO tenant_users (tenant_id, user_id, role, status) VALUES (?, ?, ?, 'active')", [tenantId, userId, 'admin']);
 
         // Task 1: Auto-generate API Key for new tenant
         const crypto = require('crypto');
@@ -793,7 +793,15 @@ app.use('/api/v1/public', dataRoutes);
 app.use('/api', authenticateToken);
 
 // Override the hardcoded tenant_id = 1 dynamically based on req.user.tenant_id
-const getTenantId = (req) => req.user.tenant_id;
+// Supports workspace switching via X-Active-Tenant header
+const getTenantId = (req) => {
+    const override = req.headers['x-active-tenant'];
+    if (override) {
+        const parsed = parseInt(override, 10);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return req.user.tenant_id;
+};
 
 // ========================================================
 // AUTH & API KEY MANAGEMENT (Protected — JWT required)
@@ -1556,6 +1564,24 @@ app.delete('/api/users/:user_id', async (req, res) => {
         await db.execute('DELETE FROM tenant_users WHERE user_id = ? AND tenant_id = ?', [user_id, tid]);
         res.json({ message: 'User removed successfully' });
     } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// --- User Workspaces (All active tenants for the logged-in user) ---
+app.get('/api/user/workspaces', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const [rows] = await db.execute(`
+            SELECT tu.tenant_id, t.name as tenant_name, t.subdomain, tu.role, tu.status
+            FROM tenant_users tu
+            JOIN tenants t ON tu.tenant_id = t.id
+            WHERE tu.user_id = ? AND tu.status = 'active'
+            ORDER BY tu.role ASC, t.name ASC
+        `, [userId]);
+        res.json(rows);
+    } catch (error) {
+        console.error('[API ERROR] Get user workspaces:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

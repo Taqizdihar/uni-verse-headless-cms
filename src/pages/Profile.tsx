@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Lock, Camera, Save, Key, ShieldCheck, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { User, Mail, Lock, Camera, Save, Key, ShieldCheck, Loader2, Building2, ChevronDown, RefreshCw } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
+interface Workspace {
+  tenant_id: number;
+  tenant_name: string;
+  subdomain: string;
+  role: string;
+  status: string;
+}
+
 export function Profile() {
-  const { user, setUser, token } = useCMS();
+  const { user, setUser, token, activeTenantId, switchWorkspace } = useCMS();
   const [profile, setProfile] = useState({ name: '', email: '', profile_picture_url: '' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [isUploading, setIsUploading] = useState(false);
@@ -14,6 +22,10 @@ export function Profile() {
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [showPassForm, setShowPassForm] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Workspace state
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
 
   const headers = { 
     'Authorization': `Bearer ${token || localStorage.getItem('token')}`,
@@ -31,6 +43,41 @@ export function Profile() {
     };
     fetchProfile();
   }, []);
+
+  // Fetch workspaces
+  const fetchWorkspaces = useCallback(async () => {
+    setLoadingWorkspaces(true);
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/workspaces`, { headers });
+      setWorkspaces(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Fetch workspaces error:', err);
+    } finally {
+      setLoadingWorkspaces(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, [fetchWorkspaces]);
+
+  const handleWorkspaceSwitch = (tenantId: number) => {
+    if (tenantId === activeTenantId) return;
+    const ws = workspaces.find(w => w.tenant_id === tenantId);
+    if (ws) {
+      switchWorkspace(ws.tenant_id, ws.role);
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Admin';
+      case 'content_creative': return 'Content Creative';
+      case 'guest': return 'Guest';
+      case 'super_admin': return 'Super Admin';
+      default: return role;
+    }
+  };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +175,6 @@ export function Profile() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Row 1: Left (Photo) & Right (Identity) */}
         {/* Profile Card */}
         <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-xl flex flex-col">
           <div className="h-32 bg-[#0B0B0B] relative flex items-center justify-center">
@@ -154,13 +200,43 @@ export function Profile() {
                 </div>
              </div>
           </div>
-          <CardContent className="pt-20 pb-8 text-center flex-1 flex flex-col justify-center">
+          <CardContent className="pt-20 pb-6 text-center flex-1 flex flex-col justify-center">
             <h3 className="text-xl font-black text-zinc-900">{profile.name}</h3>
             <p className="text-zinc-500 font-medium text-sm">{profile.email}</p>
-            <div className="mt-6 flex justify-center gap-2">
+            <div className="mt-4 flex justify-center gap-2">
                <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-zinc-200">
                  {user?.role || 'Administrator'}
                </span>
+            </div>
+
+            {/* Workspace Switcher */}
+            <div className="mt-6 pt-6 border-t border-zinc-100">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-amber-500" />
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Ganti Workspace / Peran</span>
+              </div>
+              {loadingWorkspaces ? (
+                <div className="flex items-center justify-center py-3">
+                  <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
+                </div>
+              ) : workspaces.length <= 1 ? (
+                <p className="text-[11px] text-zinc-400 italic">Anda hanya memiliki satu workspace.</p>
+              ) : (
+                <div className="relative">
+                  <select
+                    value={activeTenantId || ''}
+                    onChange={(e) => handleWorkspaceSwitch(Number(e.target.value))}
+                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 transition-all appearance-none cursor-pointer pr-10"
+                  >
+                    {workspaces.map(ws => (
+                      <option key={ws.tenant_id} value={ws.tenant_id}>
+                        {ws.tenant_name} ({getRoleLabel(ws.role)})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

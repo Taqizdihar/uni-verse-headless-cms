@@ -17,24 +17,25 @@ import {
   HelpCircle,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Handshake
 } from 'lucide-react';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
 
-const navItems = [
-  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { name: 'Halaman', path: '/pages', icon: Files },
-  { name: 'Postingan', path: '/posts', icon: FileText },
-  { name: 'Media', path: '/media', icon: ImageIcon },
-  { name: 'Komentar', path: '/comments', icon: MessageSquare },
+const allNavItems = [
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'content_creative', 'guest'] },
+  { name: 'Halaman', path: '/pages', icon: Files, roles: ['admin', 'content_creative', 'guest'] },
+  { name: 'Postingan', path: '/posts', icon: FileText, roles: ['admin', 'content_creative', 'guest'] },
+  { name: 'Media', path: '/media', icon: ImageIcon, roles: ['admin', 'content_creative', 'guest'] },
+  { name: 'Komentar', path: '/comments', icon: MessageSquare, roles: ['admin', 'guest'] },
 
-  { name: 'Pengguna', path: '/users', icon: Users },
-  { name: 'Integrasi API', path: '/api-integration', icon: Terminal },
-  { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap },
-  { name: 'Pengaturan', path: '/settings', icon: Settings },
-  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle }
+  { name: 'Pengguna', path: '/users', icon: Users, roles: ['admin', 'guest'] },
+  { name: 'Integrasi API', path: '/api-integration', icon: Terminal, roles: ['admin', 'guest'] },
+  { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap, roles: ['admin', 'guest'] },
+  { name: 'Pengaturan', path: '/settings', icon: Settings, roles: ['admin', 'guest'] },
+  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle, roles: ['admin', 'content_creative', 'guest'] }
 ];
 
 interface SidebarProps {
@@ -44,7 +45,14 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
-  const { settings } = useCMS();
+  const { settings, activeRole } = useCMS();
+
+  // Determine effective role (fallback to 'admin' if not set — own workspace)
+  const effectiveRole = activeRole || 'admin';
+  const isOwnWorkspace = effectiveRole === 'admin' || effectiveRole === 'super_admin';
+
+  // Filter nav items based on active role
+  const navItems = allNavItems.filter(item => item.roles.includes(effectiveRole));
   
   return (
     <aside className={cn("bg-zinc-900 text-white h-screen flex flex-col relative shadow-xl transition-all duration-300", isCollapsed ? "w-20" : "w-64")}>
@@ -57,7 +65,20 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
                 <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
             )}
             {!isCollapsed && (
-                <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] mt-1 opacity-90 whitespace-nowrap">UNI-INSIDE'S CMS</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] opacity-90 whitespace-nowrap">UNI-INSIDE'S CMS</p>
+                  {!isOwnWorkspace && (
+                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-400/20 text-amber-400 rounded text-[8px] font-black uppercase tracking-widest border border-amber-400/30 whitespace-nowrap">
+                      <Handshake className="w-2.5 h-2.5" />
+                      TIM MITRA
+                    </span>
+                  )}
+                </div>
+            )}
+            {isCollapsed && !isOwnWorkspace && (
+              <span className="mt-1 px-1 py-0.5 bg-amber-400/20 text-amber-400 rounded text-[7px] font-black uppercase tracking-wider border border-amber-400/30" title="Tim Mitra">
+                MITRA
+              </span>
             )}
           </div>
           <button 
