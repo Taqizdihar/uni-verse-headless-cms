@@ -7,9 +7,8 @@ import {
   History, 
   HardDrive, 
   Settings,
-  X,
-  ChevronLeft,
-  ChevronRight
+  Menu,
+  ChevronLeft
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
@@ -36,27 +35,22 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
       isCollapsed ? "w-20" : "w-64"
     )}>
       {/* Header */}
-      <div className={cn("transition-all duration-300", isCollapsed ? "p-4 pt-8" : "p-8")}>
-        <div className="flex items-center justify-between mb-2 md:block">
-          <div className={cn("flex flex-col gap-1 transition-all duration-300", isCollapsed ? "items-center" : "items-start")}>
-            {isCollapsed ? (
-                <img src="/favicon.png" alt="Favicon" className="w-10 h-10 object-contain scale-110" />
-            ) : (
-                <>
-                  <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
-                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90 whitespace-nowrap">Super Admin</span>
-                </>
-            )}
+      <div className={cn("p-6 flex items-center mb-4 transition-all", isCollapsed ? "justify-center" : "justify-between")}>
+        {!isCollapsed && (
+          <div className="flex flex-col items-start gap-1">
+             <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
+             <span className="text-[10px] text-amber-400 font-bold uppercase tracking-[0.2em] mt-1 opacity-90">Super Admin</span>
           </div>
-          {onClose && (
-            <button 
-              onClick={onClose}
-              className="p-2 md:hidden text-zinc-400 hover:text-white transition-colors absolute top-4 right-4"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          )}
-        </div>
+        )}
+        {isCollapsed && <img src={universeLogo} alt="Logo" className="w-8 h-8 object-contain" />}
+        
+        {/* Mobile close button is separate from collapse */}
+        <button 
+          onClick={onClose}
+          className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors absolute right-4 top-6"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
       </div>
 
       <nav className="flex-1 px-3 space-y-2">
@@ -80,31 +74,24 @@ export function SuperAdminSidebar({ isCollapsed, toggleCollapse, onClose }: Supe
               title={isCollapsed ? item.name : undefined}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
-              <span className={cn("whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0" : "opacity-100")}>{item.name}</span>
+              {!isCollapsed && <span>{item.name}</span>}
             </NavLink>
           );
         })}
       </nav>
 
-      {/* Collapse Toggle Button & Status */}
-      <div className={cn("p-4 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-2" : "px-4")}>
-          <div className={cn("bg-zinc-800/50 rounded-xl transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-3 flex-col gap-3" : "p-4")}>
-              <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)] shrink-0"></div>
-                  {!isCollapsed && (
-                      <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <span className="text-xs font-bold text-zinc-300 whitespace-nowrap">Sistem Online</span>
-                      </div>
-                  )}
-              </div>
-              <button 
-                  onClick={toggleCollapse}
-                  className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                  title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-              >
-                  {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-              </button>
-          </div>
+      {/* Collapse Toggle Button (Desktop Only) */}
+      <div className="hidden md:flex p-4 border-t border-zinc-800">
+          <button 
+             onClick={toggleCollapse}
+             className={cn(
+                 "w-full flex items-center p-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all",
+                 isCollapsed ? "justify-center" : "justify-between"
+             )}
+          >
+              {!isCollapsed && <span className="text-xs font-bold uppercase tracking-widest">Collapse</span>}
+              <Menu className="w-5 h-5" />
+          </button>
       </div>
     </aside>
   );

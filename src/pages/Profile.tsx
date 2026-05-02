@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Camera, Save, Key, ShieldCheck, Loader2 } from 'lucide-react';
-import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 import { useCMS } from '../context/CMSContext';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
@@ -131,12 +130,8 @@ export function Profile() {
         {/* Row 1: Left (Photo) & Right (Identity) */}
         {/* Profile Card */}
         <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-xl flex flex-col">
-          <div className="h-32 bg-[#0B0B0B] relative overflow-hidden">
-             {/* Background Logo Integration */}
-             <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-                <img src={universeLogo} alt="" className="w-64 h-auto scale-150 rotate-[-10deg]" />
-             </div>
-             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-10">
+          <div className="h-32 bg-amber-400 relative">
+             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-xl bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                     {profile.profile_picture_url ? (
