@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, X, Save, FileText, Layout, User, Phone, Globe, Trash2, Edit3, CheckCircle } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 
@@ -12,6 +12,15 @@ export function PagesEditor() {
   const [priority, setPriority] = useState(0);
   const [formData, setFormData] = useState<any>({});
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -123,8 +132,14 @@ export function PagesEditor() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+          onMouseDown={() => setIsModalOpen(false)}
+        >
+          <div 
+            className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+            onMouseDown={e => e.stopPropagation()}
+          >
             <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold text-zinc-900">Halaman Baru</h2>

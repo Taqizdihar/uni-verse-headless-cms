@@ -49,6 +49,16 @@ export function GlobalFaqManager() {
     fetchFaqs();
   }, []);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
+
   const fetchFaqs = async () => {
     try {
       const token = localStorage.getItem('token');

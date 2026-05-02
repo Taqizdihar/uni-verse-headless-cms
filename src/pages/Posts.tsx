@@ -100,6 +100,22 @@ export function Posts() {
     handleInputChange('speakers', current);
   };
 
+  const addEventLabel = () => {
+    const current = formData.event_labels || [];
+    handleInputChange('event_labels', [...current, '']);
+  };
+
+  const updateEventLabel = (index: number, value: string) => {
+    const current = [...(formData.event_labels || [])];
+    current[index] = value;
+    handleInputChange('event_labels', current);
+  };
+
+  const removeEventLabel = (index: number) => {
+    const current = formData.event_labels || [];
+    handleInputChange('event_labels', current.filter((_: any, i: number) => i !== index));
+  };
+
   const addEventGalleryImage = () => {
     const current = formData.event_gallery || [];
     handleInputChange('event_gallery', [...current, { url: '', caption: '', alt_text: '' }]);
@@ -156,7 +172,6 @@ export function Posts() {
         parsed = post.content || {};
       }
       
-      // Ensure content is treated as the first element of the array if it's an array
       const contentData = Array.isArray(parsed) ? (parsed[0] || {}) : parsed;
       
       setFormData({
@@ -187,12 +202,10 @@ export function Posts() {
       setIsCategoryModalOpen(false);
       setIsModalOpen(true);
       
-      // Reset specific data but keep global ones if it's a new post or we're fine with it
       if (!editingId) {
           setFormData({
               excerpt: formData.excerpt || '',
               featured_image: formData.featured_image || '',
-              // Reset category specific fields
           });
       }
     }
@@ -214,19 +227,22 @@ export function Posts() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Sanitize data: convert empty strings to null
     const sanitizedData = Object.keys(formData).reduce((acc: any, key) => {
       const val = formData[key];
       acc[key] = (val === '' || val === undefined) ? null : val;
       return acc;
     }, {});
 
+    if (sanitizedData.event_labels && Array.isArray(sanitizedData.event_labels)) {
+        sanitizedData.event_labels = sanitizedData.event_labels.filter((l: string) => l.trim() !== '');
+    }
+
     const payload = {
       ...(editingId && { id: editingId }),
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       category,
-      content: [sanitizedData], // Wrap in an array for compatibility
+      content: [sanitizedData],
       excerpt: formData.excerpt || '',
       status: editingId ? (posts.find((p: any) => p.id === editingId)?.status || 'published') : 'published'
     };
@@ -320,15 +336,33 @@ export function Posts() {
       case 'Event':
         return (
           <div className="space-y-8">
-            {/* 1. Informasi Dasar */}
             <div className="space-y-6">
               <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Informasi Dasar</h4>
               
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Label Kategori (Pisahkan dengan koma)</label>
-                <div className="relative">
-                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
-                  <input type="text" value={(formData.event_labels || []).join(', ')} onChange={e => handleInputChange('event_labels', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} placeholder="Misal: Kuliner, F&B" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Label Kategori</label>
+                  <button type="button" onClick={addEventLabel} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH LABEL</button>
+                </div>
+                <div className="space-y-3">
+                  {(formData.event_labels || []).map((label: string, idx: number) => (
+                    <div key={idx} className="relative flex items-center gap-3 animate-in slide-in-from-right-2 duration-300">
+                      <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
+                      <input 
+                          type="text" 
+                          value={label} 
+                          onChange={e => updateEventLabel(idx, e.target.value)} 
+                          placeholder="Misal: Kuliner, F&B" 
+                          className="w-full pl-12 pr-12 py-3.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all text-sm" 
+                      />
+                      <button type="button" onClick={() => removeEventLabel(idx)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {(!formData.event_labels || formData.event_labels.length === 0) && (
+                    <p className="text-xs text-zinc-400 font-medium italic ml-1">Belum ada label ditambahkan.</p>
+                  )}
                 </div>
               </div>
               
@@ -413,7 +447,6 @@ export function Posts() {
               </div>
             </div>
 
-            {/* 2. Agenda & Pembicara */}
             <div className="space-y-6 pt-4">
               <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Agenda & Pembicara</h4>
               
@@ -484,7 +517,6 @@ export function Posts() {
               </div>
             </div>
 
-            {/* 3. Media Tambahan */}
             <div className="space-y-6 pt-4">
               <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Media Tambahan</h4>
               
@@ -753,11 +785,11 @@ export function Posts() {
   };
 
 
-  const filteredPosts = posts?.filter((post: any) => {
+  const filteredPosts = useMemo(() => posts?.filter((post: any) => {
     const matchesSearch = post.title?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategoryFilter === 'Semua Kategori' || post.category === selectedCategoryFilter;
     return matchesSearch && matchesCategory;
-  }) || [];
+  }) || [], [posts, searchQuery, selectedCategoryFilter]);
 
   return (
     <div className="animate-in fade-in duration-500 pb-10">
@@ -906,11 +938,11 @@ export function Posts() {
       {isModalOpen && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-zinc-900/70 backdrop-blur-md animate-in fade-in duration-300"
-          onClick={() => setIsModalOpen(false)}
+          onMouseDown={() => setIsModalOpen(false)}
         >
           <div 
             className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Sticky Header */}
             <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0 z-10">

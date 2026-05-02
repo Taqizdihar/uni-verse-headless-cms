@@ -43,6 +43,16 @@ export function UpdateHistory() {
     fetchUpdates();
   }, []);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedImage) {
+        setSelectedImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [selectedImage]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -57,7 +67,7 @@ export function UpdateHistory() {
       {selectedImage && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
-          onClick={() => setSelectedImage(null)}
+          onMouseDown={() => setSelectedImage(null)}
         >
           <div className="relative max-w-5xl w-full max-h-[90vh] p-4 flex flex-col items-center justify-center">
             <button 
@@ -70,7 +80,7 @@ export function UpdateHistory() {
               src={selectedImage} 
               alt="Enlarged screenshot" 
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-              onClick={e => e.stopPropagation()}
+              onMouseDown={e => e.stopPropagation()}
             />
           </div>
         </div>

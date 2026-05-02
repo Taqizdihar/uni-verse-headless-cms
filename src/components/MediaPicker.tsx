@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, Image as ImageIcon, Video as VideoIcon, File as FileIcon } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 
@@ -14,6 +14,16 @@ export function MediaPicker({ isOpen, onClose, onSelect }: MediaPickerProps) {
   const [sortBy, setSortBy] = useState<'date' | 'size' | 'name'>('date');
   const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'image' | 'video' | 'document'>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

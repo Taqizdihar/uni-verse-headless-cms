@@ -27,7 +27,17 @@ export function Pages() {
   
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [pickerContext, setPickerContext] = useState<{ blockId?: string, field: string, index?: number, subIndex?: number } | null>(null);
+  const [pickerContext, setPickerContext] = useState<any>(null);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
 
   // Status Toggle Loading State
   const [togglingIds, setTogglingIds] = useState<Set<number>>(new Set());
@@ -353,9 +363,12 @@ export function Pages() {
       {isModalOpen && (
         <div 
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200"
-            onMouseDown={(e) => { if (e.target === e.currentTarget) setIsModalOpen(false); }}
+            onMouseDown={() => setIsModalOpen(false)}
         >
-          <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 max-h-[90vh]">
+          <div 
+            className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-300 max-h-[90vh]"
+            onMouseDown={e => e.stopPropagation()}
+          >
             {/* Modal Header */}
             <div className="p-8 border-b border-zinc-100 flex items-center justify-between shrink-0">
                 <h2 className="text-2xl font-bold text-zinc-900">{editingId ? 'Edit Halaman' : 'Buat Halaman Baru'}</h2>

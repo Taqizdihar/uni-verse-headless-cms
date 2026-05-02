@@ -53,6 +53,16 @@ export function UpdateHistoryManager() {
     fetchUpdates();
   }, []);
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen]);
+
   const fetchUpdates = async () => {
     try {
       const token = localStorage.getItem('token');
