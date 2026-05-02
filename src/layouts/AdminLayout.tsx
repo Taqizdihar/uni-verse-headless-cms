@@ -14,6 +14,7 @@ interface BroadcastMsg {
 
 export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [broadcast, setBroadcast] = useState<BroadcastMsg | null>(null);
   const [isBroadcastVisible, setIsBroadcastVisible] = useState(true);
 
@@ -34,8 +35,8 @@ export function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-zinc-100 text-zinc-900 font-sans selection:bg-amber-400 selection:text-black uppercase-none overflow-x-hidden">
       {/* Sidebar - Responsive */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out`}>
-        <Sidebar onClose={() => setIsSidebarOpen(false)} />
+      <div className={`fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        <Sidebar onClose={() => setIsSidebarOpen(false)} isCollapsed={isSidebarCollapsed} onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       </div>
 
       {/* Overlay for mobile */}
@@ -47,7 +48,7 @@ export function AdminLayout() {
       )}
 
       {/* Main Content Area - Taking remaining space and offset by sidebar width */}
-      <div className="flex-1 flex flex-col md:pl-64 relative z-0 min-w-0">
+      <div className={`flex-1 flex flex-col relative z-0 min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'}`}>
         {broadcast && isBroadcastVisible && (
           <div className={`w-full px-4 py-3 flex items-center justify-between text-white shadow-sm z-50 ${
             broadcast.urgency_level === 'danger' ? 'bg-red-600' :

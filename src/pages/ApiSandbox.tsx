@@ -263,7 +263,7 @@ export function ApiSandbox() {
                   type={isKeyVisible ? 'text' : 'password'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full pl-4 pr-24 py-3.5 bg-white border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all shadow-sm"
+                  className="w-full pl-4 pr-24 py-3.5 bg-white border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-sm"
                   placeholder="Masukkan API Key Anda..."
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -289,7 +289,7 @@ export function ApiSandbox() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full flex items-center justify-between px-4 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl text-left hover:border-violet-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all"
+                  className="w-full flex items-center justify-between px-4 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl text-left hover:border-amber-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all"
                 >
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
@@ -314,8 +314,8 @@ export function ApiSandbox() {
                           setSelectedIdx(idx);
                           setIsDropdownOpen(false);
                         }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-violet-50 transition-colors ${
-                          idx === selectedIdx ? 'bg-violet-50' : ''
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-amber-50 transition-colors ${
+                          idx === selectedIdx ? 'bg-amber-50' : ''
                         }`}
                       >
                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
@@ -349,7 +349,7 @@ export function ApiSandbox() {
                   type="text"
                   value={paramValue}
                   onChange={(e) => setParamValue(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-sm font-medium text-zinc-800 placeholder-zinc-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all"
+                  className="w-full px-4 py-3.5 bg-zinc-50 border border-zinc-200 rounded-xl outline-none text-sm font-medium text-zinc-800 placeholder-zinc-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all"
                   placeholder={selected.paramPlaceholder}
                 />
               </div>
@@ -365,7 +365,7 @@ export function ApiSandbox() {
                   value={requestBody}
                   onChange={(e) => setRequestBody(e.target.value)}
                   rows={7}
-                  className="w-full px-4 py-3.5 bg-zinc-950 border border-zinc-800 rounded-xl outline-none text-sm font-mono text-green-400 placeholder-zinc-600 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all resize-none"
+                  className="w-full px-4 py-3.5 bg-zinc-950 border border-zinc-800 rounded-xl outline-none text-sm font-mono text-green-400 placeholder-zinc-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all resize-none"
                   placeholder='{ "key": "value" }'
                 />
               </div>
@@ -377,7 +377,7 @@ export function ApiSandbox() {
                 type="button"
                 onClick={handleExecute}
                 disabled={isLoading}
-                className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-violet-500/25 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
+                className="w-full py-4 bg-amber-400 hover:bg-amber-500 text-zinc-950 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-amber-400/20 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
               >
                 {isLoading ? (
                   <>
@@ -397,9 +397,9 @@ export function ApiSandbox() {
           {/* Info Box */}
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6">
             <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <Info className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
-                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block mb-1">CORS & Dukungan</span>
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest block mb-1">CORS & Dukungan</span>
                 <p className="text-xs text-zinc-500 font-medium leading-relaxed">
                   Permintaan dikirim langsung dari browser Anda ke server produksi. Pastikan server mengizinkan origin ini melalui konfigurasi CORS.
                   Jika Anda mengalami error CORS, hubungi administrator untuk menambahkan domain ini ke daftar yang diizinkan.
@@ -456,7 +456,7 @@ export function ApiSandbox() {
                   </div>
                   <h4 className="text-lg font-bold text-zinc-400 mb-2">Menunggu Eksekusi</h4>
                   <p className="text-sm text-zinc-600 font-medium max-w-xs">
-                    Pilih endpoint dan tekan <span className="text-violet-400 font-bold">"Jalankan Permintaan"</span> untuk melihat respon API secara real-time.
+                    Pilih endpoint dan tekan <span className="text-amber-500 font-bold">"Jalankan Permintaan"</span> untuk melihat respon API secara real-time.
                   </p>
                 </div>
               )}
@@ -464,8 +464,8 @@ export function ApiSandbox() {
               {/* Loading State */}
               {isLoading && (
                 <div className="flex flex-col items-center justify-center h-[420px] text-center">
-                  <div className="w-16 h-16 rounded-xl bg-violet-500/10 flex items-center justify-center mb-5 animate-pulse">
-                    <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
+                  <div className="w-16 h-16 rounded-xl bg-amber-500/10 flex items-center justify-center mb-5 animate-pulse">
+                    <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
                   </div>
                   <h4 className="text-base font-bold text-zinc-300 mb-1">Mengirim Permintaan...</h4>
                   <p className="text-sm text-zinc-500 font-medium">Menghubungi server produksi</p>

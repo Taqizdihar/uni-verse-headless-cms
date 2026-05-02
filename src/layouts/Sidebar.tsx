@@ -39,11 +39,12 @@ const navItems = [
 
 interface SidebarProps {
   onClose?: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ onClose }: SidebarProps) {
+export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const { settings } = useCMS();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   
   return (
     <aside className={cn("bg-zinc-900 text-white h-screen flex flex-col relative shadow-xl transition-all duration-300", isCollapsed ? "w-20" : "w-64")}>
@@ -106,7 +107,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                   )}
               </div>
               <button 
-                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  onClick={onToggleCollapse}
                   className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                   title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               >

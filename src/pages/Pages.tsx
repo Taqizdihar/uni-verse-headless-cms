@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
 import { Plus, Pencil, Trash2, Eye, Loader2, X, Send, Image as ImageIcon, Copy, ArrowUp, ArrowDown, CheckCircle, EyeOff } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { useSearch } from '../context/SearchContext';
 import { useCMS } from '../context/CMSContext';
@@ -252,16 +252,10 @@ export function Pages() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                <AnimatePresence mode="popLayout">
                 {filteredPages.length > 0 ? (
                   filteredPages.map((page, idx) => (
-                    <motion.tr
+                    <tr
                       key={page.id}
-                      layout
-                      layoutId={`page-row-${page.id}`}
-                      initial={false}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                       className="hover:bg-zinc-50/50 transition-colors group"
                     >
                       <td className="pl-8 pr-3 py-6 text-center">
@@ -340,21 +334,15 @@ export function Pages() {
                           </button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))
                 ) : (
-                  <motion.tr
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
+                  <tr key="empty">
                     <td colSpan={7} className="px-8 py-20 text-center text-zinc-400 italic">
                         Tidak ada halaman yang cocok dengan pencarian.
                     </td>
-                  </motion.tr>
+                  </tr>
                 )}
-                </AnimatePresence>
               </tbody>
             </table>
           </div>

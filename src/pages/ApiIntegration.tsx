@@ -261,11 +261,11 @@ export function ApiIntegration() {
               </button>
             </div>
             
-            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
-              <ShieldAlert className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <div>
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest block mb-1">TIPS: Kebutuhan Headers</span>
-                <p className="text-xs text-blue-200/70 font-medium">Hampir semua permintaan membutuhkan header <code className="bg-blue-500/20 px-1 py-0.5 rounded text-blue-300">x-api-key</code> untuk mengautentikasi aplikasi frontend.</p>
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest block mb-1">TIPS: Kebutuhan Headers</span>
+                <p className="text-xs text-amber-200/70 font-medium">Hampir semua permintaan membutuhkan header <code className="bg-amber-500/20 px-1 py-0.5 rounded text-amber-300">x-api-key</code> untuk mengautentikasi aplikasi frontend.</p>
               </div>
             </div>
           </div>
