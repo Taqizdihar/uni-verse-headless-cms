@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
 
 export function PublicLanding() {
   const navigate = useNavigate();
+  const [version, setVersion] = useState<string>('1.0.0');
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
@@ -17,13 +19,119 @@ export function PublicLanding() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const fetchVersion = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/public/updates`);
+        const latest = response.data?.[0];
+        if (latest && (latest.version || latest.update_version)) {
+          setVersion(latest.version || latest.update_version);
+        }
+      } catch (err) {
+        console.error('Failed to fetch CMS version', err);
+      }
+    };
+    fetchVersion();
+  }, []);
+
+  useEffect(() => {
+    const canvas = document.getElementById('particle-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let particles: any[] = [];
+    let animationFrameId: number;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    const icons = ['✨', '✏️', '🎨', '🌟', '✦', '✦'];
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const isInteractive = (e.target as HTMLElement).closest('button, a, [role="button"], img');
+      if (isInteractive) return;
+
+      if (Math.random() > 0.4) return;
+      
+      particles.push({
+        x: e.clientX,
+        y: e.clientY,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: (Math.random() - 0.5) * 1.5 + 0.5,
+        life: 1.0,
+        icon: icons[Math.floor(Math.random() * icons.length)],
+        size: Math.random() * 8 + 8,
+        rotation: Math.random() * 360,
+        vRot: (Math.random() - 0.5) * 8
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05; 
+        p.life -= 0.015; 
+        p.rotation += p.vRot;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.globalAlpha = p.life;
+          ctx.font = `${p.size}px Arial`;
+          ctx.fillStyle = '#FAD02C';
+          ctx.fillText(p.icon, -p.size/2, p.size/2);
+          ctx.restore();
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col font-sans selection:bg-amber-400 selection:text-black overflow-hidden relative">
+    <div className="min-h-screen bg-[#0B0B0B] text-white flex flex-col font-sans selection:bg-amber-400 selection:text-black overflow-hidden relative cursor-pencil">
+      <style>{`
+        .cursor-pencil {
+          cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 24 24' fill='white' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E") 2 22, auto;
+        }
+        @keyframes drift {
+          0% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(-30%, -70%) scale(1.1); }
+          100% { transform: translate(-70%, -30%) scale(0.9); }
+        }
+      `}</style>
+      
+      <canvas id="particle-canvas" className="absolute inset-0 pointer-events-none z-50" />
+
       {/* Background Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FAD02C] opacity-10 blur-[150px] rounded-full pointer-events-none" 
+        style={{ animation: 'drift 20s infinite alternate ease-in-out' }}
+      />
       
       {/* Navigation */}
-      <header className="flex items-center justify-between px-10 py-6 sticky top-0 z-50">
+      <header className="flex items-center justify-between px-10 py-6 sticky top-0 z-50 bg-[#0B0B0B]">
         <div className="flex items-center">
            <img src={uniInsideLogo} alt="Uni-Inside" className="h-10 w-auto" />
         </div>
@@ -72,16 +180,12 @@ export function PublicLanding() {
             </Link>
             
             <span className="text-zinc-500 font-bold text-sm uppercase tracking-[0.3em] italic">
-              Beta Version
+              V {version}
             </span>
           </div>
         </div>
       </main>
 
-      {/* Subtle bottom detail */}
-      <div className="absolute bottom-10 left-10 text-[10px] font-bold text-zinc-800 uppercase tracking-widest">
-        SYSTEM READY // V. 1.0.4
-      </div>
       <div className="absolute bottom-10 right-10 flex gap-4">
          <div className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
          <div className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
