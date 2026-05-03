@@ -133,7 +133,14 @@ export function PublicLanding() {
       {/* Navigation */}
       <header className="flex items-center justify-between px-10 py-6 sticky top-0 z-50 bg-[#0B0B0B]">
         <div className="flex items-center">
-           <img src={uniInsideLogo} alt="Uni-Inside" className="h-10 w-auto" />
+           <a 
+            href="https://uni-inside.pages.dev/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+           >
+            <img src={uniInsideLogo} alt="Uni-Inside" className="h-10 w-auto" />
+           </a>
         </div>
         
         <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">

@@ -21,6 +21,7 @@ import {
   Handshake
 } from 'lucide-react';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
+import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
 import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
 
@@ -66,7 +67,15 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
             )}
             {!isCollapsed && (
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] opacity-90 whitespace-nowrap">UNI-INSIDE'S CMS</p>
+                  <a 
+                    href="https://uni-inside.pages.dev/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <img src={uniInsideLogo} alt="Uni-Inside" className="h-3.5 w-auto object-contain" />
+                  </a>
+                  <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] opacity-90 whitespace-nowrap">CMS</p>
                 </div>
             )}
           </div>

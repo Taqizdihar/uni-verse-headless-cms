@@ -4,6 +4,7 @@ import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
+import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
 
 interface Notification {
   id: number;
@@ -147,7 +148,16 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
-          <div className="flex items-center gap-2 w-full">
+          <div className="flex items-center gap-3 w-full">
+            <a 
+              href="https://uni-inside.pages.dev/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+              title="Kunjungi Uni-Inside"
+            >
+              <img src={uniInsideLogo} alt="Uni-Inside" className="h-7 w-auto object-contain" />
+            </a>
             <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
               {settings?.site_name || 'Uni-Inside'}
             </h1>
@@ -301,6 +311,19 @@ export function Header({ onMenuClick }: HeaderProps) {
                     </div>
                   ))
                 )}
+              </div>
+
+              {/* View All Button */}
+              <div className="p-3 bg-zinc-50 border-t border-zinc-100">
+                <button
+                  onClick={() => {
+                    setIsNotifOpen(false);
+                    navigate('/notifications');
+                  }}
+                  className="w-full py-2 bg-white border border-zinc-200 text-zinc-600 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 hover:border-amber-400 hover:text-zinc-950 transition-all shadow-sm"
+                >
+                  Lihat Selengkapnya
+                </button>
               </div>
             </div>
           )}

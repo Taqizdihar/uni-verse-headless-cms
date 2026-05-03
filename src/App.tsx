@@ -20,6 +20,7 @@ import { HeadlessPosts } from './pages/HeadlessPosts';
 import { LandingPagePreview } from './pages/LandingPagePreview';
 import { UpdateHistory } from './pages/UpdateHistory';
 import { FaqCenter } from './pages/FaqCenter';
+import { Notifications } from './pages/Notifications';
 import { Profile } from './pages/Profile';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { TenantManagement } from './pages/TenantManagement';
@@ -78,6 +79,7 @@ export default function App() {
                   <Route path="/headless-preview" element={<LandingPagePreview />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/dashboard/updates" element={<UpdateHistory />} />
+                  <Route path="/notifications" element={<Notifications />} />
                   <Route path="/faq" element={<FaqCenter />} />
                 </Route>
               </Route>
