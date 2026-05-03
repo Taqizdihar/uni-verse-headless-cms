@@ -73,7 +73,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
                     rel="noopener noreferrer"
                     className="cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <img src={uniInsideLogo} alt="Uni-Inside" className="h-3.5 w-auto object-contain" />
+                    <img src={uniInsideLogo} alt="Uni-Inside" className="h-7 w-auto object-contain" />
                   </a>
                   <p className="text-[10px] text-white font-bold uppercase tracking-[0.2em] opacity-90 whitespace-nowrap">CMS</p>
                 </div>
