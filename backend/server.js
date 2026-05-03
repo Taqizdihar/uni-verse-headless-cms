@@ -1426,7 +1426,18 @@ app.patch('/api/posts/:id/status', async (req, res) => {
 app.get('/api/media', async (req, res) => {
     try {
         const tid = getTenantId(req);
-        const [rows] = await db.execute('SELECT * FROM media WHERE tenant_id = ?', [tid]);
+        const folder_id = req.query.folder_id ? parseInt(req.query.folder_id) : null;
+        let rows;
+        if (req.query.folder_id !== undefined) {
+            if (folder_id) {
+                [rows] = await db.execute('SELECT * FROM media WHERE tenant_id = ? AND folder_id = ?', [tid, folder_id]);
+            } else {
+                [rows] = await db.execute('SELECT * FROM media WHERE tenant_id = ? AND folder_id IS NULL', [tid]);
+            }
+        } else {
+            // If folder_id is not provided in query at all, return all for global search
+            [rows] = await db.execute('SELECT * FROM media WHERE tenant_id = ?', [tid]);
+        }
         res.json(rows);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -1438,6 +1449,7 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
         
         const tid = getTenantId(req);
+        const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
         const filename = req.file.filename; // Cloudinary public_id
         const file_url = req.file.path; // Cloudinary secure_url
         const file_type = req.file.mimetype;
@@ -1445,8 +1457,8 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const uploaded_by = req.user?.userId || 1;
 
         const [result] = await db.execute(
-            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [tid, filename, file_url, file_type, uploaded_by, filename, file_size]
+            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [tid, filename, file_url, file_type, uploaded_by, filename, file_size, folder_id]
         );
 
         res.status(201).json({ 
@@ -1488,25 +1500,125 @@ app.delete('/api/media/:id', async (req, res) => {
 
 app.patch('/api/media/:id', async (req, res) => {
     const { id } = req.params;
-    const { file_name } = req.body;
+    const { file_name, folder_id } = req.body;
     const tid = getTenantId(req);
 
-    if (!file_name) return res.status(400).json({ error: 'file_name is required' });
+    if (file_name === undefined && folder_id === undefined) return res.status(400).json({ error: 'No update data provided' });
 
     try {
-        const [result] = await db.execute(
-            'UPDATE media SET file_name = ? WHERE id = ? AND tenant_id = ?',
-            [file_name, id, tid]
-        );
+        let query = 'UPDATE media SET ';
+        let params = [];
+        if (file_name !== undefined) {
+            query += 'file_name = ?, ';
+            params.push(file_name);
+        }
+        if (folder_id !== undefined) {
+            query += 'folder_id = ?, ';
+            params.push(folder_id);
+        }
+        query = query.slice(0, -2) + ' WHERE id = ? AND tenant_id = ?';
+        params.push(id, tid);
+
+        const [result] = await db.execute(query, params);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Media not found or unauthorized' });
         }
 
-        res.json({ message: 'Media renamed successfully' });
+        res.json({ message: 'Media updated successfully' });
     } catch (error) {
-        console.error('Rename Error:', error);
-        res.status(500).json({ error: 'Internal system rename failure' });
+        console.error('Update Error:', error);
+        res.status(500).json({ error: 'Internal system update failure' });
+    }
+});
+
+// --- Folders ---
+app.get('/api/folders', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const folder_id = req.query.folder_id ? parseInt(req.query.folder_id) : null;
+        
+        let rows;
+        if (req.query.folder_id !== undefined) {
+            if (folder_id) {
+                [rows] = await db.execute('SELECT * FROM media_folders WHERE tenant_id = ? AND parent_id = ? ORDER BY name ASC', [tid, folder_id]);
+            } else {
+                [rows] = await db.execute('SELECT * FROM media_folders WHERE tenant_id = ? AND parent_id IS NULL ORDER BY name ASC', [tid]);
+            }
+        } else {
+            [rows] = await db.execute('SELECT * FROM media_folders WHERE tenant_id = ? ORDER BY name ASC', [tid]);
+        }
+        
+        res.json(rows);
+    } catch (error) {
+        console.error('Fetch Folders Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/api/folders', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const { name, parent_id } = req.body;
+        
+        if (!name) return res.status(400).json({ error: 'Folder name is required' });
+        
+        const [result] = await db.execute(
+            'INSERT INTO media_folders (tenant_id, name, parent_id) VALUES (?, ?, ?)',
+            [tid, name, parent_id || null]
+        );
+        
+        res.status(201).json({ id: result.insertId, name, parent_id });
+    } catch (error) {
+        console.error('Create Folder Error:', error);
+        res.status(500).json({ error: 'Failed to create folder' });
+    }
+});
+
+app.patch('/api/folders/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const tid = getTenantId(req);
+        const { name, parent_id } = req.body;
+        
+        if (name === undefined && parent_id === undefined) return res.status(400).json({ error: 'No update data provided' });
+        
+        let query = 'UPDATE media_folders SET ';
+        let params = [];
+        if (name !== undefined) {
+            query += 'name = ?, ';
+            params.push(name);
+        }
+        if (parent_id !== undefined) {
+            query += 'parent_id = ?, ';
+            params.push(parent_id);
+        }
+        query = query.slice(0, -2) + ' WHERE id = ? AND tenant_id = ?';
+        params.push(id, tid);
+        
+        const [result] = await db.execute(query, params);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Folder not found or unauthorized' });
+        
+        res.json({ message: 'Folder updated successfully' });
+    } catch (error) {
+        console.error('Update Folder Error:', error);
+        res.status(500).json({ error: 'Failed to update folder' });
+    }
+});
+
+app.delete('/api/folders/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const tid = getTenantId(req);
+        
+        const [result] = await db.execute('DELETE FROM media_folders WHERE id = ? AND tenant_id = ?', [id, tid]);
+        
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Folder not found or unauthorized' });
+        
+        res.json({ message: 'Folder deleted successfully' });
+    } catch (error) {
+        console.error('Delete Folder Error:', error);
+        res.status(500).json({ error: 'Failed to delete folder' });
     }
 });
 
