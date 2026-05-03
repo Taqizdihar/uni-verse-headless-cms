@@ -50,34 +50,56 @@ export function PublicLanding() {
     window.addEventListener('resize', resize);
     resize();
 
-    const icons = ['✨', '✏️', '🎨', '🌟', '✦', '✦'];
+    const icons = ['🎨', '🖌️', '🌟', '✨', '⚡', '💫', '✏️', '💛'];
+
+    let lastX = -1;
+    let lastY = -1;
 
     const handleMouseMove = (e: MouseEvent) => {
       const isInteractive = (e.target as HTMLElement).closest('button, a, [role="button"], img');
       if (isInteractive) return;
 
-      // Density Increase: Spawn 3-5 emojis per trigger
-      const count = Math.floor(Math.random() * 3) + 3;
-      
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: e.clientX,
-          y: e.clientY,
-          // Randomize horizontal drift (spread)
-          vx: (Math.random() - 0.5) * 3, 
-          vy: (Math.random() - 0.5) * 2 + 0.5,
-          life: 1.0,
-          // Randomize initial scale (size)
-          initialSize: Math.random() * 10 + 10,
-          icon: icons[Math.floor(Math.random() * icons.length)],
-          rotation: Math.random() * 360,
-          vRot: (Math.random() - 0.5) * 12
-        });
+      if (lastX === -1 && lastY === -1) {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        return;
       }
 
-      // Performance: Optimize cleanup by limiting maximum particles
-      if (particles.length > 500) {
-        particles.shift();
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      const threshold = 15;
+
+      // Throttling: spawn evenly based on distance to avoid clusters but maintain a continuous trail
+      if (distance >= threshold) {
+        // Calculate how many emojis to spawn along the path
+        const count = Math.max(1, Math.floor(distance / threshold));
+        
+        for (let i = 1; i <= count; i++) {
+          const spawnX = lastX + (dx * i) / count;
+          const spawnY = lastY + (dy * i) / count;
+
+          particles.push({
+            x: spawnX,
+            y: spawnY,
+            vx: (Math.random() - 0.5) * 1.5, // gentle horizontal drift
+            vy: Math.random() * 1.5 + 0.5,   // fall downwards
+            life: 1.0,
+            initialSize: Math.random() * 10 + 15,
+            icon: icons[Math.floor(Math.random() * icons.length)],
+            rotation: Math.random() * 360,
+            vRot: (Math.random() - 0.5) * 4
+          });
+        }
+        
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        // Performance: Maintain short array for immediate cleanup
+        if (particles.length > 150) {
+          particles.splice(0, particles.length - 150);
+        }
       }
     };
 
@@ -134,7 +156,7 @@ export function PublicLanding() {
         }
       `}</style>
       
-      <canvas id="particle-canvas" className="absolute inset-0 pointer-events-none z-50" />
+      <canvas id="particle-canvas" className="absolute inset-0 pointer-events-none z-0" />
 
       {/* Background Glows */}
       <div 
