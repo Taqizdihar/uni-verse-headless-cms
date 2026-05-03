@@ -56,19 +56,29 @@ export function PublicLanding() {
       const isInteractive = (e.target as HTMLElement).closest('button, a, [role="button"], img');
       if (isInteractive) return;
 
-      if (Math.random() > 0.4) return;
+      // Density Increase: Spawn 3-5 emojis per trigger
+      const count = Math.floor(Math.random() * 3) + 3;
       
-      particles.push({
-        x: e.clientX,
-        y: e.clientY,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: (Math.random() - 0.5) * 1.5 + 0.5,
-        life: 1.0,
-        icon: icons[Math.floor(Math.random() * icons.length)],
-        size: Math.random() * 8 + 8,
-        rotation: Math.random() * 360,
-        vRot: (Math.random() - 0.5) * 8
-      });
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          // Randomize horizontal drift (spread)
+          vx: (Math.random() - 0.5) * 3, 
+          vy: (Math.random() - 0.5) * 2 + 0.5,
+          life: 1.0,
+          // Randomize initial scale (size)
+          initialSize: Math.random() * 10 + 10,
+          icon: icons[Math.floor(Math.random() * icons.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12
+        });
+      }
+
+      // Performance: Optimize cleanup by limiting maximum particles
+      if (particles.length > 500) {
+        particles.shift();
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -80,20 +90,22 @@ export function PublicLanding() {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.05; 
-        p.life -= 0.015; 
+        p.vy += 0.08; // Physics: gravity effect
+        p.life -= 0.02; // Fade speed
         p.rotation += p.vRot;
 
         if (p.life <= 0) {
           particles.splice(i, 1);
         } else {
+          // Fade out and shrink simultaneously
+          const currentSize = p.initialSize * p.life;
           ctx.save();
           ctx.translate(p.x, p.y);
           ctx.rotate((p.rotation * Math.PI) / 180);
           ctx.globalAlpha = p.life;
-          ctx.font = `${p.size}px Arial`;
+          ctx.font = `${currentSize}px Arial`;
           ctx.fillStyle = '#FAD02C';
-          ctx.fillText(p.icon, -p.size/2, p.size/2);
+          ctx.fillText(p.icon, -currentSize/2, currentSize/2);
           ctx.restore();
         }
       }
