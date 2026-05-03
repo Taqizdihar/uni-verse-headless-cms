@@ -51,50 +51,32 @@ export function PublicLanding() {
     resize();
 
     const icons = ['🎨', '🖌️', '🌟', '✨', '⚡', '💫', '✏️', '💛'];
-
-    let lastX = -1;
-    let lastY = -1;
     let lastSpawnTime = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       const isInteractive = (e.target as HTMLElement).closest('button, a, [role="button"], img');
       if (isInteractive) return;
 
-      const currentTime = Date.now();
+      const now = Date.now();
+      // Adjust delay speed: 1 emoji per 0.2 seconds (200ms)
+      if (now - lastSpawnTime >= 200) {
+        lastSpawnTime = now;
 
-      if (lastX === -1 && lastY === -1) {
-        lastX = e.clientX;
-        lastY = e.clientY;
-        lastSpawnTime = currentTime;
-        return;
-      }
-
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      const threshold = 15;
-
-      // Adjusted to 1 second delay between spawns as requested
-      if (distance >= threshold && currentTime - lastSpawnTime >= 1000) {
         particles.push({
           x: e.clientX,
           y: e.clientY,
-          vx: (Math.random() - 0.5) * 1.5,
-          vy: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 1.5, // gentle horizontal drift
+          vy: Math.random() * 1.5 + 0.5,   // fall downwards
           life: 1.0,
           initialSize: Math.random() * 10 + 15,
           icon: icons[Math.floor(Math.random() * icons.length)],
           rotation: Math.random() * 360,
           vRot: (Math.random() - 0.5) * 4
         });
-        
-        lastX = e.clientX;
-        lastY = e.clientY;
-        lastSpawnTime = currentTime;
 
+        // Performance: Maintain short array for immediate cleanup
         if (particles.length > 50) {
-          particles.shift();
+          particles.splice(0, particles.length - 50);
         }
       }
     };
@@ -109,7 +91,7 @@ export function PublicLanding() {
         p.x += p.vx;
         p.y += p.vy;
         p.vy += 0.08; // Physics: gravity effect
-        p.life -= 0.016; // Fade speed (approx 1 second lifetime at 60fps)
+        p.life -= 0.02; // Fade speed
         p.rotation += p.vRot;
 
         if (p.life <= 0) {
