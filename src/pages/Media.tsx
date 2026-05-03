@@ -353,6 +353,13 @@ export function Media() {
   });
 
   const filteredMedia = (media || []).filter((m: any) => {
+    if (!searchInAll) {
+        if (currentFolderId === null) {
+            if (m.folder_id != null) return false;
+        } else {
+            if (m.folder_id !== currentFolderId) return false;
+        }
+    }
     const filename = (m.file_name || m.filename || '').toLowerCase();
     if (searchTerm && !filename.includes(searchTerm.toLowerCase())) return false;
 
@@ -404,6 +411,7 @@ export function Media() {
                     <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
+                    title="Maksimal: Gambar 5 MB, Video & Dokumen 10 MB."
                     >
                     <Plus className="w-5 h-5 stroke-[3]" />
                     Unggah Media
@@ -534,16 +542,25 @@ export function Media() {
       {/* Main Grid View */}
       <div className={viewMode === 'grid' ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" : "flex flex-col gap-2"}>
           {/* Render Folders First */}
-          {filteredFolders.map(folder => (
+          {filteredFolders.map(folder => {
+              const itemsCount = (media || []).filter((m: any) => m.folder_id === folder.id).length + (allFolders || []).filter(f => f.parent_id === folder.id).length;
+              return (
               <div 
                   key={`folder-${folder.id}`} 
                   onDoubleClick={() => enterFolder(folder)}
-                  className={`bg-zinc-50 rounded-xl border border-zinc-200 hover:border-amber-400/50 hover:bg-amber-50/30 transition-all group cursor-pointer ${viewMode === 'list' ? 'flex items-center p-3' : 'p-4 flex flex-col items-center justify-center aspect-square relative'}`}
+                  className={`bg-zinc-50 rounded-xl border border-zinc-200 hover:border-[#FAD02C]/50 hover:bg-[#FAD02C]/5 hover:scale-[1.02] transition-all group cursor-pointer ${viewMode === 'list' ? 'flex items-center p-3' : 'p-4 flex flex-col items-center justify-center aspect-square relative'}`}
               >
                   {viewMode === 'list' ? (
-                      <Folder className="w-8 h-8 text-amber-400 mr-4 fill-amber-400/20" />
+                      <Folder className="w-8 h-8 mr-4" style={{ color: '#FAD02C', fill: '#FAD02C' }} fillOpacity={0.2} />
                   ) : (
-                      <Folder className="w-16 h-16 text-amber-400 mb-3 fill-amber-400/20 group-hover:scale-105 transition-transform" />
+                      <div className="relative mb-3">
+                          <Folder className="w-16 h-16 group-hover:scale-105 transition-transform" style={{ color: '#FAD02C', fill: '#FAD02C' }} fillOpacity={0.2} />
+                          {itemsCount > 0 && (
+                              <div className="absolute -bottom-1 -right-1 bg-white text-zinc-600 border border-zinc-200 rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow-sm">
+                                  {itemsCount}
+                              </div>
+                          )}
+                      </div>
                   )}
                   
                   <div className={`flex-1 min-w-0 w-full ${viewMode === 'grid' ? 'text-center' : ''}`}>
@@ -581,7 +598,7 @@ export function Media() {
                       </div>
                   )}
               </div>
-          ))}
+          )})}
 
           {/* Render Media Files */}
           {filteredMedia.map((m: any) => (
@@ -617,7 +634,11 @@ export function Media() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest bg-zinc-100 px-1.5 py-0.5 rounded">{(m.file_type || '').split('/').pop() || 'UNKNOWN'}</p>
+                      <span className="text-zinc-300">•</span>
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{(m.file_size / (1024 * 1024)).toFixed(2)} MB</p>
+                      <span className="text-zinc-300">•</span>
+                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (m.date ? new Date(m.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'HARI INI')}</p>
                   </div>
                 </div>
 
