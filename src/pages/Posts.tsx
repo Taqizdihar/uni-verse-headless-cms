@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter } from 'lucide-react';
+import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter, DownloadCloud } from 'lucide-react';
 import axios from 'axios';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -13,6 +13,7 @@ const CATEGORIES = [
   { id: 'Produk', label: 'Produk', icon: ShoppingBag, color: 'text-amber-500', bg: 'bg-amber-50', badge: 'bg-amber-100 text-amber-700 border-amber-200', description: 'Informasi produk atau jasa' },
   { id: 'Lowongan', label: 'Lowongan', icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50', badge: 'bg-purple-100 text-purple-700 border-purple-200', description: 'Kesempatan karir atau pekerjaan' },
   { id: 'Pengumuman', label: 'Pengumuman', icon: Megaphone, color: 'text-rose-500', bg: 'bg-rose-50', badge: 'bg-rose-100 text-rose-700 border-rose-200', description: 'Informasi penting atau siaran' },
+  { id: 'Template', label: 'Template', icon: DownloadCloud, color: 'text-indigo-500', bg: 'bg-indigo-50', badge: 'bg-indigo-100 text-indigo-700 border-indigo-200', description: 'Sediakan file, template, atau repositori aset untuk diunduh.' },
 ];
 
 export function Posts() {
@@ -158,6 +159,54 @@ export function Posts() {
     handleInputChange('product_gallery', current.filter((_: any, i: number) => i !== index));
   };
 
+  const addTemplateTag = () => {
+    const current = formData.tags || [];
+    handleInputChange('tags', [...current, '']);
+  };
+
+  const removeTemplateTag = (index: number) => {
+    const current = formData.tags || [];
+    handleInputChange('tags', current.filter((_: any, i: number) => i !== index));
+  };
+
+  const updateTemplateTag = (index: number, value: string) => {
+    const current = [...(formData.tags || [])];
+    current[index] = value;
+    handleInputChange('tags', current);
+  };
+
+  const addTechDetail = () => {
+    const current = formData.technical_details || [];
+    handleInputChange('technical_details', [...current, { label: '', value: '' }]);
+  };
+
+  const removeTechDetail = (index: number) => {
+    const current = formData.technical_details || [];
+    handleInputChange('technical_details', current.filter((_: any, i: number) => i !== index));
+  };
+
+  const updateTechDetail = (index: number, field: string, value: string) => {
+    const current = [...(formData.technical_details || [])];
+    current[index][field] = value;
+    handleInputChange('technical_details', current);
+  };
+
+  const addCtaButton = () => {
+    const current = formData.cta || [];
+    handleInputChange('cta', [...current, { text: '', url: '' }]);
+  };
+
+  const removeCtaButton = (index: number) => {
+    const current = formData.cta || [];
+    handleInputChange('cta', current.filter((_: any, i: number) => i !== index));
+  };
+
+  const updateCtaButton = (index: number, field: string, value: string) => {
+    const current = [...(formData.cta || [])];
+    current[index][field] = value;
+    handleInputChange('cta', current);
+  };
+
   const openEditor = (post: any = null) => {
     if (post) {
       setEditingId(post.id);
@@ -235,6 +284,13 @@ export function Posts() {
 
     if (sanitizedData.event_labels && Array.isArray(sanitizedData.event_labels)) {
         sanitizedData.event_labels = sanitizedData.event_labels.filter((l: string) => l.trim() !== '');
+    }
+    if (sanitizedData.tags && Array.isArray(sanitizedData.tags)) {
+        sanitizedData.tags = sanitizedData.tags.filter((l: string) => l.trim() !== '');
+    }
+
+    if (category === 'Template') {
+        sanitizedData.type = 'template';
     }
 
     const payload = {
@@ -774,6 +830,113 @@ export function Posts() {
           </div>
         );
 
+      case 'Template':
+        return (
+          <div className="space-y-8">
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest border-b border-zinc-100 pb-2">Informasi Utama</h4>
+              
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Deskripsi Singkat</label>
+                <textarea 
+                  value={formData.short_description || ''} 
+                  onChange={e => handleInputChange('short_description', e.target.value)} 
+                  placeholder="Tuliskan deskripsi singkat template..."
+                  className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[100px] resize-none transition-all"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Kategori/Tags</label>
+                  <button type="button" onClick={addTemplateTag} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ TAMBAH LABEL</button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {(formData.tags || []).map((tag: string, idx: number) => (
+                    <div key={idx} className="relative flex items-center animate-in slide-in-from-right-2 duration-300">
+                      <input 
+                        type="text" 
+                        value={tag} 
+                        onChange={e => updateTemplateTag(idx, e.target.value)} 
+                        placeholder="Misal: IG, Canva" 
+                        className="w-32 px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all text-xs" 
+                      />
+                      <button type="button" onClick={() => removeTemplateTag(idx)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {(!formData.tags || formData.tags.length === 0) && (
+                    <p className="text-xs text-zinc-400 font-medium italic ml-1 w-full">Belum ada label ditambahkan.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-4">
+              <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
+                <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Detail Teknis</h4>
+                <button type="button" onClick={addTechDetail} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ ADD DETAIL</button>
+              </div>
+              <div className="space-y-3">
+                {(formData.technical_details || []).map((detail: any, idx: number) => (
+                  <div key={idx} className="flex gap-3 items-start animate-in slide-in-from-right-2 duration-300">
+                    <input 
+                      type="text" 
+                      placeholder="Label (Misal: Format)" 
+                      value={detail.label || ''} 
+                      onChange={e => updateTechDetail(idx, 'label', e.target.value)}
+                      className="flex-1 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Deskripsi (Misal: PNG)" 
+                      value={detail.value || ''} 
+                      onChange={e => updateTechDetail(idx, 'value', e.target.value)}
+                      className="flex-1 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                    />
+                    <button type="button" onClick={() => removeTechDetail(idx)} className="p-3 text-red-400 hover:bg-red-50 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {(!formData.technical_details || formData.technical_details.length === 0) && (
+                  <p className="text-xs text-zinc-400 font-medium italic">Belum ada detail teknis yang ditambahkan.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-4">
+              <div className="flex justify-between items-center border-b border-zinc-100 pb-2">
+                <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Tombol CTA</h4>
+                <button type="button" onClick={addCtaButton} className="text-[10px] font-black text-amber-600 hover:text-amber-700 bg-amber-50 px-3 py-1.5 rounded-lg transition-colors">+ ADD BUTTON</button>
+              </div>
+              <div className="space-y-3">
+                {(formData.cta || []).map((cta: any, idx: number) => (
+                  <div key={idx} className="flex gap-3 items-start animate-in slide-in-from-right-2 duration-300">
+                    <input 
+                      type="text" 
+                      placeholder="Teks Tombol (Misal: Download)" 
+                      value={cta.text || ''} 
+                      onChange={e => updateCtaButton(idx, 'text', e.target.value)}
+                      className="w-1/3 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                    />
+                    <input 
+                      type="url" 
+                      placeholder="URL Tujuan (Misal: https://...)" 
+                      value={cta.url || ''} 
+                      onChange={e => updateCtaButton(idx, 'url', e.target.value)}
+                      className="flex-1 px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 text-xs font-bold"
+                    />
+                    <button type="button" onClick={() => removeCtaButton(idx)} className="p-3 text-red-400 hover:bg-red-50 rounded-xl transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {(!formData.cta || formData.cta.length === 0) && (
+                  <p className="text-xs text-zinc-400 font-medium italic">Belum ada tombol CTA yang ditambahkan.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="py-10 text-center bg-zinc-50 rounded-3xl border-2 border-dashed border-zinc-200">
@@ -826,6 +989,7 @@ export function Posts() {
               <option value="Produk">Produk</option>
               <option value="Lowongan">Lowongan</option>
               <option value="Pengumuman">Pengumuman</option>
+              <option value="Template">Template</option>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
