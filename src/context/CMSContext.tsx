@@ -302,7 +302,17 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     };
 
     initializeSession();
-  }, [token]);
+
+    // Task 2: Background Data Polling
+    const pollInterval = setInterval(() => {
+      const currentToken = token || localStorage.getItem('token');
+      if (currentToken) {
+        fetchAllData();
+      }
+    }, 60000);
+
+    return () => clearInterval(pollInterval);
+  }, [token, activeTenantId]);
 
   // API Call abstractions
   const savePage = async (pageData: any) => {
@@ -390,6 +400,20 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(newSettings)
       });
       if (resp.ok) {
+         await fetchAllData();
+         
+         // Task 4: UI Refinement - Update user.site_name for immediate consistency
+         if (newSettings.site_name) {
+             setUser((prev: any) => {
+                 if (prev) {
+                     const updatedUser = { ...prev, site_name: newSettings.site_name };
+                     localStorage.setItem('user', JSON.stringify(updatedUser));
+                     return updatedUser;
+                 }
+                 return prev;
+             });
+         }
+
          addActivity({ tenant: "Admin", action: `Updated global settings`, status: "Success" });
       }
     } catch(err) {

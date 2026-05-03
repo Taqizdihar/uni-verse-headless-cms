@@ -715,9 +715,9 @@ app.post('/api/auth/login', async (req, res) => {
             }
         }
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id: primary_tenant_id, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id: primary_tenant_id, role: role || 'admin' }, JWT_SECRET, { expiresIn: '1d' });
         
-        console.log(`[AUTH] Login successful for ${email}. Tenant: ${tenant_id || 'NONE'}`);
+        console.log(`[AUTH] Login successful for ${email}. Tenant: ${tenant_id || 'NONE'}, Role: ${role}`);
 
         // 5. Response Payload: return token, user object, and top-level tenant_id
         res.json({ 
@@ -728,7 +728,7 @@ app.post('/api/auth/login', async (req, res) => {
                 email: user.email, 
                 profile_picture_url: user.profile_picture_url,
                 tenant_id: primary_tenant_id, 
-                role: 'admin', 
+                role: role || 'admin', 
                 site_name 
             },
             tenant_id: primary_tenant_id,
@@ -889,6 +889,8 @@ app.put(['/api/settings', '/api/site-settings/:tenantId'], async (req, res) => {
     const tid = req.params.tenantId ? parseInt(req.params.tenantId) : getTenantId(req);
     try {
         const globalOptions = JSON.stringify({
+            site_name: site_name || '',
+            tagline: tagline || '',
             support_email: support_email || '',
             footer_config: footer_config || null,
             frontend_url: frontend_url || ''
