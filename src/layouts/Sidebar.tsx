@@ -63,7 +63,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
             {isCollapsed ? (
                 <img src="/favicon.png" alt="Favicon" className="w-10 h-10 object-contain scale-110" />
             ) : (
-                <img src={universeLogo} alt="UNI-VERSE" className="h-10 w-auto" />
+                <img src={universeLogo} alt="UNI-VERSE" className="h-[60px] w-auto" />
             )}
             {!isCollapsed && (
                 <div className="flex items-center gap-2 mt-1">
