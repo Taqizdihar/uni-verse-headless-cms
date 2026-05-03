@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
+import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
 
 export function PublicLanding() {
   const navigate = useNavigate();
@@ -132,7 +133,14 @@ export function PublicLanding() {
       {/* Navigation */}
       <header className="flex items-center justify-between px-10 py-6 sticky top-0 z-50 bg-[#0B0B0B]">
         <div className="flex items-center">
-           {/* Logo removed as requested */}
+           <a 
+            href="https://uni-inside.pages.dev/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+           >
+            <img src={uniInsideLogo} alt="Uni-Inside" className="h-8 w-auto object-contain" />
+           </a>
         </div>
         
         <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
