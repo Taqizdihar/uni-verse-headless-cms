@@ -119,7 +119,7 @@ export function Notifications() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 tracking-tighter italic">Pusat Notifikasi</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Pusat Notifikasi</h2>
           <p className="text-zinc-500 text-sm mt-1">Kelola undangan dan pemberitahuan sistem Anda.</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest">
