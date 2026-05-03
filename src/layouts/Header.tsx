@@ -4,7 +4,6 @@ import { useCMS } from '../context/CMSContext';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
-import uniInsideLogo from '../assets/logo/Uni-Inside Logo.png';
 
 interface Notification {
   id: number;
@@ -148,16 +147,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
-          <div className="flex items-center gap-3 w-full">
-            <a 
-              href="https://uni-inside.pages.dev/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
-              title="Kunjungi Uni-Inside"
-            >
-              <img src={uniInsideLogo} alt="Uni-Inside" className="h-7 w-auto object-contain" />
-            </a>
+          <div className="flex items-center gap-2 w-full">
             <h1 className="text-xl font-black text-amber-500 tracking-tighter uppercase italic truncate" title={settings?.site_name || 'Uni-Inside'}>
               {settings?.site_name || 'Uni-Inside'}
             </h1>
