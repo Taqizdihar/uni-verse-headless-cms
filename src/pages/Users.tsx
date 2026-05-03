@@ -25,6 +25,7 @@ export function Users() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState('');
   const [inviteSuccess, setInviteSuccess] = useState('');
+  const [deleteModalData, setDeleteModalData] = useState<{ id: number, name: string } | null>(null);
 
   const getHeaders = useCallback(() => {
     const t = localStorage.getItem('token');
@@ -97,10 +98,15 @@ export function Users() {
     }
   };
 
-  const handleDelete = async (userId: number, userName: string) => {
-    if (!window.confirm(`Hapus pengguna ${userName} dari tenant ini?`)) return;
-    await deleteUser(userId);
+  const handleDelete = (userId: number, userName: string) => {
+    setDeleteModalData({ id: userId, name: userName });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModalData) return;
+    await deleteUser(deleteModalData.id);
     await fetchUsers();
+    setDeleteModalData(null);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -336,6 +342,55 @@ export function Users() {
                   <Send className="w-4 h-4" />
                 )}
                 Kirim Undangan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalData && (
+        <div 
+          className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onMouseDown={() => setDeleteModalData(null)}
+        >
+          <div 
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+            onMouseDown={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-5 bg-zinc-900 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-zinc-900" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white uppercase tracking-wider">Hapus Pengguna</h3>
+                </div>
+              </div>
+              <button onClick={() => setDeleteModalData(null)} className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-sm font-medium text-zinc-600 leading-relaxed">
+                Apakah Anda yakin ingin menghapus <span className="font-bold text-zinc-900">{deleteModalData.name}</span> dari tim? Tindakan ini akan segera mencabut akses mereka.
+              </p>
+            </div>
+            {/* Modal Footer */}
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                onClick={() => setDeleteModalData(null)}
+                className="flex-1 px-6 py-3.5 rounded-xl font-bold text-zinc-500 bg-zinc-50 hover:bg-zinc-100 transition-all border border-zinc-100"
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-6 py-3.5 rounded-xl font-bold bg-amber-400 text-zinc-900 hover:bg-amber-500 transition-all shadow-lg shadow-amber-400/20"
+              >
+                Ya, Hapus
               </button>
             </div>
           </div>

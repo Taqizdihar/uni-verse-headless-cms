@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import universeLogo from '../assets/logo/UNI-VERSE Logo V3.png';
+import { NotificationModal } from '../components/ui/NotificationModal';
 
 export interface PageItem {
   id: number;
@@ -158,6 +159,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem('active_role') || null;
   });
   const [isSwitchingWorkspace, setIsSwitchingWorkspace] = useState(false);
+  const [evictionNotification, setEvictionNotification] = useState<{tenantName: string} | null>(null);
 
   // Helper for headers
   const getHeaders = () => {
@@ -268,6 +270,27 @@ export function CMSProvider({ children }: { children: ReactNode }) {
             if (adminWs) {
               localStorage.setItem('primary_tenant_id', String(adminWs.tenant_id));
             }
+          }
+
+          // Task 3: Eviction Notification Check
+          try {
+            const activeWorkspaces = workspaces.filter((w: any) => w.status === 'active');
+            const lastKnownStr = localStorage.getItem('last_known_workspaces');
+            if (lastKnownStr) {
+              const lastKnown = JSON.parse(lastKnownStr);
+              if (lastKnown.length > 0) {
+                const evicted = lastKnown.filter((old: any) => 
+                  !activeWorkspaces.some((cur: any) => cur.tenant_id === old.tenant_id)
+                );
+                if (evicted.length > 0) {
+                  // Just show the first one
+                  setEvictionNotification({ tenantName: evicted[0].tenant_name });
+                }
+              }
+            }
+            localStorage.setItem('last_known_workspaces', JSON.stringify(activeWorkspaces));
+          } catch(e) {
+            console.error('Eviction check error:', e);
           }
         }
       } catch (err) {
@@ -623,6 +646,16 @@ export function CMSProvider({ children }: { children: ReactNode }) {
             textTransform: 'uppercase'
           }}>Menyiapkan Workspace...</p>
         </div>
+      )}
+      
+      {evictionNotification && (
+        <NotificationModal
+          isOpen={true}
+          title="Akses Dicabut"
+          message={`Anda telah dihapus dari tim ${evictionNotification.tenantName}.`}
+          type="info"
+          onClose={() => setEvictionNotification(null)}
+        />
       )}
       {children}
     </CMSContext.Provider>

@@ -47,12 +47,14 @@ export function Login() {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
+      const primaryTenantId = String(res.data.primary_tenant_id || user.primary_tenant_id || user.tenant_id || '');
+
       // Always set active workspace from login response (primary tenant)
-      localStorage.setItem('active_tenant_id', String(user.tenant_id || ''));
+      localStorage.setItem('active_tenant_id', primaryTenantId);
       localStorage.setItem('active_role', user.role || 'admin');
       
       // Store primary tenant ID for TIM MITRA badge logic
-      localStorage.setItem('primary_tenant_id', String(res.data.primary_tenant_id || user.tenant_id || ''));
+      localStorage.setItem('primary_tenant_id', primaryTenantId);
       
       setToken(token);
       setUser(user);

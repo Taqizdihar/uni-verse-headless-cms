@@ -221,7 +221,7 @@ export function Profile() {
                 <div className="flex items-center justify-center py-3">
                   <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
                 </div>
-              ) : workspaces.length <= 1 ? (
+              ) : workspaces.filter(w => w.status === 'active').length <= 1 ? (
                 <p className="text-[11px] text-zinc-400 italic">Anda hanya memiliki satu workspace.</p>
               ) : (
                 <div className="relative">
@@ -230,7 +230,7 @@ export function Profile() {
                     onChange={(e) => handleWorkspaceSwitch(Number(e.target.value))}
                     className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 transition-all appearance-none cursor-pointer pr-10"
                   >
-                    {workspaces.map(ws => (
+                    {workspaces.filter(w => w.status === 'active').map(ws => (
                       <option key={ws.tenant_id} value={ws.tenant_id}>
                         {ws.tenant_name} ({getRoleLabel(ws.role)})
                       </option>
