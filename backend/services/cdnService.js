@@ -135,7 +135,7 @@ const cdnService = {
       const apiKey = process.env.CDN_API_KEY;
       if (!apiKey) throw new Error('CDN_API_KEY is not configured');
 
-      const response = await axios.get(`${CDN_BASE_URL}/files/${fileId}`, {
+      const response = await axios.get(`${CDN_BASE_URL}/status/${fileId}`, {
         headers: {
           'x-api-key': apiKey,
         },

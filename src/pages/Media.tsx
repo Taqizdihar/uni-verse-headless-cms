@@ -4,6 +4,8 @@ import {
   UploadCloud, 
   Image as ImageIcon, 
   File as FileIcon, 
+  FileText as FileTextIcon,
+  Video as VideoIcon,
   X, 
   LayoutGrid, 
   List, 
@@ -124,6 +126,34 @@ export function Media() {
     fetchData();
     fetchAllFolders();
   }, [currentFolderId, searchInAll]);
+
+  // Task 3: Background Polling System
+  useEffect(() => {
+    const processingItems = media.filter((m: any) => m.status === 'processing');
+    if (processingItems.length === 0) return;
+
+    const interval = setInterval(() => {
+      processingItems.forEach(async (item: any) => {
+        try {
+          const token = localStorage.getItem('token');
+          // filename stores the Kroombox fileId
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/media/status/${item.filename}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.data.status === 'ready') {
+            setMedia((prev: any[]) => prev.map((m) => 
+              m.id === item.id ? { ...m, status: 'ready', file_url: res.data.url || m.file_url } : m
+            ));
+          }
+        } catch (error) {
+          console.error('Error polling status for', item.id, error);
+        }
+      });
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(interval);
+  }, [media, setMedia]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -567,7 +597,7 @@ export function Media() {
 
           {/* Render Media Files */}
           {filteredMedia.map((m: any) => {
-             const isProcessing = m.cdn_status && m.cdn_status !== 'ready';
+             const isProcessing = m.status === 'processing';
              const isImage = (m.file_type || '').startsWith('image/');
              return (
              <div key={`media-${m.id}`} className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
@@ -578,26 +608,25 @@ export function Media() {
                     window.open(m.file_url || m.url, '_blank');
                   }}
                 >
-                  {isImage && !isProcessing ? (
+                  {isProcessing ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-zinc-900 border border-amber-500/30 text-amber-400">
+                        <Loader2 className="w-6 h-6 animate-spin mb-2" />
+                        {isImage ? (
+                            <><ImageIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
+                        ) : (m.file_type || '').startsWith('video/') ? (
+                            <><VideoIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Video sedang<br/>diproses...</span></>
+                        ) : (
+                            <><FileTextIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Dokumen sedang<br/>diproses...</span></>
+                        )}
+                      </div>
+                  ) : isImage ? (
                     <img src={m.file_url || m.url} alt={m.file_name || m.filename} className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      {isProcessing ? (
-                        <Loader2 className="w-10 h-10 text-amber-400 animate-spin" />
-                      ) : (
                         <FileIcon className="w-10 h-10 text-zinc-200" />
-                      )}
                     </div>
                   )}
-                  {/* Task 3: Processing overlay */}
-                  {isProcessing ? (
-                    <div className="absolute inset-0 bg-amber-500/20 backdrop-blur-[2px] flex items-center justify-center">
-                      <div className="flex flex-col items-center text-amber-700">
-                        <Clock className="w-5 h-5 mb-1 animate-pulse" />
-                        <span className="text-[9px] font-black uppercase tracking-widest">Processing...</span>
-                      </div>
-                    </div>
-                  ) : (
+                  {!isProcessing && (
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
                           <Eye className="w-6 h-6 mb-1" />

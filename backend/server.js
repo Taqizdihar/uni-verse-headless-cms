@@ -1474,12 +1474,18 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
         const display_name = cdnResponse.originalName || req.file.originalname;
+        const status = cdnResponse.status || 'processing';
 
         // Immediate Database Record
         try {
+            // Check if status column exists, if not, add it silently
+            try {
+                await db.execute("ALTER TABLE media ADD COLUMN status VARCHAR(50) DEFAULT 'ready'");
+            } catch(e) {} // Ignore if exists
+
             const [result] = await db.execute(
-                'INSERT INTO media (tenant_id, filename, file_url, file_type, file_size, folder_id, uploaded_by, file_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                [tid, fileId, file_url, file_type, file_size, folder_id, uploaded_by, display_name]
+                'INSERT INTO media (tenant_id, filename, file_url, file_type, file_size, folder_id, uploaded_by, file_name, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [tid, fileId, file_url, file_type, file_size, folder_id, uploaded_by, display_name, status]
             );
 
             console.log(`[MEDIA] ✅ Record Created: ID ${result.insertId} | fileId ${fileId} | folder_id ${folder_id}`);
@@ -1539,27 +1545,27 @@ app.delete('/api/media/:id', async (req, res) => {
 });
 
 // Task 3: CDN Status Check Endpoint — allows frontend to poll processing state
-app.get('/api/media/:id/cdn-status', async (req, res) => {
-    const { id } = req.params;
+app.get('/api/media/status/:fileId', async (req, res) => {
+    const { fileId } = req.params;
     const tid = getTenantId(req);
     try {
-        const [rows] = await db.execute('SELECT filename, cdn_status FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
+        const [rows] = await db.execute('SELECT id, status FROM media WHERE filename = ? AND tenant_id = ?', [fileId, tid]);
         if (rows.length === 0) return res.status(404).json({ error: 'Media not found' });
 
-        const cdnFileId = rows[0].filename;
+        const mediaId = rows[0].id;
         
         // If already marked ready in DB, return immediately
-        if (rows[0].cdn_status === 'ready') {
+        if (rows[0].status === 'ready') {
             return res.json({ status: 'ready' });
         }
 
         // Otherwise check live status from CDN
-        const statusData = await cdnService.getStatus(cdnFileId);
+        const statusData = await cdnService.getStatus(fileId);
         const newStatus = statusData.status || 'ready';
 
         // Update DB if status changed
-        if (newStatus !== rows[0].cdn_status) {
-            await db.execute('UPDATE media SET cdn_status = ? WHERE id = ? AND tenant_id = ?', [newStatus, id, tid]);
+        if (newStatus !== rows[0].status) {
+            await db.execute('UPDATE media SET status = ? WHERE id = ? AND tenant_id = ?', [newStatus, mediaId, tid]);
         }
 
         res.json({ status: newStatus, url: statusData.url || null });
