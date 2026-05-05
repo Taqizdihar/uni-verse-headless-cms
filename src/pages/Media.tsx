@@ -609,18 +609,28 @@ export function Media() {
                   }}
                 >
                   {isProcessing ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-zinc-900 border border-amber-500/30 text-amber-400">
-                        <Loader2 className="w-6 h-6 animate-spin mb-2" />
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-zinc-800 border border-zinc-700 text-zinc-300">
                         {isImage ? (
-                            <><ImageIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
+                            <><ImageIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
                         ) : (m.file_type || '').startsWith('video/') ? (
-                            <><VideoIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Video sedang<br/>diproses...</span></>
+                            <><VideoIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Video sedang<br/>diproses...</span></>
                         ) : (
-                            <><FileTextIcon className="w-5 h-5 mb-1 opacity-80" /><span className="text-[8px] font-bold uppercase tracking-widest leading-tight">Dokumen sedang<br/>diproses...</span></>
+                            <><FileIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Dokumen sedang<br/>diproses...</span></>
                         )}
                       </div>
                   ) : isImage ? (
-                    <img src={m.file_url || m.url} alt={m.file_name || m.filename} className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" />
+                    <img 
+                      src={m.file_url || m.url} 
+                      alt={m.file_name || m.filename} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" 
+                      onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null; // Mencegah infinite loop
+                          setMedia((prev: any[]) => prev.map((item) => 
+                              item.id === m.id ? { ...item, status: 'processing' } : item
+                          ));
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                         <FileIcon className="w-10 h-10 text-zinc-200" />
