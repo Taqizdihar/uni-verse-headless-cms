@@ -1438,50 +1438,64 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const tid = getTenantId(req);
         const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
         
-        // Task 1: Build hierarchical CDN path from tenant root + folder chain
+        // Task 1: Re-engineer the Upload Controller - construct dynamic project name
         let cdnPath;
         try {
             cdnPath = await buildCdnPath(tid, folder_id);
         } catch (pathErr) {
-            console.error('[MEDIA] Path build failed:', pathErr);
-            cdnPath = `tenant_${tid}`; // Fallback to tenant root
+            console.error('[MEDIA] Path construction failed:', pathErr);
+            cdnPath = `${process.env.CDN_PROJECT_ID || 'kd59zf94'}_tenant_${tid}`;
         }
 
-        // Upload to CDN with the hierarchical project path
+        // Wait for CDN response BEFORE attempting to save to MySQL
         let cdnResponse;
         try {
             cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, cdnPath);
         } catch (cdnErr) {
+            console.error('[CDN ERROR] Upload failed:', cdnErr.message);
             return res.status(500).json({ error: 'Failed to upload to Kroombox CDN: ' + cdnErr.message });
         }
 
-        // Detailed Metadata — prefer CDN response metadata, fallback to multer
-        const cdnFileId = cdnResponse.fileId;
-        const file_url = cdnResponse.url;
+        // Task 2: MySQL Mapping & Data Integrity
+        const fileId = cdnResponse.fileId;
+        const file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
         const file_type = cdnResponse.mimeType || req.file.mimetype;
         const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
-        const file_name = cdnResponse.originalName || req.file.originalname;
-        const cdn_status = cdnResponse.status || 'ready';
+        const display_name = cdnResponse.originalName || req.file.originalname;
 
-        // CRITICAL: folder_id MUST be saved so the CMS UI can filter by folder
-        const [result] = await db.execute(
-            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [tid, cdnFileId, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status]
-        );
+        // Immediate Database Record
+        try {
+            const [result] = await db.execute(
+                'INSERT INTO media (tenant_id, filename, file_url, file_type, file_size, folder_id, uploaded_by, file_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                [tid, fileId, file_url, file_type, file_size, folder_id, uploaded_by, display_name]
+            );
 
-        console.log(`[MEDIA] ✅ Saved "${file_name}" → DB ID: ${result.insertId} | CDN ID: ${cdnFileId} | folder_id: ${folder_id} | path: ${cdnPath}`);
+            console.log(`[MEDIA] ✅ Record Created: ID ${result.insertId} | fileId ${fileId} | folder_id ${folder_id}`);
 
-        res.status(201).json({ 
-            message: 'Media synchronized with storage', 
-            id: result.insertId,
-            url: file_url,
-            cdn_status,
-            folder_id
-        });
+            res.status(201).json({ 
+                success: true,
+                message: 'Aset berhasil diunggah dan direkam',
+                id: result.insertId,
+                url: file_url,
+                folder_id
+            });
+        } catch (dbErr) {
+            // Task 3: Database Fallback Log
+            console.error('[DATABASE ERROR] MySQL INSERT failed! Asset is in CDN but missing in UI.');
+            console.error(`[CRITICAL] fileId: ${fileId} | tenantId: ${tid} | url: ${file_url}`);
+            console.error('Error Details:', dbErr.message);
+
+            res.status(201).json({ 
+                success: true, 
+                message: 'Aset terunggah ke CDN namun gagal sinkronisasi DB (Lihat Log Server)',
+                url: file_url,
+                fileId: fileId
+            });
+        }
     } catch (error) {
-        console.error('[MEDIA] ❌ Upload Error:', error);
-        res.status(500).json({ error: 'Storage synchronization failure: ' + error.message });
+        console.error('[MEDIA] ❌ General Upload Error:', error);
+        res.status(500).json({ error: 'Storage synchronization failure' });
     }
 });
 
