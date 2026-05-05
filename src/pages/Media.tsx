@@ -17,12 +17,12 @@ import {
   FolderPlus,
   ChevronRight,
   MoreVertical,
-  FolderTree
+  FolderTree,
+  Clock
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import axios from 'axios';
-import imageCompression from 'browser-image-compression';
 
 export function Media() {
   const { media, setMedia, addMedia, deleteMedia } = useCMS();
@@ -371,7 +371,7 @@ export function Media() {
                     <FolderPlus className="w-5 h-5" />
                     Buat Folder
                 </button>
-                <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                 <div className="relative group">
                     <button 
                     onClick={() => fileInputRef.current?.click()}
@@ -566,23 +566,45 @@ export function Media() {
           )})}
 
           {/* Render Media Files */}
-          {filteredMedia.map((m: any) => (
+          {filteredMedia.map((m: any) => {
+             const isProcessing = m.cdn_status && m.cdn_status !== 'ready';
+             const isImage = (m.file_type || '').startsWith('image/');
+             return (
              <div key={`media-${m.id}`} className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
                 <div 
-                  className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 cursor-pointer group/preview`}
-                  onClick={() => window.open(m.file_url || m.url, '_blank')}
+                  className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'} group/preview`}
+                  onClick={() => {
+                    if (isProcessing) return; // Task 3: Block opening while processing
+                    window.open(m.file_url || m.url, '_blank');
+                  }}
                 >
-                  {(m.file_type || '').startsWith('image/') ? (
+                  {isImage && !isProcessing ? (
                     <img src={m.file_url || m.url} alt={m.file_name || m.filename} className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center"><FileIcon className="w-10 h-10 text-zinc-200" /></div>
+                    <div className="w-full h-full flex items-center justify-center">
+                      {isProcessing ? (
+                        <Loader2 className="w-10 h-10 text-amber-400 animate-spin" />
+                      ) : (
+                        <FileIcon className="w-10 h-10 text-zinc-200" />
+                      )}
+                    </div>
                   )}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
-                        <Eye className="w-6 h-6 mb-1" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+                  {/* Task 3: Processing overlay */}
+                  {isProcessing ? (
+                    <div className="absolute inset-0 bg-amber-500/20 backdrop-blur-[2px] flex items-center justify-center">
+                      <div className="flex flex-col items-center text-amber-700">
+                        <Clock className="w-5 h-5 mb-1 animate-pulse" />
+                        <span className="text-[9px] font-black uppercase tracking-widest">Processing...</span>
                       </div>
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
+                          <Eye className="w-6 h-6 mb-1" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+                        </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex-1 min-w-0">
@@ -600,6 +622,9 @@ export function Media() {
                   </div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest bg-zinc-100 px-1.5 py-0.5 rounded">{(m.file_type || '').split('/').pop() || 'UNKNOWN'}</p>
+                      {isProcessing && (
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded animate-pulse">PROCESSING</span>
+                      )}
                       <span className="text-zinc-300">•</span>
                       <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{(m.file_size / (1024 * 1024)).toFixed(2)} MB</p>
                       <span className="text-zinc-300">•</span>
@@ -628,7 +653,7 @@ export function Media() {
                     </div>
                 )}
              </div>
-          ))}
+           )})}
       </div>
 
       {folders.length === 0 && (!media || filteredMedia.length === 0) && !isLoading && (

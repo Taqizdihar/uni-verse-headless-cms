@@ -1437,6 +1437,7 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const tid = getTenantId(req);
         const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
         
+        // Task 1: Dynamic Folder Isolation — cdnService now enforces tenant_ prefix internally
         let cdnResponse;
         try {
             cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, tid);
@@ -1444,22 +1445,27 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
             return res.status(500).json({ error: 'Failed to upload to Kroombox CDN: ' + cdnErr.message });
         }
 
-        const cdnFileId = cdnResponse.fileId || cdnResponse.id;
-        const file_url = cdnResponse.url || `https://api-cdn.kroombox.com/api/bridge/view/${cdnFileId}`;
-        const file_type = req.file.mimetype;
-        const file_size = req.file.size || 0; // Size in bytes
+        // Task 4: Detailed Metadata — prefer CDN response metadata, fallback to multer
+        const cdnFileId = cdnResponse.fileId;
+        const file_url = cdnResponse.url;
+        const file_type = cdnResponse.mimeType || req.file.mimetype;
+        const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
-        const file_name = req.file.originalname; // Better display name than ID
+        const file_name = cdnResponse.originalName || req.file.originalname;
+        const cdn_status = cdnResponse.status || 'ready'; // 'ready' | 'processing'
 
         const [result] = await db.execute(
-            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [tid, cdnFileId, file_url, file_type, uploaded_by, file_name, file_size, folder_id]
+            'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [tid, cdnFileId, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status]
         );
+
+        console.log(`[MEDIA] Uploaded "${file_name}" → CDN ID: ${cdnFileId} | Status: ${cdn_status} | Type: ${file_type}`);
 
         res.status(201).json({ 
             message: 'Media synchronized with storage', 
             id: result.insertId,
-            url: file_url 
+            url: file_url,
+            cdn_status
         });
     } catch (error) {
         console.error('Upload Error:', error);
@@ -1492,6 +1498,37 @@ app.delete('/api/media/:id', async (req, res) => {
     } catch (error) {
         console.error('Purge Error:', error);
         res.status(500).json({ error: 'Internal system purge failure' });
+    }
+});
+
+// Task 3: CDN Status Check Endpoint — allows frontend to poll processing state
+app.get('/api/media/:id/cdn-status', async (req, res) => {
+    const { id } = req.params;
+    const tid = getTenantId(req);
+    try {
+        const [rows] = await db.execute('SELECT filename, cdn_status FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Media not found' });
+
+        const cdnFileId = rows[0].filename;
+        
+        // If already marked ready in DB, return immediately
+        if (rows[0].cdn_status === 'ready') {
+            return res.json({ status: 'ready' });
+        }
+
+        // Otherwise check live status from CDN
+        const statusData = await cdnService.getStatus(cdnFileId);
+        const newStatus = statusData.status || 'ready';
+
+        // Update DB if status changed
+        if (newStatus !== rows[0].cdn_status) {
+            await db.execute('UPDATE media SET cdn_status = ? WHERE id = ? AND tenant_id = ?', [newStatus, id, tid]);
+        }
+
+        res.json({ status: newStatus, url: statusData.url || null });
+    } catch (error) {
+        console.error('CDN Status Check Error:', error);
+        res.status(500).json({ error: 'Failed to check CDN status' });
     }
 });
 
@@ -1863,16 +1900,17 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
     try {
         if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diunggah' });
         const userId = req.user.userId;
+        const tid = getTenantId(req);
         
         let cdnResponse;
         try {
-            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, `avatar_${userId}`);
+            // Task 1: Use tenant_ prefix for avatar isolation as well
+            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, tid);
         } catch (cdnErr) {
             return res.status(500).json({ error: 'Failed to upload avatar to CDN' });
         }
 
-        const cdnFileId = cdnResponse.fileId || cdnResponse.id;
-        const avatarUrl = cdnResponse.url || `https://api-cdn.kroombox.com/api/bridge/view/${cdnFileId}`;
+        const avatarUrl = cdnResponse.url;
         
         await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
         res.json({ url: avatarUrl });
