@@ -146,43 +146,8 @@ export function Media() {
     if (fileInputRef.current) fileInputRef.current.value = "";
 
     newFiles.forEach(async (queuedFile) => {
-        const file = queuedFile.file;
-        const isImage = file.type.startsWith('image/');
-        const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
-        const MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024;
-        const MAX_OTHER_SIZE = 10 * 1024 * 1024;
-
-        if (isImage) {
-            if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
-                updateQueue(queuedFile.id, { status: 'Too Large', errorMessage: 'Ukuran Terlalu Besar (> 5MB)' });
-            } else if (file.size > MAX_IMAGE_SIZE) {
-                updateQueue(queuedFile.id, { status: 'Compressing' });
-                try {
-                    const options = {
-                        maxSizeMB: 2,
-                        maxWidthOrHeight: 1920,
-                        useWebWorker: true
-                    };
-                    const compressedFile = await imageCompression(file, options);
-                    
-                    if (compressedFile.size > MAX_IMAGE_SIZE) {
-                        updateQueue(queuedFile.id, { status: 'Too Large', errorMessage: 'Ukuran Terlalu Besar (Gagal dikompresi)' });
-                    } else {
-                        updateQueue(queuedFile.id, { file: compressedFile, status: 'Ready' });
-                    }
-                } catch (error) {
-                    updateQueue(queuedFile.id, { status: 'Error', errorMessage: 'Gagal mengompresi gambar' });
-                }
-            } else {
-                updateQueue(queuedFile.id, { status: 'Ready' });
-            }
-        } else {
-            if (file.size > MAX_OTHER_SIZE) {
-                updateQueue(queuedFile.id, { status: 'Too Large', errorMessage: 'Ukuran Terlalu Besar (> 10MB)' });
-            } else {
-                updateQueue(queuedFile.id, { status: 'Ready' });
-            }
-        }
+        // Bypass file size restrictions as requested
+        updateQueue(queuedFile.id, { status: 'Ready' });
     });
   };
 
@@ -411,7 +376,7 @@ export function Media() {
                     <button 
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
-                    title="Maksimal: Gambar 5 MB, Video & Dokumen 10 MB."
+                    title="Unggah Media (Tanpa Batas Ukuran)"
                     >
                     <Plus className="w-5 h-5 stroke-[3]" />
                     Unggah Media

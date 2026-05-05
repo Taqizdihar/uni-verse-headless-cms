@@ -13,14 +13,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { v2: cloudinary } = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// Cloudinary removed in favor of Kroombox CDN
 
 const app = express();
 
@@ -52,16 +45,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Multer & Cloudinary Storage Configuration
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'uni-inside-cms',
-    allowedFormats: ['jpeg', 'png', 'jpg', 'gif', 'svg', 'webp'],
-  },
-});
-
-const upload = multer({ storage: storage });
+// Kroombox CDN Service & Multer Memory Storage Configuration
+const cdnService = require('./services/cdnService');
+const upload = multer({ storage: multer.memoryStorage() });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ========================================================
@@ -1450,15 +1436,24 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         
         const tid = getTenantId(req);
         const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
-        const filename = req.file.filename; // Cloudinary public_id
-        const file_url = req.file.path; // Cloudinary secure_url
+        
+        let cdnResponse;
+        try {
+            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, tid);
+        } catch (cdnErr) {
+            return res.status(500).json({ error: 'Failed to upload to Kroombox CDN: ' + cdnErr.message });
+        }
+
+        const cdnFileId = cdnResponse.fileId || cdnResponse.id;
+        const file_url = cdnResponse.url || `https://api-cdn.kroombox.com/api/bridge/view/${cdnFileId}`;
         const file_type = req.file.mimetype;
         const file_size = req.file.size || 0; // Size in bytes
         const uploaded_by = req.user?.userId || 1;
+        const file_name = req.file.originalname; // Better display name than ID
 
         const [result] = await db.execute(
             'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [tid, filename, file_url, file_type, uploaded_by, filename, file_size, folder_id]
+            [tid, cdnFileId, file_url, file_type, uploaded_by, file_name, file_size, folder_id]
         );
 
         res.status(201).json({ 
@@ -1480,13 +1475,15 @@ app.delete('/api/media/:id', async (req, res) => {
         const [rows] = await db.execute('SELECT filename FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
         if (rows.length === 0) return res.status(404).json({ error: 'Resource not found or unauthorized' });
         
-        const filename = rows[0].filename;
+        const filename = rows[0].filename; // This holds Kroombox fileId now
 
-        // Physical Deletion from Cloudinary
-        try {
-            await cloudinary.uploader.destroy(filename);
-        } catch(e) { 
-            console.error('Cloudinary delete failed:', e); 
+        // Physical Deletion from CDN
+        if (filename && !filename.startsWith('http')) {
+            try {
+                await cdnService.delete(filename);
+            } catch(e) { 
+                console.error('CDN delete failed:', e); 
+            }
         }
 
         // Registry Deletion
@@ -1865,8 +1862,18 @@ app.put('/api/user/profile', async (req, res) => {
 app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Tidak ada file yang diunggah' });
-        const avatarUrl = req.file.path; // Cloudinary secure_url
         const userId = req.user.userId;
+        
+        let cdnResponse;
+        try {
+            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, `avatar_${userId}`);
+        } catch (cdnErr) {
+            return res.status(500).json({ error: 'Failed to upload avatar to CDN' });
+        }
+
+        const cdnFileId = cdnResponse.fileId || cdnResponse.id;
+        const avatarUrl = cdnResponse.url || `https://api-cdn.kroombox.com/api/bridge/view/${cdnFileId}`;
+        
         await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
         res.json({ url: avatarUrl });
     } catch (error) {
