@@ -15,6 +15,26 @@ export function Login() {
 
   // Auto-redirect if already logged in
   useEffect(() => {
+    // Task 4: Emergency Logout Loop Prevention (Soft Redirects)
+    const now = Date.now();
+    const countStr = sessionStorage.getItem('redirect_count') || '0';
+    const timeStr = sessionStorage.getItem('redirect_timestamp') || String(now);
+    let count = parseInt(countStr, 10);
+    const timestamp = parseInt(timeStr, 10);
+    
+    if (now - timestamp < 2000) {
+      count += 1;
+      sessionStorage.setItem('redirect_count', String(count));
+      if (count > 5) {
+        sessionStorage.removeItem('redirect_count');
+        localStorage.clear();
+        return; // Break the loop, keep user on login page
+      }
+    } else {
+      sessionStorage.setItem('redirect_count', '1');
+      sessionStorage.setItem('redirect_timestamp', String(now));
+    }
+
     if (localStorage.getItem('token')) {
        const user = JSON.parse(localStorage.getItem('user') || '{}');
         // Super Admin Check

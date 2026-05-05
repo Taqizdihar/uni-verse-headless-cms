@@ -5,6 +5,8 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import axios from 'axios';
 import { AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { useCMS } from '../context/CMSContext';
+import { SuperAdminLayout } from './SuperAdminLayout';
 
 interface BroadcastMsg {
   message: string;
@@ -17,6 +19,13 @@ export function AdminLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [broadcast, setBroadcast] = useState<BroadcastMsg | null>(null);
   const [isBroadcastVisible, setIsBroadcastVisible] = useState(true);
+  const { user } = useCMS();
+
+  // Task 3: Super Admin Persistence Fix
+  // Prioritize the role over the tenant_id during layout determination process
+  if (user && user.role === 'super_admin') {
+    return <SuperAdminLayout />;
+  }
 
   React.useEffect(() => {
     const fetchBroadcast = async () => {

@@ -159,6 +159,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     return localStorage.getItem('active_role') || null;
   });
   const [isSwitchingWorkspace, setIsSwitchingWorkspace] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [evictionNotification, setEvictionNotification] = useState<{tenantName: string} | null>(null);
 
   // Helper for headers
@@ -240,8 +241,46 @@ export function CMSProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initializeSession = async () => {
+      // Task 4: Emergency Logout Button (Force Reset logic)
+      const now = Date.now();
+      const countStr = sessionStorage.getItem('redirect_count') || '0';
+      const timeStr = sessionStorage.getItem('redirect_timestamp') || String(now);
+      
+      let count = parseInt(countStr, 10);
+      const timestamp = parseInt(timeStr, 10);
+      
+      if (now - timestamp < 2000) {
+        count += 1;
+        sessionStorage.setItem('redirect_count', String(count));
+        if (count > 5) {
+          sessionStorage.removeItem('redirect_count');
+          localStorage.clear();
+          window.location.href = '/login';
+          return;
+        }
+      } else {
+        sessionStorage.setItem('redirect_count', '1');
+        sessionStorage.setItem('redirect_timestamp', String(now));
+      }
+
       const currentToken = token || localStorage.getItem('token');
-      if (!currentToken) return;
+      if (!currentToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Task 3: Ensure user object (including role) is re-hydrated from JWT
+      try {
+        const payload = JSON.parse(atob(currentToken.split('.')[1]));
+        if (payload && payload.id) {
+           setUser((prev: any) => ({ ...prev, ...payload }));
+           const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+           const rehydrated = { ...currentUser, ...payload };
+           localStorage.setItem('user', JSON.stringify(rehydrated));
+        }
+      } catch (e) {
+        console.warn('Failed to parse JWT for rehydration');
+      }
 
       try {
         // Fetch full list of workspaces to verify identity
@@ -256,6 +295,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
           const isValid = workspaces.find((w: any) => w.tenant_id === currentTenantId && w.status === 'active');
           
           if (!isValid && workspaces.length > 0) {
+            // Task 2: Stale Tenant Cleansing
+            localStorage.removeItem('active_tenant_id');
             // Fallback to primary admin workspace
             const primary = workspaces.find((w: any) => w.role === 'admin') || workspaces[0];
             setActiveTenantId(primary.tenant_id);
@@ -298,7 +339,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       }
 
       // Fetch the data after verifying the tenant context
-      fetchAllData();
+      await fetchAllData();
+      setIsLoading(false);
     };
 
     initializeSession();
@@ -641,8 +683,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       togglePageStatus, togglePostStatus,
       addActivity 
     }}>
-      {/* Task 2: Branded Full-Screen Loading Overlay */}
-      {isSwitchingWorkspace && (
+      {/* Task 1: Loading Guard */}
+      {isLoading ? (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 9999,
           background: 'rgba(11,11,11,0.92)',
@@ -668,20 +710,53 @@ export function CMSProvider({ children }: { children: ReactNode }) {
             color: '#FAD02C', fontSize: '12px',
             fontWeight: 800, letterSpacing: '0.15em',
             textTransform: 'uppercase'
-          }}>Menyiapkan Workspace...</p>
+          }}>Loading Universe...</p>
         </div>
+      ) : (
+        <>
+          {/* Task 2: Branded Full-Screen Loading Overlay */}
+          {isSwitchingWorkspace && (
+            <div style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              background: 'rgba(11,11,11,0.92)',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: '24px'
+            }}>
+              <style>{`
+                @keyframes universe-pulse {
+                  0%, 100% { transform: scale(1); opacity: 0.85; }
+                  50% { transform: scale(1.1); opacity: 1; }
+                }
+              `}</style>
+              <img
+                src={universeLogo}
+                alt="UNI-VERSE"
+                style={{
+                  height: '64px', width: 'auto',
+                  animation: 'universe-pulse 1.5s ease-in-out infinite'
+                }}
+              />
+              <p style={{
+                color: '#FAD02C', fontSize: '12px',
+                fontWeight: 800, letterSpacing: '0.15em',
+                textTransform: 'uppercase'
+              }}>Menyiapkan Workspace...</p>
+            </div>
+          )}
+          
+          {evictionNotification && (
+            <NotificationModal
+              isOpen={true}
+              title="Akses Dicabut"
+              message={`Anda telah dihapus dari tim ${evictionNotification.tenantName}.`}
+              type="info"
+              onClose={() => setEvictionNotification(null)}
+            />
+          )}
+          {children}
+        </>
       )}
-      
-      {evictionNotification && (
-        <NotificationModal
-          isOpen={true}
-          title="Akses Dicabut"
-          message={`Anda telah dihapus dari tim ${evictionNotification.tenantName}.`}
-          type="info"
-          onClose={() => setEvictionNotification(null)}
-        />
-      )}
-      {children}
     </CMSContext.Provider>
   );
 }
