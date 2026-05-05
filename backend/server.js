@@ -1466,8 +1466,8 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
             throw new Error("Failed to capture fileId from CDN");
         }
 
-        // Task 3: URL Construction Fix
-        const file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        // Task 1: Use the viewable preview URL from cdnService (already transformed)
+        const file_url = cdnResponse.url;
         
         // Task 4: Syncing MySQL with CDN Response / File Metadata
         const file_type = cdnResponse.mimeType || req.file.mimetype;
@@ -1549,18 +1549,19 @@ app.get('/api/media/status/:fileId', async (req, res) => {
     const { fileId } = req.params;
     const tid = getTenantId(req);
     try {
-        const [rows] = await db.execute('SELECT id, status, file_url FROM media WHERE filename = ? AND tenant_id = ?', [fileId, tid]);
+        const [rows] = await db.execute('SELECT id, status, file_url, file_type FROM media WHERE filename = ? AND tenant_id = ?', [fileId, tid]);
         if (rows.length === 0) return res.status(404).json({ error: 'Media not found' });
 
         const mediaId = rows[0].id;
+        const mimeType = rows[0].file_type || '';
         
         // If already marked ready in DB, return immediately
         if (rows[0].status === 'ready') {
             return res.json({ status: 'ready', url: rows[0].file_url });
         }
 
-        // Otherwise check live status from CDN
-        const statusData = await cdnService.getStatus(fileId);
+        // Otherwise check live status from CDN (pass mimeType for URL transformation)
+        const statusData = await cdnService.getStatus(fileId, mimeType);
         const newStatus = statusData.status || 'ready';
         const newUrl = statusData.url;
 
@@ -1568,6 +1569,7 @@ app.get('/api/media/status/:fileId', async (req, res) => {
         if (newStatus !== rows[0].status) {
             if (newStatus === 'ready' && newUrl) {
                 await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', [newStatus, newUrl, mediaId, tid]);
+                console.log(`[MEDIA] ✅ Status updated to 'ready' for fileId ${fileId} | New URL: ${newUrl}`);
             } else {
                 await db.execute('UPDATE media SET status = ? WHERE id = ? AND tenant_id = ?', [newStatus, mediaId, tid]);
             }

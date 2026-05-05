@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Plus, 
   UploadCloud, 
   Image as ImageIcon, 
+  ImageOff,
   File as FileIcon, 
   FileText as FileTextIcon,
   Video as VideoIcon,
@@ -25,6 +26,124 @@ import {
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import axios from 'axios';
+
+/**
+ * MediaCardItem — Extracted component for each media file card.
+ * Owns its own `imgError` state (required by Rules of Hooks — cannot use useState inside .map()).
+ * Handles: image preview with <a target="_blank">, onError fallback, processing placeholder.
+ */
+function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEditingId, setEditingName, handleRenameFile, setMovingFileId, setIsMoveModalOpen, setConfirmDelete }: any) {
+  const [imgError, setImgError] = React.useState(false);
+
+  const isProcessing = m.status === 'processing';
+  const isImage = (m.file_type || '').startsWith('image/');
+  const isVideo = (m.file_type || '').startsWith('video/');
+  const viewableUrl = m.file_url || m.url;
+
+  return (
+    <div className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+      <div
+        className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'} group/preview`}
+      >
+        {isProcessing ? (
+          /* Status: PROCESSING — static icon placeholder (no blinking icon) */
+          <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-zinc-800 border border-zinc-700 text-zinc-300">
+            {isImage ? (
+              <><ImageIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
+            ) : isVideo ? (
+              <><VideoIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Video sedang<br/>diproses...</span></>
+            ) : (
+              <><FileIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Dokumen sedang<br/>diproses...</span></>
+            )}
+          </div>
+        ) : isImage && !imgError ? (
+          /* Task 3: Image preview wrapped in <a> for new-tab viewing (viewable URL, not download) */
+          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+            <img
+              src={viewableUrl}
+              alt={m.file_name || m.filename}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
+              onError={(e) => {
+                /* Task 4: Show fallback icon instead of broken alt-text */
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                setImgError(true);
+              }}
+            />
+          </a>
+        ) : isImage && imgError ? (
+          /* Task 4: "Preview Not Available" fallback */
+          <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-100 text-zinc-400">
+            <ImageOff className="w-10 h-10 mb-2 opacity-60" />
+            <span className="text-[9px] font-bold uppercase tracking-widest">Pratinjau Tidak Tersedia</span>
+          </div>
+        ) : (
+          /* Non-image files: open in new tab */
+          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center">
+            <FileIcon className="w-10 h-10 text-zinc-200" />
+          </a>
+        )}
+
+        {/* Hover overlay — only when ready and no error */}
+        {!isProcessing && !imgError && (
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+            <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
+              <Eye className="w-6 h-6 mb-1" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* File Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          {editingId === m.id ? (
+            <div ref={renameRef} className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1 relative">
+              <input autoFocus type="text" value={editingName} onChange={(e: any) => setEditingName(e.target.value)} onKeyDown={(e: any) => { if (e.key === 'Enter') handleRenameFile(m.id); if (e.key === 'Escape') setEditingId(null); }} className="flex-1 min-w-0 text-xs font-bold px-2 py-1.5 border border-amber-400 rounded-md outline-none focus:ring-2 focus:ring-amber-400/20" />
+              <button onClick={() => handleRenameFile(m.id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded-md"><Check className="w-3.5 h-3.5" /></button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 w-full group/name min-w-0">
+              <p className="text-sm font-bold text-zinc-900 truncate flex-1" title={m.file_name || m.filename}>{m.file_name || m.filename}</p>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest bg-zinc-100 px-1.5 py-0.5 rounded">{(m.file_type || '').split('/').pop() || 'UNKNOWN'}</p>
+          {isProcessing && (
+            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded animate-pulse">PROCESSING</span>
+          )}
+          <span className="text-zinc-300">•</span>
+          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{(m.file_size / (1024 * 1024)).toFixed(2)} MB</p>
+          <span className="text-zinc-300">•</span>
+          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (m.date ? new Date(m.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'HARI INI')}</p>
+        </div>
+      </div>
+
+      {/* File Action Menu */}
+      {!editingId && (
+        <div className={`absolute ${viewMode === 'list' ? 'right-4' : 'top-3 right-3'} opacity-0 group-hover:opacity-100 transition-opacity group/menu`}>
+          <button className="p-1.5 bg-white/90 backdrop-blur border border-zinc-200 rounded-md shadow-sm text-zinc-600 hover:text-zinc-900">
+            <MoreVertical className="w-4 h-4" />
+          </button>
+          <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 overflow-hidden">
+            <button onClick={() => { setEditingId(m.id); setEditingName(m.file_name || m.filename || ""); }} className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
+              <Edit2 className="w-3.5 h-3.5" /> Ganti Nama
+            </button>
+            <button onClick={() => { setMovingFileId(m.id); setIsMoveModalOpen(true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
+              <FolderTree className="w-3.5 h-3.5" /> Pindahkan
+            </button>
+            <div className="h-px bg-zinc-100 my-1"></div>
+            <button onClick={() => setConfirmDelete({ isOpen: true, id: m.id, type: 'file' })} className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
+              <Trash2 className="w-3.5 h-3.5" /> Hapus
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Media() {
   const { media, setMedia, addMedia, deleteMedia } = useCMS();
@@ -127,39 +246,73 @@ export function Media() {
     fetchAllFolders();
   }, [currentFolderId, searchInAll]);
 
-  // Task 2: Targeted Polling System (Fixed Flicker)
-  const mediaRef = useRef(media);
-  useEffect(() => {
-    mediaRef.current = media;
-  }, [media]);
+  // Task 2: Per-File Polling System (Fixed Icon Loop)
+  // Uses a Set to track which fileIds are actively being polled,
+  // ensuring each file only has one active poll chain and stops
+  // immediately when status becomes 'ready'.
+  const pollingFileIds = useRef<Set<string>>(new Set());
+  const pollingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const processingItems = mediaRef.current.filter((m: any) => m.status === 'processing');
-      if (processingItems.length === 0) return;
+  const pollFileStatus = useCallback(async (item: any) => {
+    const fileId = item.filename;
+    if (!fileId || !pollingFileIds.current.has(fileId)) return;
 
-      processingItems.forEach(async (item: any) => {
-        try {
-          const token = localStorage.getItem('token');
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/media/status/${item.filename}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (res.data.status === 'ready') {
-            // Functional update prevents full-page blink
-            setMedia((prev: any[]) => prev.map((m) => 
-              m.id === item.id ? { ...m, status: 'ready', file_url: res.data.url || m.file_url } : m
-            ));
-          }
-        } catch (error) {
-          console.error('Error polling status for', item.id, error);
-        }
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/media/status/${fileId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-    }, 10000); // 10 seconds
 
-    // Cleanup Function
-    return () => clearInterval(interval);
+      if (res.data.status === 'ready') {
+        // ✅ STOP: Clear this file from polling immediately
+        pollingFileIds.current.delete(fileId);
+        const timer = pollingTimers.current.get(fileId);
+        if (timer) { clearTimeout(timer); pollingTimers.current.delete(fileId); }
+
+        // Update only this specific item in state (no full reload)
+        setMedia((prev: any[]) => prev.map((m) =>
+          m.id === item.id
+            ? { ...m, status: 'ready', file_url: res.data.url || m.file_url }
+            : m
+        ));
+        console.log(`[POLL] ✅ File ${fileId} is ready. Polling stopped.`);
+        return;
+      }
+
+      // Still processing — schedule next poll in 8 seconds
+      if (pollingFileIds.current.has(fileId)) {
+        const timer = setTimeout(() => pollFileStatus(item), 8000);
+        pollingTimers.current.set(fileId, timer);
+      }
+    } catch (error) {
+      console.error('[POLL] Error checking status for', fileId, error);
+      // On error, retry after 15 seconds (back-off)
+      if (pollingFileIds.current.has(fileId)) {
+        const timer = setTimeout(() => pollFileStatus(item), 15000);
+        pollingTimers.current.set(fileId, timer);
+      }
+    }
   }, [setMedia]);
+
+  // Start polling for any new 'processing' items
+  useEffect(() => {
+    const processingItems = (media || []).filter((m: any) => m.status === 'processing');
+
+    processingItems.forEach((item: any) => {
+      const fileId = item.filename;
+      if (fileId && !pollingFileIds.current.has(fileId)) {
+        pollingFileIds.current.add(fileId);
+        // Start first poll after 3 seconds
+        const timer = setTimeout(() => pollFileStatus(item), 3000);
+        pollingTimers.current.set(fileId, timer);
+      }
+    });
+
+    // Cleanup: clear timers for files no longer in media list
+    return () => {
+      pollingTimers.current.forEach((timer) => clearTimeout(timer));
+    };
+  }, [media, pollFileStatus]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -602,103 +755,22 @@ export function Media() {
           )})}
 
           {/* Render Media Files */}
-          {filteredMedia.map((m: any) => {
-             const isProcessing = m.status === 'processing';
-             const isImage = (m.file_type || '').startsWith('image/');
-             return (
-             <div key={`media-${m.id}`} className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
-                <div 
-                  className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'} group/preview`}
-                  onClick={() => {
-                    if (isProcessing) return; // Task 3: Block opening while processing
-                    window.open(m.file_url || m.url, '_blank');
-                  }}
-                >
-                  {isProcessing ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-zinc-800 border border-zinc-700 text-zinc-300">
-                        {isImage ? (
-                            <><ImageIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
-                        ) : (m.file_type || '').startsWith('video/') ? (
-                            <><VideoIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Video sedang<br/>diproses...</span></>
-                        ) : (
-                            <><FileIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Dokumen sedang<br/>diproses...</span></>
-                        )}
-                      </div>
-                  ) : isImage ? (
-                    <img 
-                      src={m.file_url || m.url} 
-                      alt={m.file_name || m.filename} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110" 
-                      onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null; // Mencegah infinite loop
-                          setMedia((prev: any[]) => prev.map((item) => 
-                              item.id === m.id ? { ...item, status: 'processing' } : item
-                          ));
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <FileIcon className="w-10 h-10 text-zinc-200" />
-                    </div>
-                  )}
-                  {!isProcessing && (
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
-                          <Eye className="w-6 h-6 mb-1" />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
-                        </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    {editingId === m.id ? (
-                      <div ref={renameRef} className="flex items-center gap-1 w-full animate-in fade-in slide-in-from-left-1 relative">
-                        <input autoFocus type="text" value={editingName} onChange={(e) => setEditingName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameFile(m.id); if (e.key === 'Escape') setEditingId(null); }} className="flex-1 min-w-0 text-xs font-bold px-2 py-1.5 border border-amber-400 rounded-md outline-none focus:ring-2 focus:ring-amber-400/20" />
-                        <button onClick={() => handleRenameFile(m.id)} className="p-1.5 text-green-600 hover:bg-green-50 rounded-md"><Check className="w-3.5 h-3.5" /></button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 w-full group/name min-w-0">
-                        <p className="text-sm font-bold text-zinc-900 truncate flex-1" title={m.file_name || m.filename}>{m.file_name || m.filename}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest bg-zinc-100 px-1.5 py-0.5 rounded">{(m.file_type || '').split('/').pop() || 'UNKNOWN'}</p>
-                      {isProcessing && (
-                        <span className="text-[10px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded animate-pulse">PROCESSING</span>
-                      )}
-                      <span className="text-zinc-300">•</span>
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{(m.file_size / (1024 * 1024)).toFixed(2)} MB</p>
-                      <span className="text-zinc-300">•</span>
-                      <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{m.created_at ? new Date(m.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : (m.date ? new Date(m.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : 'HARI INI')}</p>
-                  </div>
-                </div>
-
-                {/* File Action Menu */}
-                {!editingId && (
-                    <div className={`absolute ${viewMode === 'list' ? 'right-4' : 'top-3 right-3'} opacity-0 group-hover:opacity-100 transition-opacity group/menu`}>
-                        <button className="p-1.5 bg-white/90 backdrop-blur border border-zinc-200 rounded-md shadow-sm text-zinc-600 hover:text-zinc-900">
-                            <MoreVertical className="w-4 h-4" />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all z-20 overflow-hidden">
-                            <button onClick={() => { setEditingId(m.id); setEditingName(m.file_name || m.filename || ""); }} className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
-                                <Edit2 className="w-3.5 h-3.5" /> Ganti Nama
-                            </button>
-                            <button onClick={() => { setMovingFileId(m.id); setIsMoveModalOpen(true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
-                                <FolderTree className="w-3.5 h-3.5" /> Pindahkan
-                            </button>
-                            <div className="h-px bg-zinc-100 my-1"></div>
-                            <button onClick={() => setConfirmDelete({ isOpen: true, id: m.id, type: 'file' })} className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                <Trash2 className="w-3.5 h-3.5" /> Hapus
-                            </button>
-                        </div>
-                    </div>
-                )}
-             </div>
-           )})}
+          {filteredMedia.map((m: any) => (
+            <MediaCardItem 
+              key={`media-${m.id}`}
+              m={m}
+              viewMode={viewMode}
+              editingId={editingId}
+              editingName={editingName}
+              renameRef={renameRef}
+              setEditingId={setEditingId}
+              setEditingName={setEditingName}
+              handleRenameFile={handleRenameFile}
+              setMovingFileId={setMovingFileId}
+              setIsMoveModalOpen={setIsMoveModalOpen}
+              setConfirmDelete={setConfirmDelete}
+            />
+          ))}
       </div>
 
       {folders.length === 0 && (!media || filteredMedia.length === 0) && !isLoading && (
