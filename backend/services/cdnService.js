@@ -141,7 +141,31 @@ const cdnService = {
         },
       });
 
-      return response.data;
+      let result = response.data;
+      
+      // Task 1: If ready, fetch full details to get the physical URL
+      if (result.status === 'ready') {
+        try {
+          const detailRes = await axios.get(`${CDN_BASE_URL}/files/${fileId}`, {
+            headers: { 'x-api-key': apiKey },
+          });
+          const detail = detailRes.data;
+          
+          // Capture physical URL (lh3.googleusercontent.com)
+          const physicalUrl = detail.url || detail.webContentLink || detail.directUrl;
+          if (physicalUrl) {
+             result.url = physicalUrl;
+          } else {
+             // Fallback
+             result.url = `${CDN_BASE_URL}/view/${fileId}`;
+          }
+        } catch(detailErr) {
+          console.error('[CDN] Failed to fetch full details for physical URL fallback to bridge view', detailErr.message);
+          result.url = `${CDN_BASE_URL}/view/${fileId}`;
+        }
+      }
+
+      return result;
     } catch (error) {
       console.error('[CDN] Status Check Error:', error.response?.data || error.message);
       return { status: 'unknown' };

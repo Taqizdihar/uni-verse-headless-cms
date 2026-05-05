@@ -1549,26 +1549,31 @@ app.get('/api/media/status/:fileId', async (req, res) => {
     const { fileId } = req.params;
     const tid = getTenantId(req);
     try {
-        const [rows] = await db.execute('SELECT id, status FROM media WHERE filename = ? AND tenant_id = ?', [fileId, tid]);
+        const [rows] = await db.execute('SELECT id, status, file_url FROM media WHERE filename = ? AND tenant_id = ?', [fileId, tid]);
         if (rows.length === 0) return res.status(404).json({ error: 'Media not found' });
 
         const mediaId = rows[0].id;
         
         // If already marked ready in DB, return immediately
         if (rows[0].status === 'ready') {
-            return res.json({ status: 'ready' });
+            return res.json({ status: 'ready', url: rows[0].file_url });
         }
 
         // Otherwise check live status from CDN
         const statusData = await cdnService.getStatus(fileId);
         const newStatus = statusData.status || 'ready';
+        const newUrl = statusData.url;
 
         // Update DB if status changed
         if (newStatus !== rows[0].status) {
-            await db.execute('UPDATE media SET status = ? WHERE id = ? AND tenant_id = ?', [newStatus, mediaId, tid]);
+            if (newStatus === 'ready' && newUrl) {
+                await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', [newStatus, newUrl, mediaId, tid]);
+            } else {
+                await db.execute('UPDATE media SET status = ? WHERE id = ? AND tenant_id = ?', [newStatus, mediaId, tid]);
+            }
         }
 
-        res.json({ status: newStatus, url: statusData.url || null });
+        res.json({ status: newStatus, url: newUrl || null });
     } catch (error) {
         console.error('CDN Status Check Error:', error);
         res.status(500).json({ error: 'Failed to check CDN status' });

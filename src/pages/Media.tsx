@@ -127,21 +127,26 @@ export function Media() {
     fetchAllFolders();
   }, [currentFolderId, searchInAll]);
 
-  // Task 3: Background Polling System
+  // Task 2: Targeted Polling System (Fixed Flicker)
+  const mediaRef = useRef(media);
   useEffect(() => {
-    const processingItems = media.filter((m: any) => m.status === 'processing');
-    if (processingItems.length === 0) return;
+    mediaRef.current = media;
+  }, [media]);
 
+  useEffect(() => {
     const interval = setInterval(() => {
+      const processingItems = mediaRef.current.filter((m: any) => m.status === 'processing');
+      if (processingItems.length === 0) return;
+
       processingItems.forEach(async (item: any) => {
         try {
           const token = localStorage.getItem('token');
-          // filename stores the Kroombox fileId
           const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/media/status/${item.filename}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           
           if (res.data.status === 'ready') {
+            // Functional update prevents full-page blink
             setMedia((prev: any[]) => prev.map((m) => 
               m.id === item.id ? { ...m, status: 'ready', file_url: res.data.url || m.file_url } : m
             ));
@@ -152,8 +157,9 @@ export function Media() {
       });
     }, 10000); // 10 seconds
 
+    // Cleanup Function
     return () => clearInterval(interval);
-  }, [media, setMedia]);
+  }, [setMedia]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
