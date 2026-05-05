@@ -1438,13 +1438,14 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const tid = getTenantId(req);
         const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
         
-        // Task 1: Re-engineer the Upload Controller - construct dynamic project name
+        // Task 2: Dynamic ProjectName Pathing (Folder Creation)
         let cdnPath;
         try {
             cdnPath = await buildCdnPath(tid, folder_id);
         } catch (pathErr) {
             console.error('[MEDIA] Path construction failed:', pathErr);
-            cdnPath = `${process.env.CDN_PROJECT_ID || 'kd59zf94'}_tenant_${tid}`;
+            const pid = process.env.CDN_PROJECT_ID || 'kd59zf94';
+            cdnPath = `${pid}/tenant_${tid}`;
         }
 
         // Wait for CDN response BEFORE attempting to save to MySQL
@@ -1456,9 +1457,19 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
             return res.status(500).json({ error: 'Failed to upload to Kroombox CDN: ' + cdnErr.message });
         }
 
-        // Task 2: MySQL Mapping & Data Integrity
+        // Task 1 & 4: Capturing fileId and Metadata from CDN Response
         const fileId = cdnResponse.fileId;
+        
+        // Task 1: Validation
+        if (!fileId) {
+            console.error('[CDN ERROR] Kroombox returned no fileId! Full response:', cdnResponse);
+            throw new Error("Failed to capture fileId from CDN");
+        }
+
+        // Task 3: URL Construction Fix
         const file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        
+        // Task 4: Syncing MySQL with CDN Response / File Metadata
         const file_type = cdnResponse.mimeType || req.file.mimetype;
         const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
