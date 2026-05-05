@@ -1,6 +1,7 @@
 require('dotenv').config();
 const db = require('./server/lib/db');
 const cdnService = require('./services/cdnService');
+const { buildCdnPath } = require('./utils/pathHelper');
 const axios = require('axios');
 
 // Optional: only needed if you want to clean up Cloudinary after migration
@@ -45,12 +46,15 @@ async function migrateCloudinaryToKroombox() {
                 const response = await axios.get(media.file_url, { responseType: 'arraybuffer' });
                 const buffer = Buffer.from(response.data, 'binary');
                 
-                // 2. Upload to Kroombox CDN (uses tenant_ prefix internally)
+                // 2. Build CDN path (respects folder hierarchy)
+                const cdnPath = await buildCdnPath(media.tenant_id, media.folder_id || null);
+                
+                // 3. Upload to Kroombox CDN
                 const cdnResponse = await cdnService.upload(
                     buffer,
                     media.file_name || media.filename,
                     media.file_type || 'image/jpeg',
-                    media.tenant_id
+                    cdnPath
                 );
                 
                 // 3. Update Database with new CDN data + metadata

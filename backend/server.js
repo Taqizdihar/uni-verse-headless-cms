@@ -47,6 +47,7 @@ app.use((req, res, next) => {
 
 // Kroombox CDN Service & Multer Memory Storage Configuration
 const cdnService = require('./services/cdnService');
+const { buildCdnPath } = require('./utils/pathHelper');
 const upload = multer({ storage: multer.memoryStorage() });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -1437,39 +1438,50 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const tid = getTenantId(req);
         const folder_id = req.body.folder_id ? parseInt(req.body.folder_id) : null;
         
-        // Task 1: Dynamic Folder Isolation — cdnService now enforces tenant_ prefix internally
+        // Task 1: Build hierarchical CDN path from tenant root + folder chain
+        let cdnPath;
+        try {
+            cdnPath = await buildCdnPath(tid, folder_id);
+        } catch (pathErr) {
+            console.error('[MEDIA] Path build failed:', pathErr);
+            cdnPath = `tenant_${tid}`; // Fallback to tenant root
+        }
+
+        // Upload to CDN with the hierarchical project path
         let cdnResponse;
         try {
-            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, tid);
+            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, cdnPath);
         } catch (cdnErr) {
             return res.status(500).json({ error: 'Failed to upload to Kroombox CDN: ' + cdnErr.message });
         }
 
-        // Task 4: Detailed Metadata — prefer CDN response metadata, fallback to multer
+        // Detailed Metadata — prefer CDN response metadata, fallback to multer
         const cdnFileId = cdnResponse.fileId;
         const file_url = cdnResponse.url;
         const file_type = cdnResponse.mimeType || req.file.mimetype;
         const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
         const file_name = cdnResponse.originalName || req.file.originalname;
-        const cdn_status = cdnResponse.status || 'ready'; // 'ready' | 'processing'
+        const cdn_status = cdnResponse.status || 'ready';
 
+        // CRITICAL: folder_id MUST be saved so the CMS UI can filter by folder
         const [result] = await db.execute(
             'INSERT INTO media (tenant_id, filename, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [tid, cdnFileId, file_url, file_type, uploaded_by, file_name, file_size, folder_id, cdn_status]
         );
 
-        console.log(`[MEDIA] Uploaded "${file_name}" → CDN ID: ${cdnFileId} | Status: ${cdn_status} | Type: ${file_type}`);
+        console.log(`[MEDIA] ✅ Saved "${file_name}" → DB ID: ${result.insertId} | CDN ID: ${cdnFileId} | folder_id: ${folder_id} | path: ${cdnPath}`);
 
         res.status(201).json({ 
             message: 'Media synchronized with storage', 
             id: result.insertId,
             url: file_url,
-            cdn_status
+            cdn_status,
+            folder_id
         });
     } catch (error) {
-        console.error('Upload Error:', error);
-        res.status(500).json({ error: 'Storage synchronization failure' });
+        console.error('[MEDIA] ❌ Upload Error:', error);
+        res.status(500).json({ error: 'Storage synchronization failure: ' + error.message });
     }
 });
 
@@ -1601,6 +1613,10 @@ app.post('/api/folders', async (req, res) => {
             'INSERT INTO media_folders (tenant_id, name, parent_id) VALUES (?, ?, ?)',
             [tid, name, parent_id || null]
         );
+        
+        // Task 3: Log the folder hierarchy for debugging
+        // Kroombox creates sub-folders automatically on first upload, so we only track in MySQL
+        console.log(`[FOLDER] Created "${name}" (id: ${result.insertId}) | parent_id: ${parent_id || 'ROOT'} | tenant: ${tid}`);
         
         res.status(201).json({ id: result.insertId, name, parent_id });
     } catch (error) {
@@ -1902,10 +1918,12 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
         const userId = req.user.userId;
         const tid = getTenantId(req);
         
+        // Avatars go to tenant root (no folder hierarchy needed)
+        const cdnPath = `tenant_${tid}`;
+        
         let cdnResponse;
         try {
-            // Task 1: Use tenant_ prefix for avatar isolation as well
-            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, tid);
+            cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, cdnPath);
         } catch (cdnErr) {
             return res.status(500).json({ error: 'Failed to upload avatar to CDN' });
         }
@@ -1913,6 +1931,7 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
         const avatarUrl = cdnResponse.url;
         
         await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
+        console.log(`[AVATAR] ✅ User ${userId} avatar → ${avatarUrl}`);
         res.json({ url: avatarUrl });
     } catch (error) {
         console.error('[PROFILE ERROR] Upload avatar:', error);

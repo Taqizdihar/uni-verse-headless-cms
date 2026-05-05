@@ -14,16 +14,14 @@ function resolveFileUrl(cdnResponse, mimeType) {
   const isImage = mimeType && mimeType.startsWith('image/');
 
   if (isImage) {
-    // Images: use the optimized view endpoint for embedding/preview
     return physicalUrl || `${CDN_BASE_URL}/view/${fileId}`;
   }
 
-  // Videos & Documents: prefer the physical/direct URL to avoid Google 404/redirect errors
+  // Videos & Documents: prefer the physical/direct URL
   if (physicalUrl) {
     return physicalUrl;
   }
 
-  // Fallback: construct download-style URL if no physical url was returned
   return `${CDN_BASE_URL}/view/${fileId}`;
 }
 
@@ -33,16 +31,13 @@ const cdnService = {
    * @param {Buffer} fileBuffer - Raw file data
    * @param {string} originalName - Original filename
    * @param {string} mimeType - MIME type
-   * @param {string|number} tenantId - Tenant ID (will be prefixed with "tenant_")
+   * @param {string} projectName - Full hierarchical path (e.g. "tenant_9/Aset_Promosi/Jan_2026")
    * @returns {Object} { fileId, url, status, mimeType, size, originalName }
    */
-  upload: async (fileBuffer, originalName, mimeType, tenantId) => {
+  upload: async (fileBuffer, originalName, mimeType, projectName) => {
     try {
       const apiKey = process.env.CDN_API_KEY;
-      if (!apiKey) throw new Error('CDN_API_KEY is not configured');
-
-      // Task 1: Dynamic Folder Isolation — force tenant-prefixed project name
-      const projectName = `tenant_${tenantId}`;
+      if (!apiKey) throw new Error('CDN_API_KEY is not configured in environment variables');
 
       const formData = new FormData();
       formData.append('file', fileBuffer, {
@@ -51,7 +46,14 @@ const cdnService = {
       });
       formData.append('projectName', projectName);
 
-      console.log(`[CDN] Uploading "${originalName}" to project "${projectName}"`);
+      // Include PROJECT_ID if available (registered project identifier)
+      const projectId = process.env.CDN_PROJECT_ID;
+      if (projectId) {
+        formData.append('projectId', projectId);
+      }
+
+      console.log(`[CDN] ▶ Uploading "${originalName}" (${mimeType}, ${fileBuffer.length} bytes)`);
+      console.log(`[CDN]   projectName: "${projectName}"${projectId ? `, projectId: "${projectId}"` : ''}`);
 
       const response = await axios.post(`${CDN_BASE_URL}/upload`, formData, {
         headers: {
@@ -63,22 +65,35 @@ const cdnService = {
       });
 
       const data = response.data;
+
+      // Task 5: Full response logging for debugging
+      console.log(`[CDN] ✅ Kroombox Response:`, JSON.stringify(data, null, 2));
+
       const fileId = data.fileId || data.id;
 
-      // Task 2: Smart URL resolution based on file type
+      if (!fileId) {
+        console.error('[CDN] ❌ CRITICAL: Kroombox returned no fileId! Full response:', data);
+        throw new Error('CDN returned no file identifier');
+      }
+
+      // Smart URL resolution based on file type
       const resolvedUrl = resolveFileUrl(data, mimeType);
 
-      // Task 3 & 4: Normalize the response with detailed metadata
       return {
         fileId,
         url: resolvedUrl,
-        status: data.status || 'ready',        // 'ready' | 'processing'
+        status: data.status || 'ready',
         mimeType: data.mimeType || mimeType,
         size: data.size || data.fileSize || null,
         originalName: data.originalName || data.fileName || originalName,
       };
     } catch (error) {
-      console.error('[CDN] Kroombox Upload Error:', error.response?.data || error.message);
+      // Task 5: Detailed error logging
+      console.error('[CDN] ❌ Upload FAILED for:', originalName);
+      console.error('[CDN]   Status:', error.response?.status || 'N/A');
+      console.error('[CDN]   Response Body:', JSON.stringify(error.response?.data || {}, null, 2));
+      console.error('[CDN]   Message:', error.message);
+
       throw new Error(
         error.response?.data?.message || error.response?.data?.error || 'Failed to upload to CDN'
       );
@@ -94,15 +109,18 @@ const cdnService = {
       const apiKey = process.env.CDN_API_KEY;
       if (!apiKey) throw new Error('CDN_API_KEY is not configured');
 
+      console.log(`[CDN] 🗑 Deleting file: ${fileId}`);
+
       const response = await axios.delete(`${CDN_BASE_URL}/files/${fileId}`, {
         headers: {
           'x-api-key': apiKey,
         },
       });
 
+      console.log(`[CDN] ✅ Deleted:`, JSON.stringify(response.data));
       return response.data;
     } catch (error) {
-      console.error('[CDN] Kroombox Delete Error:', error.response?.data || error.message);
+      console.error('[CDN] ❌ Delete FAILED:', error.response?.data || error.message);
       throw new Error('Failed to delete from CDN');
     }
   },
@@ -125,7 +143,7 @@ const cdnService = {
 
       return response.data;
     } catch (error) {
-      console.error('[CDN] Kroombox Status Check Error:', error.response?.data || error.message);
+      console.error('[CDN] Status Check Error:', error.response?.data || error.message);
       return { status: 'unknown' };
     }
   }
