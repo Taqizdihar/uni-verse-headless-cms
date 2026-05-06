@@ -58,25 +58,29 @@ export function AdminLayout() {
     fetchBroadcast();
   }, []);
 
-  // Task 3: Urgent Alert Interceptor
+  // Task 2: Live Alert Polling
   React.useEffect(() => {
-    const fetchAlerts = async () => {
+    const fetchLatestAlert = async () => {
+      if (urgentAlert) return; // Stop polling if modal is open
+      
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications/latest-alert`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const unreadAlert = res.data.find((n: any) => n.type === 'alert' && n.is_read === 0);
-        if (unreadAlert) {
-          setUrgentAlert(unreadAlert);
+        if (res.data && res.data.id) {
+          setUrgentAlert(res.data);
         }
       } catch (e) {
-        console.error('Failed to fetch notifications');
+        // Silent catch for polling
       }
     };
-    fetchAlerts();
-  }, []);
+
+    fetchLatestAlert();
+    const intervalId = setInterval(fetchLatestAlert, 30000); // 30 seconds heartbeat
+    return () => clearInterval(intervalId);
+  }, [urgentAlert]);
 
   const handleAcknowledgeAlert = async () => {
     if (!urgentAlert) return;

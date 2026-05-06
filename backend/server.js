@@ -561,19 +561,18 @@ app.delete('/api/v1/superadmin/updates/:id', authenticateToken, verifySuperAdmin
 app.post('/api/v1/superadmin/broadcast', authenticateToken, verifySuperAdmin, async (req, res) => {
     try {
         const { message, urgency_level } = req.body;
-        
         const type = urgency_level || 'system_update';
         
-        // Create a notification for EVERY user in the database
         await db.execute(
-            'INSERT INTO notifications (user_id, tenant_id, type, message, is_read) SELECT id, NULL, ?, ?, 0 FROM users',
+            `INSERT INTO notifications (user_id, tenant_id, type, message, is_read, created_at)
+             SELECT id, tenant_id, ?, ?, 0, NOW() FROM users WHERE role != 'super_admin'`,
             [type, message]
         );
         
         res.json({ success: true });
     } catch (error) {
         console.error('[SUPER ADMIN] Broadcast error:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Database connection failed: ' + error.message });
     }
 });
 
@@ -2088,6 +2087,20 @@ app.get('/api/notifications', async (req, res) => {
     }
 });
 
+// GET /api/notifications/latest-alert — Poll for active alerts
+app.get('/api/notifications/latest-alert', async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const [alerts] = await db.execute(
+            "SELECT * FROM notifications WHERE user_id = ? AND type = 'alert' AND is_read = 0 ORDER BY created_at DESC LIMIT 1",
+            [userId]
+        );
+        res.json(alerts.length > 0 ? alerts[0] : null);
+    } catch (error) {
+        console.error('[API ERROR] Get latest alert:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 // PATCH /api/notifications/:id/read — Mark notification as read
 app.patch('/api/notifications/:id/read', async (req, res) => {
     try {

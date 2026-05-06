@@ -33,6 +33,7 @@ export function UpdateHistoryManager() {
   const [broadcastMsg, setBroadcastMsg] = useState('');
   const [broadcastUrgency, setBroadcastUrgency] = useState('system_update');
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -90,7 +91,8 @@ export function UpdateHistoryManager() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('Broadcast berhasil dikirim ke seluruh Tenant!');
+      setToastMessage('Pesan broadcast berhasil dikirim ke semua user!');
+      setTimeout(() => setToastMessage(''), 3000);
       setBroadcastMsg('');
     } catch (err) {
       console.error('Broadcast failed:', err);
@@ -233,8 +235,17 @@ export function UpdateHistoryManager() {
               disabled={isBroadcasting}
               className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-sm transition-all disabled:opacity-50"
             >
-              {isBroadcasting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Megaphone className="w-5 h-5" />}
-              Kirim Broadcast
+              {isBroadcasting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Mengirim...
+                </>
+              ) : (
+                <>
+                  <Megaphone className="w-5 h-5" />
+                  Kirim Broadcast
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -421,6 +432,14 @@ export function UpdateHistoryManager() {
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[9999] bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl font-black text-sm uppercase tracking-wider flex items-center gap-3 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <Info className="w-5 h-5" />
+          {toastMessage}
         </div>
       )}
 
