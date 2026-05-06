@@ -142,7 +142,7 @@ async function processBatch(batch, batchIndex, totalCount) {
       if (mimeType.startsWith('image/')) {
         newFileUrl = `https://drive.google.com/thumbnail?id=${newFileId}&sz=w1200`;
       } else if (mimeType.startsWith('video/')) {
-        newFileUrl = `https://drive.google.com/uc?id=${newFileId}`;
+        newFileUrl = `https://drive.google.com/file/d/${newFileId}/preview`;
       } else if (mimeType === 'application/pdf') {
         newFileUrl = `https://drive.google.com/file/d/${newFileId}/preview`;
       } else {

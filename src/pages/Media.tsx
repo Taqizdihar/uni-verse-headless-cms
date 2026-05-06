@@ -102,13 +102,28 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
             <span className="text-[9px] font-bold uppercase tracking-widest">Pratinjau Tidak Tersedia</span>
           </div>
         ) : isVideo ? (
-          /* Video preview — streamable with play overlay */
-          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
-            <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
-              <VideoIcon className="w-12 h-12 text-zinc-600" />
-            </div>
+          /* Video preview — Google thumbnail as poster, click opens Drive player */
+          <a
+            href={viewableUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full h-full relative bg-zinc-900 group/video"
+          >
+            {/* Attempt thumbnail from Drive ID if available */}
+            {viewableUrl.includes('/file/d/') && (() => {
+              const driveId = viewableUrl.split('/file/d/')[1]?.split('/')[0];
+              return driveId ? (
+                <img
+                  src={`https://drive.google.com/thumbnail?id=${driveId}&sz=w400`}
+                  alt={m.file_name || m.filename}
+                  className="w-full h-full object-cover opacity-70"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              ) : null;
+            })()}
+            {/* Play button overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur shadow-xl flex items-center justify-center group-hover/preview:scale-110 transition-transform">
+              <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur shadow-xl flex items-center justify-center group-hover/video:scale-110 transition-transform duration-200">
                 <Play className="w-5 h-5 text-zinc-900 ml-0.5" fill="currentColor" />
               </div>
             </div>

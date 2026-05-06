@@ -872,9 +872,9 @@ const buildMediaUrl = (fileId, mimeType, rawUrl) => {
             url = rawUrl.replace('&export=download', '');
         }
     } else if (type.startsWith('video/')) {
-        // Videos: Streamable link for <video> tag embedding
+        // Videos: Google Drive native player (embeddable via <iframe>, opens player in browser)
         if (driveId) {
-            url = `https://drive.google.com/uc?id=${driveId}`;
+            url = `https://drive.google.com/file/d/${driveId}/preview`;
         } else if (rawUrl) {
             url = rawUrl.replace('&export=download', '');
         }
@@ -1709,6 +1709,68 @@ app.post('/api/media/bulk-delete', async (req, res) => {
 
     console.log(`[BULK DELETE] Tenant ${tid} | Deleted: ${results.deleted} | Failed: ${results.failed}`);
     res.json(results);
+});
+
+// ★ Fix Video URLs — Super Admin endpoint to migrate existing video records
+// Finds all video records using old /uc?id= or /bridge/view/ patterns
+// and rewrites them to /file/d/.../preview for native browser playback.
+// Idempotent: records already using /preview are skipped.
+app.post('/api/v1/superadmin/fix-video-urls', async (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ error: 'Super Admin only' });
+    }
+
+    try {
+        // Fetch all video records that are NOT already using /preview
+        const [rows] = await db.execute(
+            `SELECT id, filename, file_url, file_type FROM media
+             WHERE file_type LIKE 'video/%'
+             AND (file_url NOT LIKE '%/preview' OR file_url IS NULL)`
+        );
+
+        const results = { updated: 0, skipped: 0, errors: [] };
+
+        for (const row of rows) {
+            try {
+                // Extract Drive ID from existing URL
+                let driveId = null;
+
+                // Pattern: /uc?id=DRIVE_ID or ?id=DRIVE_ID
+                const ucMatch = (row.file_url || '').match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (ucMatch) driveId = ucMatch[1];
+
+                // Pattern: /file/d/DRIVE_ID/... (already correct format, different issue)
+                if (!driveId) {
+                    const fileMatch = (row.file_url || '').match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (fileMatch) driveId = fileMatch[1];
+                }
+
+                // Fallback: use the CDN fileId stored in `filename` column
+                if (!driveId && row.filename && !row.filename.startsWith('http')) {
+                    driveId = row.filename;
+                }
+
+                if (!driveId) {
+                    results.skipped++;
+                    results.errors.push({ id: row.id, reason: 'Could not extract Drive ID' });
+                    continue;
+                }
+
+                const newUrl = `https://drive.google.com/file/d/${driveId}/preview`;
+                await db.execute('UPDATE media SET file_url = ? WHERE id = ?', [newUrl, row.id]);
+                results.updated++;
+                console.log(`[FIX VIDEO] ID ${row.id} → ${newUrl}`);
+            } catch (err) {
+                results.errors.push({ id: row.id, reason: err.message });
+            }
+        }
+
+        console.log(`[FIX VIDEO URLS] Updated: ${results.updated} | Skipped: ${results.skipped}`);
+        res.json({ message: 'Video URL migration complete', ...results });
+    } catch (err) {
+        console.error('[FIX VIDEO URLS] Error:', err);
+        res.status(500).json({ error: 'Migration failed', detail: err.message });
+    }
 });
 
 // Task 3: CDN Status Check Endpoint — allows frontend to poll processing state
