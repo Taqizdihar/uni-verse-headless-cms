@@ -1447,7 +1447,7 @@ app.get('/api/media', async (req, res) => {
                                 const rawUrl = kf.url || kf.webContentLink || kf.directUrl;
                                 let driveId = null;
                                 if (rawUrl) {
-                                    const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                                    const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
                                     if (idMatch) driveId = idMatch[1];
                                 }
                                 if (driveId) {
@@ -1518,7 +1518,7 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         if (isImage) {
             let driveId = null;
             if (rawUrl) {
-                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
                 if (idMatch) driveId = idMatch[1];
             }
             if (driveId) {
@@ -1629,7 +1629,7 @@ app.get('/api/media/status/:fileId', async (req, res) => {
         if (isImage) {
             let driveId = null;
             if (rawUrl) {
-                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
                 if (idMatch) driveId = idMatch[1];
             }
             if (driveId) {
