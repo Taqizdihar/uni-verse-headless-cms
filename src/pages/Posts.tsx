@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter, DownloadCloud } from 'lucide-react';
-import axios from 'axios';
+import api from '../lib/api';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
@@ -35,10 +35,7 @@ export function Posts() {
   React.useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/api/settings');
         setSettings(response.data);
       } catch (err) {
         console.error('Failed to fetch settings:', err);
@@ -316,11 +313,8 @@ export function Posts() {
     if (duplicatingIds.has(postId)) return;
     setDuplicatingIds(prev => new Set(prev).add(postId));
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/posts/${postId}/duplicate`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await api.post(
+        `/api/posts/${postId}/duplicate`, {}
       );
       if (res.status === 201) {
         await fetchAllData();

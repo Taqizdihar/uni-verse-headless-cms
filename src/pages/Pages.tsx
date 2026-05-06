@@ -10,7 +10,7 @@ import { NotificationModal } from '../components/ui/NotificationModal';
 import RichTextEditor from '../components/RichTextEditor';
 import { BlockBuilder, Block } from '../components/BlockBuilder';
 import { MediaPicker } from '../components/MediaPicker';
-import axios from 'axios';
+import api from '../lib/api';
 
 export function Pages() {
   const { searchQuery } = useSearch();
@@ -63,10 +63,7 @@ export function Pages() {
   useEffect(() => {
     const fetchRealData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/api/pages');
         setPages(response.data);
       } catch (err) {
         console.error('Failed to fetch pages:', err);
@@ -77,10 +74,7 @@ export function Pages() {
 
     const fetchSettings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/api/settings');
         setSettings(response.data);
       } catch (err) {
         console.error('Failed to fetch settings:', err);
@@ -133,17 +127,12 @@ export function Pages() {
     if (duplicatingIds.has(pageId)) return;
     setDuplicatingIds(prev => new Set(prev).add(pageId));
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/pages/${pageId}/duplicate`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await api.post(
+        `/api/pages/${pageId}/duplicate`, {}
       );
       if (res.status === 201) {
         // Refresh the pages list
-        const listRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const listRes = await api.get('/api/pages');
         setPages(listRes.data);
         setNotification({
           isOpen: true,
@@ -173,16 +162,12 @@ export function Pages() {
     if (reorderingIds.has(pageId)) return;
     setReorderingIds(prev => new Set(prev).add(pageId));
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/pages/${pageId}/reorder`,
-        { direction },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.patch(
+        `/api/pages/${pageId}/reorder`,
+        { direction }
       );
       // Refresh list
-      const listRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const listRes = await api.get('/api/pages');
       setPages(listRes.data);
     } catch (err) {
       console.error('Reorder failed:', err);
@@ -213,10 +198,7 @@ export function Pages() {
     setIsModalOpen(false);
     
     // Refresh pages
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await api.get('/api/pages');
     setPages(response.data);
   };
 
@@ -480,10 +462,7 @@ export function Pages() {
             if (confirmDelete.id) {
                 await deletePage(confirmDelete.id);
                 // Refresh list
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/pages`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await api.get('/api/pages');
                 setPages(response.data);
             }
             setConfirmDelete({ isOpen: false, id: null });

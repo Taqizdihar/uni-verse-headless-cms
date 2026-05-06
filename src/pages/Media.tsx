@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
-import axios from 'axios';
+import api from '../lib/api';
 
 /**
  * MediaCardItem — Extracted component for each media file card.
@@ -218,8 +218,7 @@ export function Media() {
   
   const fetchAllFolders = async () => {
     try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/folders`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await api.get('/api/folders');
         setAllFolders(res.data);
     } catch (err) {
         console.error('Failed to fetch all folders:', err);
@@ -229,12 +228,11 @@ export function Media() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
       const folderQuery = searchInAll ? '' : `?folder_id=${currentFolderId || ''}`;
       
       const [mediaRes, folderRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/api/media${folderQuery}`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/folders${folderQuery}`, { headers: { Authorization: `Bearer ${token}` } })
+          api.get(`/api/media${folderQuery}`),
+          api.get(`/api/folders${folderQuery}`)
       ]);
 
       setMedia(mediaRes.data);
@@ -261,12 +259,9 @@ export function Media() {
       // Poll every 8 seconds
       intervalId = setInterval(async () => {
         try {
-          const token = localStorage.getItem('token');
           const folderQuery = searchInAll ? '' : `?folder_id=${currentFolderId || ''}`;
           
-          const mediaRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/media${folderQuery}`, { 
-              headers: { Authorization: `Bearer ${token}` } 
-          });
+          const mediaRes = await api.get(`/api/media${folderQuery}`);
           
           // Update media with the newly synced data and add cache buster when transitioning to ready
           setMedia((prev: any[]) => {
@@ -353,11 +348,7 @@ export function Media() {
     if (!editingName.trim()) return;
     setIsRenaming(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${import.meta.env.VITE_API_URL}/api/media/${id}`, 
-        { file_name: editingName },
-        { headers: { Authorization: `Bearer ${token}` }}
-      );
+      await api.patch(`/api/media/${id}`, { file_name: editingName });
       setMedia(media.map((m: any) => m.id === id ? { ...m, file_name: editingName } : m));
       setEditingId(null);
       setEditingName("");
@@ -373,11 +364,7 @@ export function Media() {
     if (!editingFolderName.trim()) return;
     setIsRenamingFolder(true);
     try {
-        const token = localStorage.getItem('token');
-        await axios.patch(`${import.meta.env.VITE_API_URL}/api/folders/${id}`, 
-            { name: editingFolderName },
-            { headers: { Authorization: `Bearer ${token}` }}
-        );
+        await api.patch(`/api/folders/${id}`, { name: editingFolderName });
         setFolders(folders.map((f: any) => f.id === id ? { ...f, name: editingFolderName } : f));
         setEditingFolderId(null);
         setEditingFolderName("");
@@ -391,10 +378,7 @@ export function Media() {
 
   const handleDeleteFolder = async (id: number) => {
       try {
-          const token = localStorage.getItem('token');
-          await axios.delete(`${import.meta.env.VITE_API_URL}/api/folders/${id}`, {
-              headers: { Authorization: `Bearer ${token}` }
-          });
+          await api.delete(`/api/folders/${id}`);
           setFolders(folders.filter(f => f.id !== id));
           fetchAllFolders();
       } catch (err) {
@@ -406,11 +390,7 @@ export function Media() {
       if (!newFolderName.trim()) return;
       setIsCreatingFolder(true);
       try {
-          const token = localStorage.getItem('token');
-          await axios.post(`${import.meta.env.VITE_API_URL}/api/folders`, 
-            { name: newFolderName, parent_id: currentFolderId },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          await api.post('/api/folders', { name: newFolderName, parent_id: currentFolderId });
           setIsCreateFolderOpen(false);
           setNewFolderName("");
           fetchData();
@@ -425,11 +405,7 @@ export function Media() {
   const handleMoveFile = async (targetFolderId: number | null) => {
       if (!movingFileId) return;
       try {
-          const token = localStorage.getItem('token');
-          await axios.patch(`${import.meta.env.VITE_API_URL}/api/media/${movingFileId}`,
-             { folder_id: targetFolderId },
-             { headers: { Authorization: `Bearer ${token}` } }
-          );
+          await api.patch(`/api/media/${movingFileId}`, { folder_id: targetFolderId });
           setIsMoveModalOpen(false);
           setMovingFileId(null);
           fetchData();
