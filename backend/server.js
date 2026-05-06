@@ -577,6 +577,36 @@ app.post('/api/v1/superadmin/broadcast', authenticateToken, verifySuperAdmin, as
     }
 });
 
+// --- Cloudinary → Kroombox Migration (One-Time, Super Admin Only) ---
+let migrationRunning = false;
+app.get('/api/admin/start-migration', authenticateToken, verifySuperAdmin, async (req, res) => {
+    if (migrationRunning) {
+        return res.status(409).json({ error: 'Migration is already running. Please wait for it to finish.' });
+    }
+
+    migrationRunning = true;
+    console.log('[MIGRATION] ▶ Super Admin triggered Cloudinary → Kroombox migration');
+
+    try {
+        const { migrateCloudinaryToKroombox } = require('./scripts/migrateCloudinary');
+        const result = await migrateCloudinaryToKroombox();
+
+        res.json({
+            success: true,
+            message: 'Migration completed',
+            ...result,
+        });
+    } catch (error) {
+        console.error('[MIGRATION] ❌ Fatal error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Migration failed: ' + error.message,
+        });
+    } finally {
+        migrationRunning = false;
+    }
+});
+
 
 app.post('/api/auth/register', async (req, res) => {
     console.log('[AUTH] Register request received:', req.body);
