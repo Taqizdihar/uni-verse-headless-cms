@@ -31,7 +31,7 @@ export function UpdateHistoryManager() {
   
   // Broadcast State
   const [broadcastMsg, setBroadcastMsg] = useState('');
-  const [broadcastUrgency, setBroadcastUrgency] = useState('info');
+  const [broadcastUrgency, setBroadcastUrgency] = useState('system_update');
   const [isBroadcasting, setIsBroadcasting] = useState(false);
 
   // Form State
@@ -221,9 +221,9 @@ export function UpdateHistoryManager() {
                 onChange={e => setBroadcastUrgency(e.target.value)}
                 className="w-full h-full px-5 py-4 bg-zinc-950 border border-zinc-800 text-white rounded-xl outline-none focus:border-blue-500 transition-all text-sm appearance-none font-bold"
               >
-                <option value="info">Info (Biru)</option>
-                <option value="warning">Warning (Kuning)</option>
-                <option value="danger">Danger (Merah)</option>
+                <option value="system_update">Info Sistem (Biru)</option>
+                <option value="alert">Urgent / Peringatan (Merah)</option>
+                <option value="invitation">Undangan (Kuning)</option>
               </select>
             </div>
           </div>

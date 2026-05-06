@@ -562,20 +562,14 @@ app.post('/api/v1/superadmin/broadcast', authenticateToken, verifySuperAdmin, as
     try {
         const { message, urgency_level } = req.body;
         
-        // Auto-create table if missing to prevent crash
-        await db.execute(`
-            CREATE TABLE IF NOT EXISTS global_settings (
-                setting_key VARCHAR(50) PRIMARY KEY,
-                setting_value TEXT,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `);
+        const type = urgency_level || 'system_update';
         
-        const payload = JSON.stringify({ message, urgency_level, timestamp: new Date().toISOString() });
+        // Create a notification for EVERY user in the database
         await db.execute(
-            'INSERT INTO global_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?',
-            ['broadcast', payload, payload]
+            'INSERT INTO notifications (user_id, tenant_id, type, message, is_read) SELECT id, NULL, ?, ?, 0 FROM users',
+            [type, message]
         );
+        
         res.json({ success: true });
     } catch (error) {
         console.error('[SUPER ADMIN] Broadcast error:', error);

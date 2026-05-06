@@ -19,6 +19,7 @@ export function AdminLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [broadcast, setBroadcast] = useState<BroadcastMsg | null>(null);
   const [isBroadcastVisible, setIsBroadcastVisible] = useState(true);
+  const [urgentAlert, setUrgentAlert] = useState<any>(null);
   const { user } = useCMS();
 
   // Check if super admin is impersonating a tenant
@@ -56,6 +57,39 @@ export function AdminLayout() {
     };
     fetchBroadcast();
   }, []);
+
+  // Task 3: Urgent Alert Interceptor
+  React.useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/notifications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const unreadAlert = res.data.find((n: any) => n.type === 'alert' && n.is_read === 0);
+        if (unreadAlert) {
+          setUrgentAlert(unreadAlert);
+        }
+      } catch (e) {
+        console.error('Failed to fetch notifications');
+      }
+    };
+    fetchAlerts();
+  }, []);
+
+  const handleAcknowledgeAlert = async () => {
+    if (!urgentAlert) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/notifications/${urgentAlert.id}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUrgentAlert(null);
+    } catch (err) {
+      console.error('Failed to acknowledge alert:', err);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-zinc-100 text-zinc-900 font-sans selection:bg-amber-400 selection:text-black uppercase-none overflow-x-hidden">
@@ -138,6 +172,35 @@ export function AdminLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Task 4: Custom Modal UI & Behavior (Urgent Alert) */}
+      {urgentAlert && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+          <div className="relative bg-zinc-900 border border-red-500/50 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-8 text-center space-y-6">
+              <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-wide">Pengumuman Penting</h2>
+                <div className="w-12 h-1 bg-red-500 mx-auto rounded-full mb-6" />
+                <p className="text-zinc-300 text-lg leading-relaxed">
+                  {urgentAlert.message}
+                </p>
+              </div>
+              <div className="pt-4">
+                <button
+                  onClick={handleAcknowledgeAlert}
+                  className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-sm uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-500/20"
+                >
+                  Mengerti
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
