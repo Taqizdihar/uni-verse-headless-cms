@@ -62,12 +62,17 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
             <img
               src={viewableUrl}
               alt={m.file_name || m.filename}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
               onError={(e) => {
-                /* Task 4: Show fallback icon instead of broken alt-text */
                 const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                setImgError(true);
+                if (viewableUrl.includes('uc?id=') && !target.src.includes('thumbnail?id=')) {
+                  const driveId = viewableUrl.split('id=')[1].split('&')[0];
+                  target.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
+                } else {
+                  target.onerror = null;
+                  setImgError(true);
+                }
               }}
             />
           </a>
@@ -263,8 +268,18 @@ export function Media() {
               headers: { Authorization: `Bearer ${token}` } 
           });
           
-          // Update media with the newly synced data
-          setMedia(mediaRes.data);
+          // Update media with the newly synced data and add cache buster when transitioning to ready
+          setMedia((prev: any[]) => {
+              const prevMap = new Map(prev.map(p => [p.id, p.status]));
+              return mediaRes.data.map((m: any) => {
+                  const prevStatus = prevMap.get(m.id);
+                  if (prevStatus === 'processing' && m.status === 'ready') {
+                      const separator = m.file_url && m.file_url.includes('?') ? '&' : '?';
+                      m.file_url = `${m.file_url}${separator}t=${Date.now()}`;
+                  }
+                  return m;
+              });
+          });
           console.log('[POLL] Silent sync completed. Updates applied.');
         } catch (err) {
           console.error('[POLL] Silent poll failed:', err);

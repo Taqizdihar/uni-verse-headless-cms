@@ -1440,7 +1440,23 @@ app.get('/api/media', async (req, res) => {
                     for (let item of processingItems) {
                         const kf = kroomboxFiles.find(f => f.fileId === item.filename || f.id === item.filename);
                         if (kf && kf.status === 'ready') {
-                            const newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${item.filename}`;
+                            const isImage = item.file_type && item.file_type.startsWith('image/');
+                            let newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${item.filename}`;
+                            
+                            if (isImage) {
+                                const rawUrl = kf.url || kf.webContentLink || kf.directUrl;
+                                let driveId = null;
+                                if (rawUrl) {
+                                    const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                                    if (idMatch) driveId = idMatch[1];
+                                }
+                                if (driveId) {
+                                    newUrl = `https://drive.google.com/uc?id=${driveId}`;
+                                } else if (rawUrl) {
+                                    newUrl = rawUrl.replace('&export=download', '');
+                                }
+                            }
+
                             await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', ['ready', newUrl, item.id, tid]);
                             item.status = 'ready';
                             item.file_url = newUrl;
@@ -1493,11 +1509,26 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
             throw new Error("Failed to capture fileId from CDN");
         }
 
-        // Task 2: OVERWRITE the file_url logic. Format: https://api-cdn.kroombox.com/api/bridge/view/${fileId}
-        const file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        const file_type = cdnResponse.mimeType || req.file.mimetype;
+        const rawUrl = cdnResponse.url || cdnResponse.webContentLink || cdnResponse.directUrl;
+        
+        let file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        const isImage = file_type && file_type.startsWith('image/');
+        
+        if (isImage) {
+            let driveId = null;
+            if (rawUrl) {
+                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                if (idMatch) driveId = idMatch[1];
+            }
+            if (driveId) {
+                file_url = `https://drive.google.com/uc?id=${driveId}`;
+            } else if (rawUrl) {
+                file_url = rawUrl.replace('&export=download', '');
+            }
+        }
         
         // Task 4: Syncing MySQL with CDN Response / File Metadata
-        const file_type = cdnResponse.mimeType || req.file.mimetype;
         const file_size = cdnResponse.size || req.file.size || 0;
         const uploaded_by = req.user?.userId || 1;
         const display_name = cdnResponse.originalName || req.file.originalname;
@@ -1591,8 +1622,22 @@ app.get('/api/media/status/:fileId', async (req, res) => {
         const statusData = await cdnService.getStatus(fileId, mimeType);
         const newStatus = statusData.status || 'ready';
         
-        // Task 2: OVERWRITE the file_url logic. Format: https://api-cdn.kroombox.com/api/bridge/view/${fileId}
-        const newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        const rawUrl = statusData.url;
+        let newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+        const isImage = mimeType && mimeType.startsWith('image/');
+        
+        if (isImage) {
+            let driveId = null;
+            if (rawUrl) {
+                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);
+                if (idMatch) driveId = idMatch[1];
+            }
+            if (driveId) {
+                newUrl = `https://drive.google.com/uc?id=${driveId}`;
+            } else if (rawUrl) {
+                newUrl = rawUrl.replace('&export=download', '');
+            }
+        }
 
         // Update DB if status changed
         if (newStatus !== rows[0].status) {
