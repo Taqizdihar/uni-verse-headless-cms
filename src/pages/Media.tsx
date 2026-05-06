@@ -21,7 +21,10 @@ import {
   ChevronRight,
   MoreVertical,
   FolderTree,
-  Clock
+  Clock,
+  CheckSquare,
+  Square,
+  AlertTriangle
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -32,7 +35,7 @@ import api from '../lib/api';
  * Owns its own `imgError` state (required by Rules of Hooks — cannot use useState inside .map()).
  * Handles: image preview with <a target="_blank">, onError fallback, processing placeholder.
  */
-function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEditingId, setEditingName, handleRenameFile, setMovingFileId, setIsMoveModalOpen, setConfirmDelete }: any) {
+function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEditingId, setEditingName, handleRenameFile, setMovingFileId, setIsMoveModalOpen, setConfirmDelete, isSelected, onToggleSelect }: any) {
   const [imgError, setImgError] = React.useState(false);
 
   const isProcessing = m.status === 'processing';
@@ -41,7 +44,17 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
   const viewableUrl = m.file_url || m.url;
 
   return (
-    <div className={`bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+    <div className={`bg-white rounded-xl border-2 shadow-sm hover:shadow-md transition-all group overflow-hidden relative ${isSelected ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/30' : 'border-zinc-200'} ${viewMode === 'list' ? 'flex items-center p-3' : 'p-2'}`}>
+      {/* Bulk Selection Checkbox */}
+      <div 
+        className={`absolute top-2 left-2 z-10 transition-all duration-200 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleSelect(m.id); }}
+      >
+        <div className={`w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-all shadow-sm ${isSelected ? 'bg-amber-400 text-white border-amber-500' : 'bg-white/90 backdrop-blur border border-zinc-300 text-transparent hover:border-amber-400 hover:text-amber-400'}`}>
+          <Check className="w-3.5 h-3.5" strokeWidth={3} />
+        </div>
+      </div>
+
       <div
         className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'} group/preview`}
       >
@@ -66,9 +79,14 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
               className="w-full h-full object-cover transition-transform duration-500 group-hover/preview:scale-110"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (viewableUrl.includes('uc?id=') && !target.src.includes('thumbnail?id=')) {
+                if (viewableUrl.includes('thumbnail?id=') && !target.dataset.retried) {
+                  // Retry with a different size as fallback
+                  target.dataset.retried = 'true';
                   const driveId = viewableUrl.split('id=')[1].split('&')[0];
-                  target.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
+                  target.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w800`;
+                } else if (viewableUrl.includes('uc?id=') && !target.src.includes('thumbnail?id=')) {
+                  const driveId = viewableUrl.split('id=')[1].split('&')[0];
+                  target.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
                 } else {
                   target.onerror = null;
                   setImgError(true);
@@ -198,6 +216,11 @@ export function Media() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchInAll, setSearchInAll] = useState(false);
 
+  // Bulk Selection State
+  const [selectedMediaIds, setSelectedMediaIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
+
   const renameRef = useRef<HTMLDivElement>(null);
   const renameFolderRef = useRef<HTMLDivElement>(null);
 
@@ -247,6 +270,7 @@ export function Media() {
   useEffect(() => {
     fetchData();
     fetchAllFolders();
+    setSelectedMediaIds([]); // Clear selection on folder change
   }, [currentFolderId, searchInAll]);
 
   // Task 3: Global Polling System for "Processing" Items
@@ -507,6 +531,16 @@ export function Media() {
             </div>
             
             <div className="flex items-center gap-3">
+                {/* Bulk Delete Button — visible when items are selected */}
+                {selectedMediaIds.length > 0 && (
+                  <button 
+                    onClick={() => setBulkDeleteModal(true)}
+                    className="flex items-center gap-2 bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20 animate-in fade-in slide-in-from-right-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Hapus ({selectedMediaIds.length})
+                  </button>
+                )}
                 <button 
                     onClick={() => setIsCreateFolderOpen(true)}
                     className="flex items-center gap-2 bg-zinc-100 text-zinc-700 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition-all font-sans active:scale-95 border border-zinc-200"
@@ -723,6 +757,12 @@ export function Media() {
               setMovingFileId={setMovingFileId}
               setIsMoveModalOpen={setIsMoveModalOpen}
               setConfirmDelete={setConfirmDelete}
+              isSelected={selectedMediaIds.includes(m.id)}
+              onToggleSelect={(id: number) => {
+                setSelectedMediaIds(prev => 
+                  prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+                );
+              }}
             />
           ))}
       </div>
@@ -805,6 +845,52 @@ export function Media() {
         }}
         onClose={() => setConfirmDelete({ isOpen: false, id: null, type: 'file' })}
       />
+
+      {/* Bulk Delete Confirmation Modal */}
+      {bulkDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 relative animate-in zoom-in-95 fade-in">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-7 h-7 text-red-600" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900 text-center mb-2">Hapus {selectedMediaIds.length} aset media?</h3>
+            <p className="text-sm text-zinc-500 text-center leading-relaxed">
+              Tindakan ini <span className="font-bold text-red-600">permanen</span> dan akan menghapus file dari <span className="font-bold">Database</span> serta <span className="font-bold">CDN Kroombox</span>.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                onClick={() => setBulkDeleteModal(false)} 
+                disabled={isBulkDeleting}
+                className="px-5 py-2.5 text-sm font-bold text-zinc-500 hover:bg-zinc-100 rounded-xl transition-colors disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={async () => {
+                  setIsBulkDeleting(true);
+                  try {
+                    await api.post('/api/media/bulk-delete', { ids: selectedMediaIds });
+                    setSelectedMediaIds([]);
+                    setBulkDeleteModal(false);
+                    fetchData();
+                  } catch (err) {
+                    console.error('Bulk delete failed:', err);
+                  } finally {
+                    setIsBulkDeleting(false);
+                  }
+                }}
+                disabled={isBulkDeleting}
+                className="px-5 py-2.5 bg-red-600 text-white hover:bg-red-700 rounded-xl text-sm font-bold flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95 shadow-lg shadow-red-600/20"
+              >
+                {isBulkDeleting ? <Loader2 className="w-4 h-4 animate-spin"/> : <Trash2 className="w-4 h-4" />}
+                {isBulkDeleting ? 'Menghapus...' : `Ya, Hapus ${selectedMediaIds.length} File`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1487,7 +1487,7 @@ app.get('/api/media', async (req, res) => {
                                     if (idMatch) driveId = idMatch[1];
                                 }
                                 if (driveId) {
-                                    newUrl = `https://drive.google.com/uc?id=${driveId}`;
+                                    newUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
                                 } else if (rawUrl) {
                                     newUrl = rawUrl.replace('&export=download', '');
                                 }
@@ -1558,7 +1558,7 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
                 if (idMatch) driveId = idMatch[1];
             }
             if (driveId) {
-                file_url = `https://drive.google.com/uc?id=${driveId}`;
+                file_url = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
             } else if (rawUrl) {
                 file_url = rawUrl.replace('&export=download', '');
             }
@@ -1638,6 +1638,54 @@ app.delete('/api/media/:id', async (req, res) => {
     }
 });
 
+// ★ Bulk Delete — Accepts array of IDs, deletes from both CDN and MySQL
+app.post('/api/media/bulk-delete', async (req, res) => {
+    const { ids } = req.body;
+    const tid = getTenantId(req);
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ error: 'Array of media IDs is required' });
+    }
+
+    const results = { deleted: 0, failed: 0, errors: [] };
+
+    for (const id of ids) {
+        try {
+            // 1. Find the CDN fileId (stored as `filename` in MySQL)
+            const [rows] = await db.execute(
+                'SELECT filename FROM media WHERE id = ? AND tenant_id = ?', [id, tid]
+            );
+            if (rows.length === 0) {
+                results.failed++;
+                results.errors.push({ id, error: 'Not found' });
+                continue;
+            }
+
+            const filename = rows[0].filename;
+
+            // 2. Delete from CDN (Kroombox)
+            if (filename && !filename.startsWith('http')) {
+                try {
+                    await cdnService.delete(filename);
+                } catch (e) {
+                    console.error(`[BULK DELETE] CDN delete failed for ${filename}:`, e.message);
+                }
+            }
+
+            // 3. Delete from MySQL
+            await db.execute('DELETE FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
+            results.deleted++;
+        } catch (err) {
+            results.failed++;
+            results.errors.push({ id, error: err.message });
+            console.error(`[BULK DELETE] Failed for id ${id}:`, err.message);
+        }
+    }
+
+    console.log(`[BULK DELETE] Tenant ${tid} | Deleted: ${results.deleted} | Failed: ${results.failed}`);
+    res.json(results);
+});
+
 // Task 3: CDN Status Check Endpoint — allows frontend to poll processing state
 app.get('/api/media/status/:fileId', async (req, res) => {
     const { fileId } = req.params;
@@ -1669,7 +1717,7 @@ app.get('/api/media/status/:fileId', async (req, res) => {
                 if (idMatch) driveId = idMatch[1];
             }
             if (driveId) {
-                newUrl = `https://drive.google.com/uc?id=${driveId}`;
+                newUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
             } else if (rawUrl) {
                 newUrl = rawUrl.replace('&export=download', '');
             }

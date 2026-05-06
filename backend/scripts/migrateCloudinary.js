@@ -12,7 +12,7 @@
  *    1. Finds all media records whose file_url contains "cloudinary.com"
  *    2. Downloads each file to a local temp folder
  *    3. Uploads it to Kroombox CDN via the bridge API
- *    4. Updates MySQL: file_url → https://drive.google.com/uc?id=[fileId],
+ *    4. Updates MySQL: file_url → https://drive.google.com/thumbnail?id=[fileId]&sz=w1200 (images),
  *       status → "ready", filename → new CDN fileId
  *    5. Deletes the temp file
  *
@@ -136,9 +136,11 @@ async function processBatch(batch, batchIndex, totalCount) {
       console.log(`    ✓ Uploaded → fileId: ${newFileId}`);
 
       // ── Step 4: Update MySQL ──
-      // Use the exact same URL format as the existing upload route:
-      //   https://drive.google.com/uc?id=[fileId]
-      const newFileUrl = `https://drive.google.com/uc?id=${newFileId}`;
+      // Use thumbnail URL for images, bridge/view for non-images
+      const isImage = media.file_type && media.file_type.startsWith('image/');
+      const newFileUrl = isImage 
+        ? `https://drive.google.com/thumbnail?id=${newFileId}&sz=w1200`
+        : `https://api-cdn.kroombox.com/api/bridge/view/${newFileId}`;
 
       await db.execute(
         `UPDATE media 
