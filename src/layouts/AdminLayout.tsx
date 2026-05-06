@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import axios from 'axios';
-import { AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { AlertCircle, Info, AlertTriangle, X, Eye, ArrowLeft } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { SuperAdminLayout } from './SuperAdminLayout';
 
@@ -21,11 +21,27 @@ export function AdminLayout() {
   const [isBroadcastVisible, setIsBroadcastVisible] = useState(true);
   const { user } = useCMS();
 
+  // Check if super admin is impersonating a tenant
+  const impersonatingStr = localStorage.getItem('impersonating_tenant');
+  const isImpersonating = !!impersonatingStr && user?.role === 'super_admin';
+  let impersonationData: any = null;
+  if (isImpersonating && impersonatingStr) {
+    try { impersonationData = JSON.parse(impersonatingStr); } catch (e) {}
+  }
+
   // Task 3: Super Admin Persistence Fix
-  // Prioritize the role over the tenant_id during layout determination process
-  if (user && user.role === 'super_admin') {
+  // Only force SuperAdminLayout if NOT impersonating
+  if (user && user.role === 'super_admin' && !isImpersonating) {
     return <SuperAdminLayout />;
   }
+
+  // Handle "Back to Super Admin" — clear impersonation state
+  const handleExitImpersonation = () => {
+    localStorage.removeItem('impersonating_tenant');
+    localStorage.removeItem('active_tenant_id');
+    localStorage.removeItem('active_role');
+    window.location.replace('/super-admin/tenants');
+  };
 
   React.useEffect(() => {
     const fetchBroadcast = async () => {
@@ -58,6 +74,42 @@ export function AdminLayout() {
 
       {/* Main Content Area - Taking remaining space and offset by sidebar width */}
       <div className={`flex-1 flex flex-col relative z-0 min-w-0 transition-all duration-300 ${isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'}`}>
+        {/* Impersonation Bar (Task 3) */}
+        {isImpersonating && impersonationData && (
+          <div 
+            className="w-full px-4 py-2.5 flex items-center justify-between text-white z-50"
+            style={{
+              background: 'linear-gradient(135deg, #0e7490 0%, #155e75 50%, #164e63 100%)',
+              boxShadow: '0 2px 12px rgba(14, 116, 144, 0.3)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 bg-white/15 rounded-lg backdrop-blur-sm">
+                <Eye className="w-4 h-4 text-cyan-200" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200/80">Mode Impersonate:</span>
+                <span className="text-sm font-bold text-white">
+                  Mengelola {impersonationData.site_name || impersonationData.subdomain}
+                </span>
+                {impersonationData.admin_name && (
+                  <span className="text-xs text-cyan-200/60 hidden sm:inline">
+                    (Admin: {impersonationData.admin_name})
+                  </span>
+                )}
+              </div>
+            </div>
+            <button 
+              onClick={handleExitImpersonation}
+              className="flex items-center gap-2 px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all text-xs font-bold backdrop-blur-sm hover:scale-105 active:scale-95"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Kembali ke Super Admin</span>
+              <span className="sm:hidden">Keluar</span>
+            </button>
+          </div>
+        )}
+
         {broadcast && isBroadcastVisible && (
           <div className={`w-full px-4 py-3 flex items-center justify-between text-white shadow-sm z-50 ${
             broadcast.urgency_level === 'danger' ? 'bg-red-600' :

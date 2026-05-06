@@ -70,26 +70,34 @@ export function TenantManagement() {
     }
   };
 
-  const handleImpersonate = async (adminId: number) => {
-    if (!window.confirm('Anda akan mengambil alih sesi user ini. Lanjutkan?')) return;
+  const handleImpersonate = async (tenantId: number, subdomain: string) => {
+    if (!window.confirm(`Masuk ke dashboard "${subdomain}" dalam mode Shadow? Token Anda tetap aman.`)) return;
     
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/impersonate/${adminId}`, {}, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/impersonate/${tenantId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      const { token: impersonateToken, user } = res.data;
+      const { tenant_id, site_name, subdomain: tenantSubdomain, admin_name } = res.data;
       
-      // Override local storage with impersonated user
-      localStorage.setItem('token', impersonateToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Shadow Mode: Keep own JWT, just switch tenant context
+      localStorage.setItem('active_tenant_id', String(tenant_id));
+      localStorage.setItem('active_role', 'admin');
       
-      // Redirect to their dashboard
-      window.location.href = '/dashboard';
+      // Store impersonation metadata for the UI bar
+      localStorage.setItem('impersonating_tenant', JSON.stringify({
+        tenant_id,
+        subdomain: tenantSubdomain,
+        site_name,
+        admin_name
+      }));
+      
+      // Hard redirect to tenant dashboard
+      window.location.replace('/dashboard');
     } catch (err) {
       console.error('Failed to impersonate:', err);
-      alert('Gagal melakukan impersonate. Admin mungkin tidak valid.');
+      alert('Gagal melakukan impersonate. Tenant mungkin tidak valid.');
     }
   };
 
@@ -193,16 +201,14 @@ export function TenantManagement() {
                     </td>
                     <td className="px-8 py-6">
                        <div className="flex items-center justify-end gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                         {tenant.admin_id && tenant.status === 'active' && (
-                           <button
-                             onClick={() => handleImpersonate(tenant.admin_id)}
-                             className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-cyan-500 text-zinc-300 hover:text-black rounded-xl transition-all text-xs font-bold"
-                             title="Impersonate (Masuk sebagai User)"
-                           >
-                             <UserCheck className="w-4 h-4" />
-                             <span className="hidden lg:inline">Impersonate</span>
-                           </button>
-                         )}
+                          <button
+                              onClick={() => handleImpersonate(tenant.tenant_id, tenant.subdomain)}
+                              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-cyan-500 text-zinc-300 hover:text-black rounded-xl transition-all text-xs font-bold"
+                              title="Impersonate (Masuk sebagai Shadow Owner)"
+                            >
+                              <UserCheck className="w-4 h-4" />
+                              <span className="hidden lg:inline">Impersonate</span>
+                            </button>
                          
                          <button
                            onClick={() => toggleStatus(tenant.tenant_id, tenant.status)}

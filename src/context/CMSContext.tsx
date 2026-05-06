@@ -202,8 +202,11 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       ]);
 
       // Check for 403 Forbidden on any response
+      // Super Admin bypass: don't redirect on 403 during impersonation
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const isSuperAdmin = currentUser.role === 'super_admin';
       const hasForbidden = responses.some(res => res.status === 403);
-      if (hasForbidden) {
+      if (hasForbidden && !isSuperAdmin) {
          console.warn('[CMSContext] 403 Forbidden detected. Clearing invalid tenant state and redirecting...');
          localStorage.removeItem('active_tenant_id');
          localStorage.removeItem('active_role');
@@ -294,7 +297,11 @@ export function CMSProvider({ children }: { children: ReactNode }) {
           // Verify if active_tenant_id exists and is active in the fetched list
           const isValid = workspaces.find((w: any) => w.tenant_id === currentTenantId && w.status === 'active');
           
-          if (!isValid && workspaces.length > 0) {
+          // Super Admin Immunity: skip workspace reset during impersonation
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const isSuperAdmin = currentUser.role === 'super_admin';
+          
+          if (!isValid && workspaces.length > 0 && !isSuperAdmin) {
             // Task 2: Stale Tenant Cleansing
             localStorage.removeItem('active_tenant_id');
             // Fallback to primary admin workspace
@@ -313,26 +320,29 @@ export function CMSProvider({ children }: { children: ReactNode }) {
             }
           }
 
-          // Task 3: Eviction Notification Check
-          try {
-            const activeWorkspaces = workspaces.filter((w: any) => w.status === 'active');
-            const lastKnownStr = localStorage.getItem('last_known_workspaces');
-            if (lastKnownStr) {
-              const lastKnown = JSON.parse(lastKnownStr);
-              if (lastKnown.length > 0) {
-                const evicted = lastKnown.filter((old: any) => 
-                  !activeWorkspaces.some((cur: any) => cur.tenant_id === old.tenant_id)
-                );
-                if (evicted.length > 0) {
-                  // Just show the first one
-                  setEvictionNotification({ tenantName: evicted[0].tenant_name });
-                }
-              }
-            }
-            localStorage.setItem('last_known_workspaces', JSON.stringify(activeWorkspaces));
-          } catch(e) {
-            console.error('Eviction check error:', e);
-          }
+           // Task 3: Eviction Notification Check (skip for super_admin)
+           try {
+             const currentUserObj = JSON.parse(localStorage.getItem('user') || '{}');
+             if (currentUserObj.role !== 'super_admin') {
+               const activeWorkspaces = workspaces.filter((w: any) => w.status === 'active');
+               const lastKnownStr = localStorage.getItem('last_known_workspaces');
+               if (lastKnownStr) {
+                 const lastKnown = JSON.parse(lastKnownStr);
+                 if (lastKnown.length > 0) {
+                   const evicted = lastKnown.filter((old: any) => 
+                     !activeWorkspaces.some((cur: any) => cur.tenant_id === old.tenant_id)
+                   );
+                   if (evicted.length > 0) {
+                     // Just show the first one
+                     setEvictionNotification({ tenantName: evicted[0].tenant_name });
+                   }
+                 }
+               }
+               localStorage.setItem('last_known_workspaces', JSON.stringify(activeWorkspaces));
+             }
+           } catch(e) {
+             console.error('Eviction check error:', e);
+           }
         }
       } catch (err) {
         console.error('Failed to verify workspaces on init:', err);

@@ -8,6 +8,15 @@ export function useTenantGuard() {
   useEffect(() => {
     if (!token || !activeTenantId) return;
 
+    // Super Admin Immunity: never trigger eviction for super_admin role
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role === 'super_admin') return;
+      } catch (e) {}
+    }
+
     const checkTenantAccess = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/workspaces`, {

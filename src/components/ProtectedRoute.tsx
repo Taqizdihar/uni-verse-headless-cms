@@ -10,6 +10,16 @@ export function ProtectedRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { isEvicted, handleEvictionAck } = useTenantGuard();
 
+  // Super Admin immunity: never show eviction modal
+  const userStr = localStorage.getItem('user');
+  let isSuperAdmin = false;
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      isSuperAdmin = user.role === 'super_admin';
+    } catch (e) {}
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
@@ -34,8 +44,8 @@ export function ProtectedRoute() {
   return (
     <>
       <Outlet />
-      {/* Eviction Modal */}
-      {isEvicted && (
+      {/* Eviction Modal — hidden for super_admin */}
+      {isEvicted && !isSuperAdmin && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-zinc-900/80 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="px-6 py-5 bg-red-600 flex items-center justify-center">

@@ -406,39 +406,45 @@ app.patch('/api/v1/superadmin/tenants/:id/status', authenticateToken, verifySupe
     }
 });
 
-app.post('/api/v1/superadmin/impersonate/:adminId', authenticateToken, verifySuperAdmin, async (req, res) => {
+// =============================================================
+// Impersonate V2 — Shadow Mode (Super Admin keeps own identity)
+// =============================================================
+// Instead of generating a new JWT as the target user (which strips
+// the super_admin role and triggers eviction guards), this endpoint
+// returns the tenant context so the frontend can set active_tenant_id
+// while keeping the super admin's own JWT intact.
+// =============================================================
+app.post('/api/v1/superadmin/impersonate/:tenantId', authenticateToken, verifySuperAdmin, async (req, res) => {
     try {
-        const adminId = req.params.adminId;
-        const [users] = await db.execute('SELECT id, name, email, profile_picture_url FROM users WHERE id = ?', [adminId]);
-        
-        if (users.length === 0) return res.status(404).json({ error: 'Admin not found' });
-        const user = users[0];
+        const tenantId = parseInt(req.params.tenantId, 10);
+        if (isNaN(tenantId)) return res.status(400).json({ error: 'Invalid tenant ID' });
 
-        const [tenantUsers] = await db.execute('SELECT tenant_id, role FROM tenant_users WHERE user_id = ?', [user.id]);
-        const tenant_id = tenantUsers.length > 0 ? tenantUsers[0].tenant_id : null;
-        const role = tenantUsers.length > 0 ? tenantUsers[0].role : null;
+        // Verify the tenant exists
+        const [tenants] = await db.execute('SELECT id, subdomain, name FROM tenants WHERE id = ?', [tenantId]);
+        if (tenants.length === 0) return res.status(404).json({ error: 'Tenant not found' });
+        const tenant = tenants[0];
 
-        let site_name = 'My Site';
-        if (tenant_id) {
-            const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
-            if (settings && settings.length > 0) {
-                site_name = settings[0].site_name;
-            }
+        // Fetch site_name from settings
+        let site_name = tenant.name || 'My Site';
+        const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenantId]);
+        if (settings && settings.length > 0) {
+            site_name = settings[0].site_name || site_name;
         }
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id, role }, JWT_SECRET, { expiresIn: '1h' });
+        // Fetch admin info for context
+        const [adminRows] = await db.execute(
+            `SELECT u.name, u.email FROM tenant_users tu JOIN users u ON tu.user_id = u.id WHERE tu.tenant_id = ? AND tu.role = 'admin' LIMIT 1`,
+            [tenantId]
+        );
+
+        console.log(`[SUPER ADMIN] Impersonating tenant ${tenantId} (${tenant.subdomain}) in shadow mode`);
 
         res.json({
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                profile_picture_url: user.profile_picture_url,
-                tenant_id,
-                role,
-                site_name
-            }
+            tenant_id: tenantId,
+            subdomain: tenant.subdomain,
+            site_name,
+            admin_name: adminRows.length > 0 ? adminRows[0].name : null,
+            admin_email: adminRows.length > 0 ? adminRows[0].email : null
         });
     } catch (error) {
         console.error('[SUPER ADMIN] Impersonate error:', error);
@@ -1921,6 +1927,19 @@ app.delete('/api/users/:user_id', async (req, res) => {
 app.get('/api/user/workspaces', async (req, res) => {
     try {
         const userId = req.user.userId;
+        const userRole = req.user.role;
+
+        // Super Admin Shadow Mode: return ALL tenants as accessible workspaces
+        // This prevents the frontend tenant guard from triggering eviction
+        if (userRole === 'super_admin') {
+            const [allTenants] = await db.execute(`
+                SELECT t.id as tenant_id, t.name as tenant_name, t.subdomain, 'admin' as role, 'active' as status
+                FROM tenants t
+                ORDER BY t.name ASC
+            `);
+            return res.json(allTenants);
+        }
+
         const [rows] = await db.execute(`
             SELECT tu.tenant_id, t.name as tenant_name, t.subdomain, tu.role, tu.status
             FROM tenant_users tu
