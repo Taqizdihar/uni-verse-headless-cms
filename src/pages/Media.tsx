@@ -246,73 +246,36 @@ export function Media() {
     fetchAllFolders();
   }, [currentFolderId, searchInAll]);
 
-  // Task 2: Per-File Polling System (Fixed Icon Loop)
-  // Uses a Set to track which fileIds are actively being polled,
-  // ensuring each file only has one active poll chain and stops
-  // immediately when status becomes 'ready'.
-  const pollingFileIds = useRef<Set<string>>(new Set());
-  const pollingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-
-  const pollFileStatus = useCallback(async (item: any) => {
-    const fileId = item.filename;
-    if (!fileId || !pollingFileIds.current.has(fileId)) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/media/status/${fileId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.data.status === 'ready') {
-        // ✅ STOP: Clear this file from polling immediately
-        pollingFileIds.current.delete(fileId);
-        const timer = pollingTimers.current.get(fileId);
-        if (timer) { clearTimeout(timer); pollingTimers.current.delete(fileId); }
-
-        // Update only this specific item in state (no full reload)
-        setMedia((prev: any[]) => prev.map((m) =>
-          m.id === item.id
-            ? { ...m, status: 'ready', file_url: res.data.url || m.file_url }
-            : m
-        ));
-        console.log(`[POLL] ✅ File ${fileId} is ready. Polling stopped.`);
-        return;
-      }
-
-      // Still processing — schedule next poll in 8 seconds
-      if (pollingFileIds.current.has(fileId)) {
-        const timer = setTimeout(() => pollFileStatus(item), 8000);
-        pollingTimers.current.set(fileId, timer);
-      }
-    } catch (error) {
-      console.error('[POLL] Error checking status for', fileId, error);
-      // On error, retry after 15 seconds (back-off)
-      if (pollingFileIds.current.has(fileId)) {
-        const timer = setTimeout(() => pollFileStatus(item), 15000);
-        pollingTimers.current.set(fileId, timer);
-      }
-    }
-  }, [setMedia]);
-
-  // Start polling for any new 'processing' items
+  // Task 3: Global Polling System for "Processing" Items
+  // Triggered when any item is in 'processing' state. Hits /api/media to trigger Task 1's Silent Sync.
   useEffect(() => {
-    const processingItems = (media || []).filter((m: any) => m.status === 'processing');
+    const hasProcessing = (media || []).some((m: any) => m.status === 'processing');
+    let intervalId: ReturnType<typeof setInterval>;
 
-    processingItems.forEach((item: any) => {
-      const fileId = item.filename;
-      if (fileId && !pollingFileIds.current.has(fileId)) {
-        pollingFileIds.current.add(fileId);
-        // Start first poll after 3 seconds
-        const timer = setTimeout(() => pollFileStatus(item), 3000);
-        pollingTimers.current.set(fileId, timer);
-      }
-    });
+    if (hasProcessing) {
+      // Poll every 8 seconds
+      intervalId = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const folderQuery = searchInAll ? '' : `?folder_id=${currentFolderId || ''}`;
+          
+          const mediaRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/media${folderQuery}`, { 
+              headers: { Authorization: `Bearer ${token}` } 
+          });
+          
+          // Update media with the newly synced data
+          setMedia(mediaRes.data);
+          console.log('[POLL] Silent sync completed. Updates applied.');
+        } catch (err) {
+          console.error('[POLL] Silent poll failed:', err);
+        }
+      }, 8000);
+    }
 
-    // Cleanup: clear timers for files no longer in media list
     return () => {
-      pollingTimers.current.forEach((timer) => clearTimeout(timer));
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [media, pollFileStatus]);
+  }, [media, currentFolderId, searchInAll, setMedia]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);

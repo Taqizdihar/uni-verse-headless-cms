@@ -1425,6 +1425,33 @@ app.get('/api/media', async (req, res) => {
             // If folder_id is not provided in query at all, return all for global search
             [rows] = await db.execute('SELECT * FROM media WHERE tenant_id = ?', [tid]);
         }
+
+        // Task 1: Silent Sync
+        const processingItems = rows.filter(r => r.status === 'processing');
+        if (processingItems.length > 0) {
+            try {
+                const apiKey = process.env.CDN_API_KEY;
+                const axios = require('axios');
+                const { data: kroomboxFiles } = await axios.get('https://api-cdn.kroombox.com/api/bridge/files', {
+                    headers: { 'x-api-key': apiKey }
+                });
+
+                if (Array.isArray(kroomboxFiles)) {
+                    for (let item of processingItems) {
+                        const kf = kroomboxFiles.find(f => f.fileId === item.filename || f.id === item.filename);
+                        if (kf && kf.status === 'ready') {
+                            const newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${item.filename}`;
+                            await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', ['ready', newUrl, item.id, tid]);
+                            item.status = 'ready';
+                            item.file_url = newUrl;
+                        }
+                    }
+                }
+            } catch (syncErr) {
+                console.error('[SILENT SYNC ERROR]', syncErr.message);
+            }
+        }
+
         res.json(rows);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -1466,8 +1493,8 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
             throw new Error("Failed to capture fileId from CDN");
         }
 
-        // Task 1: Use the viewable preview URL from cdnService (already transformed)
-        const file_url = cdnResponse.url;
+        // Task 2: OVERWRITE the file_url logic. Format: https://api-cdn.kroombox.com/api/bridge/view/${fileId}
+        const file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
         
         // Task 4: Syncing MySQL with CDN Response / File Metadata
         const file_type = cdnResponse.mimeType || req.file.mimetype;
@@ -1563,11 +1590,13 @@ app.get('/api/media/status/:fileId', async (req, res) => {
         // Otherwise check live status from CDN (pass mimeType for URL transformation)
         const statusData = await cdnService.getStatus(fileId, mimeType);
         const newStatus = statusData.status || 'ready';
-        const newUrl = statusData.url;
+        
+        // Task 2: OVERWRITE the file_url logic. Format: https://api-cdn.kroombox.com/api/bridge/view/${fileId}
+        const newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
 
         // Update DB if status changed
         if (newStatus !== rows[0].status) {
-            if (newStatus === 'ready' && newUrl) {
+            if (newStatus === 'ready') {
                 await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', [newStatus, newUrl, mediaId, tid]);
                 console.log(`[MEDIA] ✅ Status updated to 'ready' for fileId ${fileId} | New URL: ${newUrl}`);
             } else {
@@ -1575,7 +1604,7 @@ app.get('/api/media/status/:fileId', async (req, res) => {
             }
         }
 
-        res.json({ status: newStatus, url: newUrl || null });
+        res.json({ status: newStatus, url: newUrl });
     } catch (error) {
         console.error('CDN Status Check Error:', error);
         res.status(500).json({ error: 'Failed to check CDN status' });
