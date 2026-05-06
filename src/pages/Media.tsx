@@ -24,7 +24,8 @@ import {
   Clock,
   CheckSquare,
   Square,
-  AlertTriangle
+  AlertTriangle,
+  Play
 } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
@@ -41,6 +42,7 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
   const isProcessing = m.status === 'processing';
   const isImage = (m.file_type || '').startsWith('image/');
   const isVideo = (m.file_type || '').startsWith('video/');
+  const isPdf = (m.file_type || '').toLowerCase() === 'application/pdf';
   const viewableUrl = m.file_url || m.url;
 
   return (
@@ -59,7 +61,7 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
         className={`${viewMode === 'grid' ? 'aspect-square mb-3' : 'w-16 h-16 mr-4'} bg-zinc-50 rounded-xl overflow-hidden relative flex-shrink-0 ${isProcessing ? 'cursor-not-allowed' : 'cursor-pointer'} group/preview`}
       >
         {isProcessing ? (
-          /* Status: PROCESSING — static icon placeholder (no blinking icon) */
+          /* Status: PROCESSING — static icon placeholder */
           <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-zinc-800 border border-zinc-700 text-zinc-300">
             {isImage ? (
               <><ImageIcon className="w-10 h-10 mb-3 opacity-60 text-amber-500" /><span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest leading-tight">Gambar sedang<br/>diproses...</span></>
@@ -70,7 +72,7 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
             )}
           </div>
         ) : isImage && !imgError ? (
-          /* Task 3: Image preview wrapped in <a> for new-tab viewing (viewable URL, not download) */
+          /* Image preview — thumbnail URL */
           <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
             <img
               src={viewableUrl}
@@ -80,7 +82,6 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 if (viewableUrl.includes('thumbnail?id=') && !target.dataset.retried) {
-                  // Retry with a different size as fallback
                   target.dataset.retried = 'true';
                   const driveId = viewableUrl.split('id=')[1].split('&')[0];
                   target.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w800`;
@@ -95,24 +96,45 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
             />
           </a>
         ) : isImage && imgError ? (
-          /* Task 4: "Preview Not Available" fallback */
+          /* Image error fallback */
           <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-100 text-zinc-400">
             <ImageOff className="w-10 h-10 mb-2 opacity-60" />
             <span className="text-[9px] font-bold uppercase tracking-widest">Pratinjau Tidak Tersedia</span>
           </div>
+        ) : isVideo ? (
+          /* Video preview — streamable with play overlay */
+          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
+            <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
+              <VideoIcon className="w-12 h-12 text-zinc-600" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur shadow-xl flex items-center justify-center group-hover/preview:scale-110 transition-transform">
+                <Play className="w-5 h-5 text-zinc-900 ml-0.5" fill="currentColor" />
+              </div>
+            </div>
+            <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/70 rounded text-[9px] font-bold text-white uppercase tracking-wider">
+              Video
+            </div>
+          </a>
+        ) : isPdf ? (
+          /* PDF preview — opens Google Drive PDF viewer */
+          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full flex flex-col items-center justify-center bg-red-50 hover:bg-red-100 transition-colors">
+            <FileTextIcon className="w-12 h-12 text-red-400 mb-2" />
+            <span className="text-[9px] font-bold uppercase tracking-widest text-red-500">PDF</span>
+          </a>
         ) : (
-          /* Non-image files: open in new tab */
-          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center">
-            <FileIcon className="w-10 h-10 text-zinc-200" />
+          /* Other files: open in new tab */
+          <a href={viewableUrl} target="_blank" rel="noopener noreferrer" className="w-full h-full flex items-center justify-center bg-zinc-50">
+            <FileIcon className="w-10 h-10 text-zinc-300" />
           </a>
         )}
 
-        {/* Hover overlay — only when ready and no error */}
-        {!isProcessing && !imgError && (
+        {/* Hover overlay — only when ready and no error, skip for videos (they have play button) */}
+        {!isProcessing && !imgError && !isVideo && (
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
             <div className="flex flex-col items-center text-white transform translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
               <Eye className="w-6 h-6 mb-1" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Lihat</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">{isPdf ? 'Buka PDF' : 'Lihat'}</span>
             </div>
           </div>
         )}

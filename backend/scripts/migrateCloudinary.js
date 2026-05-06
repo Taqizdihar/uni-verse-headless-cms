@@ -136,11 +136,18 @@ async function processBatch(batch, batchIndex, totalCount) {
       console.log(`    ✓ Uploaded → fileId: ${newFileId}`);
 
       // ── Step 4: Update MySQL ──
-      // Use thumbnail URL for images, bridge/view for non-images
-      const isImage = media.file_type && media.file_type.startsWith('image/');
-      const newFileUrl = isImage 
-        ? `https://drive.google.com/thumbnail?id=${newFileId}&sz=w1200`
-        : `https://api-cdn.kroombox.com/api/bridge/view/${newFileId}`;
+      // Use the same URL-mapping logic as buildMediaUrl in server.js
+      const mimeType = (media.file_type || '').toLowerCase();
+      let newFileUrl;
+      if (mimeType.startsWith('image/')) {
+        newFileUrl = `https://drive.google.com/thumbnail?id=${newFileId}&sz=w1200`;
+      } else if (mimeType.startsWith('video/')) {
+        newFileUrl = `https://drive.google.com/uc?id=${newFileId}`;
+      } else if (mimeType === 'application/pdf') {
+        newFileUrl = `https://drive.google.com/file/d/${newFileId}/preview`;
+      } else {
+        newFileUrl = `https://api-cdn.kroombox.com/api/bridge/view/${newFileId}`;
+      }
 
       await db.execute(
         `UPDATE media 

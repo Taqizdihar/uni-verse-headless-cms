@@ -838,6 +838,59 @@ const getTenantId = (req) => {
     return req.user.tenant_id;
 };
 
+/**
+ * buildMediaUrl — Centralized URL builder for all media types.
+ * Maps MIME type to the correct Google Drive endpoint:
+ *   - image/*          → /thumbnail?id=&sz=w1200  (high-quality, viewable)
+ *   - video/*          → /uc?id=                   (streamable in <video>)
+ *   - application/pdf  → /file/d/.../preview        (browser PDF viewer)
+ *   - everything else  → bridge/view (download)     (fallback)
+ *
+ * @param {string} fileId   - The Kroombox CDN fileId (also stored as `filename` in MySQL)
+ * @param {string} mimeType - The file's MIME type (e.g. 'image/jpeg', 'video/mp4')
+ * @param {string|null} rawUrl - The raw URL returned by the CDN (used to extract driveId)
+ * @returns {string} The finalized file_url
+ */
+const buildMediaUrl = (fileId, mimeType, rawUrl) => {
+    // Default fallback — direct CDN view link
+    let url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
+
+    // Extract Google Drive ID from CDN response URL
+    let driveId = null;
+    if (rawUrl) {
+        const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (idMatch) driveId = idMatch[1];
+    }
+
+    const type = (mimeType || '').toLowerCase();
+
+    if (type.startsWith('image/')) {
+        // Images: High-quality thumbnail for web display
+        if (driveId) {
+            url = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+        } else if (rawUrl) {
+            url = rawUrl.replace('&export=download', '');
+        }
+    } else if (type.startsWith('video/')) {
+        // Videos: Streamable link for <video> tag embedding
+        if (driveId) {
+            url = `https://drive.google.com/uc?id=${driveId}`;
+        } else if (rawUrl) {
+            url = rawUrl.replace('&export=download', '');
+        }
+    } else if (type === 'application/pdf') {
+        // PDFs: Browser-native PDF viewer (no download trigger)
+        if (driveId) {
+            url = `https://drive.google.com/file/d/${driveId}/preview`;
+        } else if (rawUrl) {
+            url = rawUrl.replace('&export=download', '');
+        }
+    }
+    // All other types (docs, zips, etc.): keep bridge/view fallback
+
+    return url;
+};
+
 // Async tenant access validator middleware (used on sensitive write routes)
 const validateTenantAccess = async (req, res, next) => {
     try {
@@ -1476,22 +1529,8 @@ app.get('/api/media', async (req, res) => {
                     for (let item of processingItems) {
                         const kf = kroomboxFiles.find(f => f.fileId === item.filename || f.id === item.filename);
                         if (kf && kf.status === 'ready') {
-                            const isImage = item.file_type && item.file_type.startsWith('image/');
-                            let newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${item.filename}`;
-                            
-                            if (isImage) {
-                                const rawUrl = kf.url || kf.webContentLink || kf.directUrl;
-                                let driveId = null;
-                                if (rawUrl) {
-                                    const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                                    if (idMatch) driveId = idMatch[1];
-                                }
-                                if (driveId) {
-                                    newUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
-                                } else if (rawUrl) {
-                                    newUrl = rawUrl.replace('&export=download', '');
-                                }
-                            }
+                            const rawUrl = kf.url || kf.webContentLink || kf.directUrl;
+                            const newUrl = buildMediaUrl(item.filename, item.file_type, rawUrl);
 
                             await db.execute('UPDATE media SET status = ?, file_url = ? WHERE id = ? AND tenant_id = ?', ['ready', newUrl, item.id, tid]);
                             item.status = 'ready';
@@ -1548,21 +1587,7 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
         const file_type = cdnResponse.mimeType || req.file.mimetype;
         const rawUrl = cdnResponse.url || cdnResponse.webContentLink || cdnResponse.directUrl;
         
-        let file_url = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
-        const isImage = file_type && file_type.startsWith('image/');
-        
-        if (isImage) {
-            let driveId = null;
-            if (rawUrl) {
-                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (idMatch) driveId = idMatch[1];
-            }
-            if (driveId) {
-                file_url = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
-            } else if (rawUrl) {
-                file_url = rawUrl.replace('&export=download', '');
-            }
-        }
+        const file_url = buildMediaUrl(fileId, file_type, rawUrl);
         
         // Task 4: Syncing MySQL with CDN Response / File Metadata
         const file_size = cdnResponse.size || req.file.size || 0;
@@ -1707,21 +1732,7 @@ app.get('/api/media/status/:fileId', async (req, res) => {
         const newStatus = statusData.status || 'ready';
         
         const rawUrl = statusData.url;
-        let newUrl = `https://api-cdn.kroombox.com/api/bridge/view/${fileId}`;
-        const isImage = mimeType && mimeType.startsWith('image/');
-        
-        if (isImage) {
-            let driveId = null;
-            if (rawUrl) {
-                const idMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (idMatch) driveId = idMatch[1];
-            }
-            if (driveId) {
-                newUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
-            } else if (rawUrl) {
-                newUrl = rawUrl.replace('&export=download', '');
-            }
-        }
+        const newUrl = buildMediaUrl(fileId, mimeType, rawUrl);
 
         // Update DB if status changed
         if (newStatus !== rows[0].status) {
