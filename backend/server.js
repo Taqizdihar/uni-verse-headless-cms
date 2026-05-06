@@ -565,7 +565,10 @@ app.post('/api/v1/superadmin/broadcast', authenticateToken, verifySuperAdmin, as
         
         await db.execute(
             `INSERT INTO notifications (user_id, tenant_id, type, message, is_read, created_at)
-             SELECT id, tenant_id, ?, ?, 0, NOW() FROM users WHERE role != 'super_admin'`,
+             SELECT u.id, tu.tenant_id, ?, ?, 0, NOW() 
+             FROM users u 
+             JOIN tenant_users tu ON u.id = tu.user_id 
+             WHERE tu.role != 'super_admin' AND tu.status = 'active'`,
             [type, message]
         );
         
