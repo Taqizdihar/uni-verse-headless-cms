@@ -8,7 +8,9 @@ import {
   ShieldAlert,
   Loader2,
   Calendar,
-  Globe
+  Globe,
+  X,
+  AlertTriangle
 } from 'lucide-react';
 
 interface Tenant {
@@ -21,15 +23,33 @@ interface Tenant {
   admin_email: string;
 }
 
+interface ModalConfig {
+  isOpen: boolean;
+  type: 'impersonate' | 'suspend' | 'activate' | null;
+  tenant: Tenant | null;
+}
+
 export function TenantManagement() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [modal, setModal] = useState<ModalConfig>({ isOpen: false, type: null, tenant: null });
 
   useEffect(() => {
     fetchTenants();
   }, []);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && modal.isOpen) {
+        setModal({ isOpen: false, type: null, tenant: null });
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [modal.isOpen]);
 
   const fetchTenants = async () => {
     try {
@@ -45,13 +65,32 @@ export function TenantManagement() {
     }
   };
 
-  const toggleStatus = async (tenantId: number, currentStatus: string) => {
+  const openSuspendModal = (tenant: Tenant) => {
+    const type = tenant.status === 'active' ? 'suspend' : 'activate';
+    setModal({ isOpen: true, type, tenant });
+  };
+
+  const openImpersonateModal = (tenant: Tenant) => {
+    setModal({ isOpen: true, type: 'impersonate', tenant });
+  };
+
+  const closeModal = () => {
+    setModal({ isOpen: false, type: null, tenant: null });
+  };
+
+  const handleConfirmAction = async () => {
+    if (!modal.tenant || !modal.type) return;
+
+    if (modal.type === 'impersonate') {
+      await executeImpersonate(modal.tenant.tenant_id, modal.tenant.subdomain);
+    } else {
+      await executeToggleStatus(modal.tenant.tenant_id, modal.tenant.status);
+    }
+    closeModal();
+  };
+
+  const executeToggleStatus = async (tenantId: number, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    const confirmMessage = currentStatus === 'active' 
-        ? 'Apakah Anda yakin ingin menangguhkan (suspend) tenant ini? Semua user di bawah tenant ini tidak akan bisa login.'
-        : 'Apakah Anda yakin ingin mengaktifkan kembali tenant ini?';
-        
-    if (!window.confirm(confirmMessage)) return;
 
     setActionLoading(tenantId);
     try {
@@ -64,15 +103,12 @@ export function TenantManagement() {
       setTenants(prev => prev.map(t => t.tenant_id === tenantId ? { ...t, status: newStatus } : t));
     } catch (err) {
       console.error('Failed to update tenant status:', err);
-      alert('Gagal memperbarui status tenant.');
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleImpersonate = async (tenantId: number, subdomain: string) => {
-    if (!window.confirm(`Masuk ke dashboard "${subdomain}" dalam mode Shadow? Token Anda tetap aman.`)) return;
-    
+  const executeImpersonate = async (tenantId: number, subdomain: string) => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/superadmin/impersonate/${tenantId}`, {}, {
@@ -97,7 +133,6 @@ export function TenantManagement() {
       window.location.replace('/dashboard');
     } catch (err) {
       console.error('Failed to impersonate:', err);
-      alert('Gagal melakukan impersonate. Tenant mungkin tidak valid.');
     }
   };
 
@@ -202,7 +237,7 @@ export function TenantManagement() {
                     <td className="px-8 py-6">
                        <div className="flex items-center justify-end gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                           <button
-                              onClick={() => handleImpersonate(tenant.tenant_id, tenant.subdomain)}
+                              onClick={() => openImpersonateModal(tenant)}
                               className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-cyan-500 text-zinc-300 hover:text-black rounded-xl transition-all text-xs font-bold"
                               title="Impersonate (Masuk sebagai Shadow Owner)"
                             >
@@ -211,7 +246,7 @@ export function TenantManagement() {
                             </button>
                          
                          <button
-                           onClick={() => toggleStatus(tenant.tenant_id, tenant.status)}
+                           onClick={() => openSuspendModal(tenant)}
                            disabled={actionLoading === tenant.tenant_id}
                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-xs font-bold disabled:opacity-50 ${
                              tenant.status === 'active' 
@@ -242,6 +277,103 @@ export function TenantManagement() {
           </table>
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {modal.isOpen && modal.tenant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative bg-[#09090b] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className={`px-8 pt-8 pb-4 flex items-start gap-4`}>
+              <div className={`p-3 rounded-xl flex-shrink-0 ${
+                modal.type === 'impersonate' 
+                  ? 'bg-cyan-500/10' 
+                  : modal.type === 'suspend' 
+                    ? 'bg-red-500/10' 
+                    : 'bg-amber-500/10'
+              }`}>
+                {modal.type === 'impersonate' ? (
+                  <UserCheck className="w-6 h-6 text-cyan-400" />
+                ) : modal.type === 'suspend' ? (
+                  <AlertTriangle className="w-6 h-6 text-red-400" />
+                ) : (
+                  <Power className="w-6 h-6 text-amber-400" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-black text-white mb-1">
+                  {modal.type === 'impersonate' && 'Impersonate Tenant'}
+                  {modal.type === 'suspend' && 'Suspend Tenant'}
+                  {modal.type === 'activate' && 'Aktivasi Tenant'}
+                </h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  {modal.type === 'impersonate' && (
+                    <>Masuk sebagai <span className="font-bold text-cyan-400">{modal.tenant.subdomain}</span>? Anda akan dialihkan ke dashboard mereka.</>
+                  )}
+                  {modal.type === 'suspend' && (
+                    <>Peringatan: Suspend <span className="font-bold text-red-400">{modal.tenant.subdomain}</span>? Akses admin mereka akan segera dibatasi.</>
+                  )}
+                  {modal.type === 'activate' && (
+                    <>Aktifkan kembali <span className="font-bold text-amber-400">{modal.tenant.subdomain}</span>? Akses admin mereka akan dipulihkan.</>
+                  )}
+                </p>
+              </div>
+              <button 
+                onClick={closeModal}
+                className="p-1.5 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors flex-shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Tenant Info Card */}
+            <div className="mx-8 mb-6 p-4 bg-zinc-900/80 rounded-xl border border-zinc-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500/10 rounded-lg">
+                  <Globe className="w-4 h-4 text-amber-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-white text-sm truncate">{modal.tenant.subdomain}</p>
+                  <p className="text-xs text-zinc-500">{modal.tenant.admin_name || 'N/A'} — {modal.tenant.admin_email || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="px-8 py-5 border-t border-zinc-800 flex items-center justify-end gap-3 bg-zinc-900/30">
+              <button 
+                onClick={closeModal}
+                className="px-5 py-2.5 text-zinc-400 hover:text-white font-bold text-sm transition-colors rounded-xl hover:bg-zinc-800"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleConfirmAction}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm transition-all active:scale-95 ${
+                  modal.type === 'impersonate' 
+                    ? 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/20' 
+                    : modal.type === 'suspend' 
+                      ? 'bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/20' 
+                      : 'bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20'
+                }`}
+              >
+                {modal.type === 'impersonate' && (
+                  <><UserCheck className="w-4 h-4" /> Lanjutkan</>
+                )}
+                {modal.type === 'suspend' && (
+                  <><PowerOff className="w-4 h-4" /> Suspend</>
+                )}
+                {modal.type === 'activate' && (
+                  <><Power className="w-4 h-4" /> Aktivasi</>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

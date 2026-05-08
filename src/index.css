@@ -9,6 +9,10 @@
 /* Rich Text Content Styling */
 .rich-text-content {
   line-height: 1.6;
+  max-width: 100%;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 .rich-text-content h1 {
   font-size: 2em;

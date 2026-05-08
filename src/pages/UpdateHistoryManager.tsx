@@ -274,9 +274,9 @@ export function UpdateHistoryManager() {
           </div>
         ) : (
           updates.map((update) => (
-            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-amber-500/30 transition-all">
-              <div className="flex-1 space-y-4 w-full">
-                 <div className="flex items-center gap-3">
+            <div key={update.id} className="bg-zinc-900/50 backdrop-blur-md rounded-xl border border-slate-800 p-6 sm:p-8 flex flex-col md:flex-row gap-6 justify-between items-start group hover:border-amber-500/30 transition-all overflow-hidden">
+              <div className="flex-1 min-w-0 space-y-4 w-full">
+                 <div className="flex flex-wrap items-center gap-3">
                     <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-black uppercase tracking-widest border border-amber-500/20">
                       v{update.version}
                     </span>
@@ -284,9 +284,10 @@ export function UpdateHistoryManager() {
                       {new Date(update.date).toLocaleDateString('id-ID', { dateStyle: 'long' })}
                     </span>
                  </div>
-                 <h3 className="text-xl font-black text-white">{update.title}</h3>
+                 <h3 className="text-xl font-black text-white break-words">{update.title}</h3>
                  <div 
-                   className="prose prose-invert prose-sm max-w-none text-zinc-400 prose-p:leading-relaxed"
+                   className="prose prose-invert prose-sm max-w-full text-zinc-400 prose-p:leading-relaxed overflow-hidden"
+                   style={{ wordBreak: 'normal', overflowWrap: 'break-word', hyphens: 'auto' }}
                    dangerouslySetInnerHTML={{ __html: update.description }}
                  />
                  
