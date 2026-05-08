@@ -310,7 +310,7 @@ app.get('/api/v1/superadmin/infrastructure/stats', authenticateToken, verifySupe
             },
             storage: {
                 total_used_mb: totalUsedMB,
-                quota_mb: 1024,
+                quota_mb: 25600,
                 top_consumers: formattedTopConsumers
             }
         });

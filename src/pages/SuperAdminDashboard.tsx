@@ -7,9 +7,8 @@ import {
   Copy,
   Check,
   HardDrive,
-  Video,
-  RefreshCw,
-  AlertCircle
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -18,9 +17,7 @@ export function SuperAdminDashboard() {
   const [infraStats, setInfraStats] = useState({ total_used_mb: 0, quota_mb: 1024 });
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [fixVideoState, setFixVideoState] = useState<{ status: 'idle' | 'running' | 'done' | 'error', result?: any }>({
-    status: 'idle'
-  });
+  const [showRepo, setShowRepo] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -58,20 +55,6 @@ export function SuperAdminDashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleFixVideoUrls = async () => {
-    setFixVideoState({ status: 'running' });
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/v1/superadmin/fix-video-urls`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setFixVideoState({ status: 'done', result: res.data });
-    } catch (err: any) {
-      setFixVideoState({ status: 'error', result: { message: err?.response?.data?.error || err.message } });
-    }
-  };
 
   if (loading) {
     return (
@@ -129,7 +112,7 @@ export function SuperAdminDashboard() {
              <div className="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition-colors">
                <HardDrive className="w-6 h-6 text-blue-400" />
              </div>
-             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{storageUsed} MB / 1 GB</span>
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{storageUsed} MB / 25 GB</span>
           </div>
           <div>
              <div className="flex items-end justify-between mb-2">
@@ -147,55 +130,6 @@ export function SuperAdminDashboard() {
 
       </div>
 
-      {/* System Maintenance */}
-      <div className="bg-zinc-900/50 backdrop-blur-md p-6 rounded-xl border border-slate-800 shadow-xl">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="p-3 bg-violet-500/10 rounded-xl">
-            <RefreshCw className="w-5 h-5 text-violet-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">System Maintenance</h3>
-            <p className="text-xs text-zinc-500 font-medium mt-0.5">One-click database repair tools</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-black/30 rounded-xl border border-zinc-800">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="p-2.5 bg-violet-500/10 rounded-lg">
-              <Video className="w-5 h-5 text-violet-400" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white">Fix Video URLs</p>
-              <p className="text-[11px] text-zinc-500 font-medium">
-                Migrate existing video records from <code className="text-violet-400 bg-violet-500/10 px-1 rounded">/uc?id=</code> to{' '}
-                <code className="text-violet-400 bg-violet-500/10 px-1 rounded">/file/d/.../preview</code>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {fixVideoState.status === 'done' && fixVideoState.result && (
-              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                ✓ {fixVideoState.result.updated} updated
-              </span>
-            )}
-            {fixVideoState.status === 'error' && (
-              <span className="text-xs font-bold text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20 flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {fixVideoState.result?.message || 'Failed'}
-              </span>
-            )}
-            <button
-              onClick={handleFixVideoUrls}
-              disabled={fixVideoState.status === 'running'}
-              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-lg shadow-violet-600/20"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${fixVideoState.status === 'running' ? 'animate-spin' : ''}`} />
-              {fixVideoState.status === 'running' ? 'Running...' : 'Run Fix'}
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Super Admin Hub Card (GitHub Link) */}
       <div className="bg-gradient-to-br from-zinc-900/80 to-[#020617] backdrop-blur-xl p-8 rounded-xl border border-slate-800 shadow-2xl relative overflow-hidden">
@@ -211,9 +145,18 @@ export function SuperAdminDashboard() {
             
             <div className="flex items-center gap-3 bg-black/40 border border-zinc-800/80 p-2 pl-5 rounded-xl w-full md:w-auto">
                <Github className="w-5 h-5 text-zinc-400 flex-shrink-0" />
-               <span className="text-xs font-mono text-zinc-300 truncate max-w-[200px] md:max-w-none">
-                  https://github.com/Taqizdihar/uni-verse-headless-cms.git
-               </span>
+               <div className="flex items-center gap-2 overflow-hidden">
+                 <span className="text-xs font-mono text-zinc-300 truncate max-w-[200px] md:max-w-none">
+                    {showRepo ? 'https://github.com/Taqizdihar/uni-verse-headless-cms.git' : 'https://github.com/**********/**********.git'}
+                 </span>
+                 <button 
+                   onClick={() => setShowRepo(!showRepo)}
+                   className="p-1.5 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-200 transition-colors"
+                   title={showRepo ? "Hide Repository URL" : "Show Repository URL"}
+                 >
+                   {showRepo ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                 </button>
+               </div>
                <button 
                  onClick={copyToClipboard}
                  className="flex items-center justify-center p-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all shadow-[0_0_15px_rgba(250,208,44,0.3)] hover:shadow-[0_0_20px_rgba(250,208,44,0.5)] active:scale-95 group"
