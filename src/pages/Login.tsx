@@ -37,13 +37,19 @@ export function Login() {
 
     if (localStorage.getItem('token')) {
        const user = JSON.parse(localStorage.getItem('user') || '{}');
+       const hasActiveTenant = !!localStorage.getItem('active_tenant_id');
+       
         // Super Admin Check
         if (user.role === 'super_admin') {
           navigate('/super-admin/dashboard');
           return;
         }
 
-        if (user.site_name && user.site_name !== 'My Site') {
+        // If an active_tenant_id is set (from workspace switch), always go to dashboard
+        // This prevents the login loop where switching workspaces triggers /setup
+        if (hasActiveTenant) {
+          navigate('/dashboard');
+        } else if (user.site_name && user.site_name !== 'My Site') {
           navigate('/dashboard');
         } else {
           navigate('/setup');

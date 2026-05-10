@@ -201,12 +201,11 @@ export function Profile() {
             <div className="mt-4 flex justify-center gap-2">
                <span className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-zinc-200">
                  {(() => {
-                   const primaryTenantId = localStorage.getItem('primary_tenant_id');
-                   const isPrimary = !primaryTenantId || !activeTenantId || String(activeTenantId) === String(primaryTenantId);
-                   if (isPrimary) return 'ADMIN';
+                   // Role-based badge: admin = ADMIN, others show their actual role
                    const currentWs = workspaces.find(w => w.tenant_id === activeTenantId);
-                   const role = currentWs?.role || user?.role || 'admin';
-                   return role.replace(/_/g, ' ').toUpperCase();
+                   const effectiveRole = currentWs?.role || user?.role || 'admin';
+                   if (effectiveRole === 'admin' || effectiveRole === 'super_admin') return 'ADMIN';
+                   return effectiveRole.replace(/_/g, ' ').toUpperCase();
                  })()}
                </span>
             </div>

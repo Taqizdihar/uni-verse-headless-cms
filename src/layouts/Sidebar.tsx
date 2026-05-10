@@ -26,17 +26,17 @@ import { useCMS } from '../context/CMSContext';
 import { cn } from '../lib/utils';
 
 const allNavItems = [
-  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'content_creative', 'guest'] },
-  { name: 'Halaman', path: '/pages', icon: Files, roles: ['admin', 'content_creative', 'guest'] },
-  { name: 'Postingan', path: '/posts', icon: FileText, roles: ['admin', 'content_creative', 'guest'] },
-  { name: 'Media', path: '/media', icon: ImageIcon, roles: ['admin', 'content_creative', 'guest'] },
-  { name: 'Komentar', path: '/comments', icon: MessageSquare, roles: ['admin', 'guest'] },
+  { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
+  { name: 'Halaman', path: '/pages', icon: Files, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
+  { name: 'Postingan', path: '/posts', icon: FileText, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
+  { name: 'Media', path: '/media', icon: ImageIcon, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
+  { name: 'Komentar', path: '/comments', icon: MessageSquare, roles: ['admin', 'co_admin', 'guest'] },
 
-  { name: 'Pengguna', path: '/users', icon: Users, roles: ['admin', 'guest'] },
-  { name: 'Integrasi API', path: '/api-integration', icon: Terminal, roles: ['admin', 'guest'] },
-  { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap, roles: ['admin', 'guest'] },
-  { name: 'Pengaturan', path: '/settings', icon: Settings, roles: ['admin', 'guest'] },
-  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle, roles: ['admin', 'content_creative', 'guest'] }
+  { name: 'Pengguna', path: '/users', icon: Users, roles: ['admin', 'co_admin', 'guest'] },
+  { name: 'Integrasi API', path: '/api-integration', icon: Terminal, roles: ['admin', 'co_admin', 'guest'] },
+  { name: 'Uji Coba API', path: '/api-sandbox', icon: Zap, roles: ['admin', 'co_admin', 'guest'] },
+  { name: 'Pengaturan', path: '/settings', icon: Settings, roles: ['admin', 'co_admin', 'guest'] },
+  { name: 'Pusat FAQ', path: '/faq', icon: HelpCircle, roles: ['admin', 'co_admin', 'content_creative', 'guest'] }
 ];
 
 interface SidebarProps {
@@ -50,6 +50,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
 
   // Determine effective role (fallback to 'admin' if not set — own workspace)
   const effectiveRole = activeRole || 'admin';
+  // co_admin has same access as admin, but is treated as guest workspace for labeling
   const isOwnWorkspace = effectiveRole === 'admin' || effectiveRole === 'super_admin';
 
   // Filter nav items based on active role

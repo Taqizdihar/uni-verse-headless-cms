@@ -811,6 +811,86 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
     }
 });
 
+// =============================================================
+// POST /api/auth/switch-workspace — Re-issue JWT for workspace switch
+// =============================================================
+// This endpoint generates a fresh JWT containing the target tenant_id
+// and the user's role for that specific workspace. This prevents the
+// system from "remembering" the old role/workspace from the previous
+// session and eliminates the login redirect loop.
+// =============================================================
+app.post('/api/auth/switch-workspace', authenticateToken, async (req, res) => {
+    const { tenant_id } = req.body;
+    const userId = req.user.userId;
+
+    if (!tenant_id) {
+        return res.status(400).json({ error: 'tenant_id is required.' });
+    }
+
+    try {
+        // 1. Verify the user has active membership in the target tenant
+        const [membership] = await db.execute(
+            "SELECT role, status FROM tenant_users WHERE tenant_id = ? AND user_id = ? AND status = 'active'",
+            [tenant_id, userId]
+        );
+
+        // Super Admin bypass: always allow switching
+        const isSuperAdmin = req.user.userId === 1 || req.user.role === 'super_admin';
+
+        if (membership.length === 0 && !isSuperAdmin) {
+            return res.status(403).json({ error: 'Anda tidak memiliki akses aktif ke workspace ini.' });
+        }
+
+        const targetRole = isSuperAdmin ? 'super_admin' : membership[0].role;
+
+        // 2. Fetch site_name for the target workspace
+        let site_name = 'My Site';
+        const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenant_id]);
+        if (settings && settings.length > 0) {
+            site_name = settings[0].site_name;
+        }
+
+        // 3. Identify the user's primary tenant (where role is admin)
+        const [adminTenants] = await db.execute(
+            "SELECT tenant_id FROM tenant_users WHERE user_id = ? AND role = 'admin' AND status = 'active' ORDER BY tenant_id ASC LIMIT 1",
+            [userId]
+        );
+        const primary_tenant_id = adminTenants.length > 0 ? adminTenants[0].tenant_id : tenant_id;
+
+        // 4. Re-issue JWT with the target tenant context
+        const newToken = jwt.sign(
+            { userId, email: req.user.email, tenant_id: parseInt(tenant_id, 10), role: targetRole },
+            JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        // 5. Fetch user details for frontend context
+        const [userRows] = await db.execute('SELECT name, email, profile_picture_url FROM users WHERE id = ?', [userId]);
+        const userInfo = userRows.length > 0 ? userRows[0] : {};
+
+        console.log(`[AUTH] Workspace switched: User ${userId} → Tenant ${tenant_id} (Role: ${targetRole})`);
+
+        res.json({
+            token: newToken,
+            user: {
+                id: userId,
+                name: userInfo.name,
+                email: userInfo.email,
+                profile_picture_url: userInfo.profile_picture_url,
+                tenant_id: parseInt(tenant_id, 10),
+                role: targetRole,
+                site_name
+            },
+            tenant_id: parseInt(tenant_id, 10),
+            primary_tenant_id,
+            workspace_type: parseInt(tenant_id, 10) === primary_tenant_id ? 'primary' : 'guest'
+        });
+    } catch (error) {
+        console.error('[AUTH ERROR] Switch workspace:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    }
+});
+
 app.get('/', (req, res) => res.send('Server is running'));
 
 // ========================================================
@@ -918,8 +998,8 @@ app.use('/api', (req, res, next) => {
     // Skip validation for non-tenant routes
     const exemptPaths = ['/api/user/', '/api/notifications', '/api/auth/'];
     if (exemptPaths.some(p => req.originalUrl.startsWith(p))) return next();
-    // Skip for super_admin
-    if (req.user && req.user.role === 'super_admin') return next();
+    // Skip for super_admin and co_admin (co_admin has same access as admin within tenant)
+    if (req.user && (req.user.role === 'super_admin')) return next();
     // Run async validation
     validateTenantAccess(req, res, next);
 });
@@ -1976,7 +2056,7 @@ app.post('/api/tenant/invite', async (req, res) => {
     if (!email || !email.trim()) {
         return res.status(400).json({ error: 'Email wajib diisi.' });
     }
-    const validRoles = ['admin', 'content_creative', 'guest'];
+    const validRoles = ['admin', 'co_admin', 'content_creative', 'guest'];
     const finalRole = validRoles.includes(role) ? role : 'guest';
 
     try {
@@ -2014,7 +2094,7 @@ app.post('/api/tenant/invite', async (req, res) => {
         );
 
         // 6. Create notification for the invited user
-        const roleLabel = finalRole === 'admin' ? 'Admin' : finalRole === 'content_creative' ? 'Content Creative' : 'Guest';
+        const roleLabel = finalRole === 'admin' ? 'Admin' : finalRole === 'co_admin' ? 'Co-Admin' : finalRole === 'content_creative' ? 'Content Creative' : 'Guest';
         const notifMessage = `Anda diundang bergabung ke "${tenantName}" sebagai ${roleLabel}.`;
         await db.execute(
             "INSERT INTO notifications (user_id, tenant_id, type, message) VALUES (?, ?, 'invitation', ?)",
@@ -2057,6 +2137,13 @@ app.get('/api/user/workspaces', async (req, res) => {
             return res.json(allTenants);
         }
 
+        // Identify primary tenant (where user is admin)
+        const [adminTenants] = await db.execute(
+            "SELECT tenant_id FROM tenant_users WHERE user_id = ? AND role = 'admin' AND status = 'active' ORDER BY tenant_id ASC LIMIT 1",
+            [userId]
+        );
+        const primaryTenantId = adminTenants.length > 0 ? adminTenants[0].tenant_id : null;
+
         const [rows] = await db.execute(`
             SELECT tu.tenant_id, t.name as tenant_name, t.subdomain, tu.role, tu.status
             FROM tenant_users tu
@@ -2064,7 +2151,13 @@ app.get('/api/user/workspaces', async (req, res) => {
             WHERE tu.user_id = ? AND tu.status = 'active'
             ORDER BY tu.role ASC, t.name ASC
         `, [userId]);
-        res.json(rows);
+
+        // Annotate each workspace with type: 'primary' (admin) or 'guest' (co_admin, content_creative, guest)
+        const annotated = rows.map(ws => ({
+            ...ws,
+            workspace_type: ws.role === 'admin' && ws.tenant_id === primaryTenantId ? 'primary' : 'guest'
+        }));
+        res.json(annotated);
     } catch (error) {
         console.error('[API ERROR] Get user workspaces:', error);
         res.status(500).json({ error: 'Internal Server Error' });

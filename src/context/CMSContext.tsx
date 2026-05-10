@@ -108,7 +108,7 @@ interface CMSContextType {
   setPosts: (p: PostItem[]) => void;
   setMedia: (m: MediaItem[]) => void;
   fetchAllData: () => Promise<void>;
-  switchWorkspace: (tenantId: number, role: string) => void;
+  switchWorkspace: (tenantId: number, role: string) => Promise<void>;
   
   savePage: (pageData: any) => Promise<void>;
   deletePage: (id: number) => Promise<void>;
@@ -637,11 +637,11 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setComments(prev => prev.filter(c => c.id !== id));
   };
 
-  const switchWorkspace = (tenantId: number, role: string) => {
+  const switchWorkspace = async (tenantId: number, role: string) => {
     // 1. Show branded loading overlay
     setIsSwitchingWorkspace(true);
 
-    // 2. Clear ALL tenant-specific React state and localStorage cache for a clean slate
+    // 2. Clear ALL tenant-specific React state for a clean slate
     setPages([]);
     setPosts([]);
     setMedia([]);
@@ -653,27 +653,56 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setActivities([]);
     setTotalUsers(0);
 
-    // Clear potential cached data in localStorage except auth and user identity
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && !['token', 'user', 'active_tenant_id', 'active_role', 'primary_tenant_id'].includes(key)) {
-        keysToRemove.push(key);
+    try {
+      // 3. Call backend to re-issue JWT with the target tenant's role
+      const currentToken = token || localStorage.getItem('token');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/switch-workspace`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(currentToken ? { 'Authorization': `Bearer ${currentToken}` } : {})
+        },
+        body: JSON.stringify({ tenant_id: tenantId })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        // 4. Clear ALL localStorage except what we're about to set
+        // This prevents stale data from the previous workspace leaking in
+        const primaryTid = data.primary_tenant_id || localStorage.getItem('primary_tenant_id');
+        localStorage.clear();
+
+        // 5. Set fresh session data from backend response
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('active_tenant_id', String(data.tenant_id));
+        localStorage.setItem('active_role', data.user.role);
+        localStorage.setItem('primary_tenant_id', String(primaryTid));
+
+        // 6. Force full page reload to wipe all React state and re-initialize
+        // Using window.location.href ensures complete re-initialization
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1200);
+      } else {
+        // Fallback: if API fails, do the old behavior
+        console.error('[switchWorkspace] API failed, falling back to local switch');
+        localStorage.setItem('active_tenant_id', String(tenantId));
+        localStorage.setItem('active_role', role);
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1200);
       }
+    } catch (err) {
+      console.error('[switchWorkspace] Network error:', err);
+      // Fallback: do local switch on network error
+      localStorage.setItem('active_tenant_id', String(tenantId));
+      localStorage.setItem('active_role', role);
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1200);
     }
-    keysToRemove.forEach(k => localStorage.removeItem(k));
-
-    // 3. Update active workspace in both React state and localStorage
-    setActiveTenantId(tenantId);
-    setActiveRole(role);
-    localStorage.setItem('active_tenant_id', String(tenantId));
-    localStorage.setItem('active_role', role);
-
-    // 4. Wait 1.5s for overlay animation, then hard redirect to /dashboard
-    // Using replace() is more aggressive and discards previous page state entirely
-    setTimeout(() => {
-      window.location.replace('/dashboard');
-    }, 1500);
   };
 
   const isAuthenticated = !!token || !!localStorage.getItem('token');

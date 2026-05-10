@@ -113,6 +113,8 @@ export function Users() {
     switch (role.toLowerCase()) {
       case 'admin':
         return 'bg-zinc-900 text-white';
+      case 'co_admin':
+        return 'bg-amber-100 text-amber-700';
       case 'content_creative':
         return 'bg-blue-100 text-blue-700';
       case 'guest':
@@ -125,6 +127,7 @@ export function Users() {
   const getRoleLabel = (role: string) => {
     switch (role.toLowerCase()) {
       case 'admin': return 'Admin';
+      case 'co_admin': return 'Co-Admin';
       case 'content_creative': return 'Content Creative';
       case 'guest': return 'Guest';
       default: return role;
@@ -192,7 +195,7 @@ export function Users() {
                                 <img src={u.profile_picture_url} alt={u.name} className="w-full h-full object-cover" />
                               ) : (
                                 <div className={`w-full h-full flex items-center justify-center ${
-                                  u.role.toLowerCase() === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'
+                                  ['admin', 'co_admin'].includes(u.role.toLowerCase()) ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'
                                 }`}>
                                   {(u.name || 'U').charAt(0).toUpperCase()}
                                 </div>
@@ -209,7 +212,7 @@ export function Users() {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeColor(u.role)}`}>
-                            {u.role.toLowerCase() === 'admin' && <ShieldCheck className="w-3 h-3" />}
+                            {['admin', 'co_admin'].includes(u.role.toLowerCase()) && <ShieldCheck className="w-3 h-3" />}
                             {getRoleLabel(u.role)}
                           </span>
                         </td>
@@ -300,6 +303,7 @@ export function Users() {
                   onChange={(e) => setInviteRole(e.target.value)}
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none cursor-pointer"
                 >
+                  <option value="co_admin">Co-Admin</option>
                   <option value="admin">Admin</option>
                   <option value="content_creative">Content Creative</option>
                   <option value="guest">Guest</option>
