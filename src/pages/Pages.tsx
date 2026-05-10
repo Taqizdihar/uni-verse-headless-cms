@@ -14,7 +14,7 @@ import api from '../lib/api';
 
 export function Pages() {
   const { searchQuery } = useSearch();
-  const { pages, setPages, deletePage, savePage, togglePageStatus, media } = useCMS();
+  const { pages, setPages, deletePage, savePage, togglePageStatus, media, user } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<any>(null);
 
@@ -222,10 +222,12 @@ export function Pages() {
           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Pages</h2>
           <p className="text-zinc-500 text-sm mt-1 font-medium">Kelola halaman statis website Anda.</p>
         </div>
-        <button onClick={() => openEditor()} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-zinc-900 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-amber-400/20 active:scale-95">
-          <Plus className="w-5 h-5 stroke-[3]" />
-          Tambah Halaman Baru
-        </button>
+        {user?.role !== 'guest' && (
+          <button onClick={() => openEditor()} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-zinc-900 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-amber-400/20 active:scale-95">
+            <Plus className="w-5 h-5 stroke-[3]" />
+            Tambah Halaman Baru
+          </button>
+        )}
       </div>
 
       <Card className="bg-white border-zinc-200 shadow-sm rounded-xl overflow-hidden">
@@ -262,13 +264,19 @@ export function Pages() {
                       </td>
                       <td className="px-8 py-6">
                         <div className="flex justify-center">
-                            <button 
-                                onClick={() => handleToggle(page)}
-                                disabled={togglingIds.has(page.id)}
-                                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${page.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}
-                            >
-                                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${page.status === 'published' ? 'translate-x-4' : 'translate-x-0'}`} />
-                            </button>
+                            {user?.role !== 'guest' ? (
+                                <button 
+                                    onClick={() => handleToggle(page)}
+                                    disabled={togglingIds.has(page.id)}
+                                    className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${page.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}
+                                >
+                                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${page.status === 'published' ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </button>
+                            ) : (
+                                <div className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 border-transparent opacity-50 ${page.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}>
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 ${page.status === 'published' ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </div>
+                            )}
                         </div>
                       </td>
                       <td className="px-8 py-6">
@@ -285,46 +293,54 @@ export function Pages() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => handleReorder(page.id!, 'up')}
-                            disabled={idx === 0 || reorderingIds.has(page.id!)}
-                            className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
-                            title="Naikkan"
-                          >
-                            {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5 stroke-[2.5]" />}
-                          </button>
-                          <button
-                            onClick={() => handleReorder(page.id!, 'down')}
-                            disabled={idx === filteredPages.length - 1 || reorderingIds.has(page.id!)}
-                            className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
-                            title="Turunkan"
-                          >
-                            {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowDown className="w-5 h-5 stroke-[2.5]" />}
-                          </button>
-                        </div>
+                        {user?.role !== 'guest' ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => handleReorder(page.id!, 'up')}
+                              disabled={idx === 0 || reorderingIds.has(page.id!)}
+                              className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
+                              title="Naikkan"
+                            >
+                              {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5 stroke-[2.5]" />}
+                            </button>
+                            <button
+                              onClick={() => handleReorder(page.id!, 'down')}
+                              disabled={idx === filteredPages.length - 1 || reorderingIds.has(page.id!)}
+                              className="p-2.5 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl border border-transparent hover:border-amber-200 transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:hover:border-transparent shadow-sm hover:shadow-md"
+                              title="Turunkan"
+                            >
+                              {reorderingIds.has(page.id!) ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowDown className="w-5 h-5 stroke-[2.5]" />}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-center text-zinc-300">-</div>
+                        )}
                       </td>
                       <td className="px-8 py-6 text-right pr-10">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button 
-                            onClick={() => handleDuplicate(page.id!)}
-                            disabled={duplicatingIds.has(page.id!)}
-                            className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Duplikasi Halaman"
-                          >
-                            {duplicatingIds.has(page.id!) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
-                          </button>
-                          <button onClick={() => openEditor(page)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Halaman">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => setConfirmDelete({ isOpen: true, id: page.id! })}
-                            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            title="Hapus"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        {user?.role !== 'guest' ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button 
+                              onClick={() => handleDuplicate(page.id!)}
+                              disabled={duplicatingIds.has(page.id!)}
+                              className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Duplikasi Halaman"
+                            >
+                              {duplicatingIds.has(page.id!) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                            <button onClick={() => openEditor(page)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Halaman">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => setConfirmDelete({ isOpen: true, id: page.id! })}
+                              className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-zinc-300">-</div>
+                        )}
                       </td>
                     </tr>
                   ))

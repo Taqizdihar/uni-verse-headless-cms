@@ -226,8 +226,8 @@ export function Users() {
                         </td>
                         <td className="px-6 py-4 text-right pr-6">
                           <div className="flex items-center justify-end gap-2">
-                            {/* Don't allow deleting yourself */}
-                            {u.user_id !== user?.id && (
+                            {/* Only admin can delete team members, and cannot delete themselves */}
+                            {u.user_id !== user?.id && user?.role === 'admin' && (
                               <button 
                                 onClick={() => handleDelete(u.user_id, u.name)}
                                 className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
@@ -304,7 +304,6 @@ export function Users() {
                   className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all appearance-none cursor-pointer"
                 >
                   <option value="co_admin">Co-Admin</option>
-                  <option value="admin">Admin</option>
                   <option value="content_creative">Content Creative</option>
                   <option value="guest">Guest</option>
                 </select>

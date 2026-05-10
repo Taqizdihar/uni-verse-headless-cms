@@ -36,7 +36,7 @@ import api from '../lib/api';
  * Owns its own `imgError` state (required by Rules of Hooks — cannot use useState inside .map()).
  * Handles: image preview with <a target="_blank">, onError fallback, processing placeholder.
  */
-function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEditingId, setEditingName, handleRenameFile, setMovingFileId, setIsMoveModalOpen, setConfirmDelete, isSelected, onToggleSelect }: any) {
+function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEditingId, setEditingName, handleRenameFile, setMovingFileId, setIsMoveModalOpen, setConfirmDelete, isSelected, onToggleSelect, user }: any) {
   const [imgError, setImgError] = React.useState(false);
 
   const isProcessing = m.status === 'processing';
@@ -182,7 +182,7 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
       </div>
 
       {/* File Action Menu */}
-      {!editingId && (
+      {!editingId && user?.role !== 'guest' && (
         <div className={`absolute ${viewMode === 'list' ? 'right-4' : 'top-3 right-3'} opacity-0 group-hover:opacity-100 transition-opacity group/menu`}>
           <button className="p-1.5 bg-white/90 backdrop-blur border border-zinc-200 rounded-md shadow-sm text-zinc-600 hover:text-zinc-900">
             <MoreVertical className="w-4 h-4" />
@@ -206,7 +206,7 @@ function MediaCardItem({ m, viewMode, editingId, editingName, renameRef, setEdit
 }
 
 export function Media() {
-  const { media, setMedia, addMedia, deleteMedia } = useCMS();
+  const { media, setMedia, addMedia, deleteMedia, user } = useCMS();
   
   // Hierarchical State
   const [folders, setFolders] = useState<any[]>([]);
@@ -567,36 +567,38 @@ export function Media() {
               <p className="text-zinc-500 text-sm mt-1 font-medium">Unggah dan kelola aset multimedia untuk website Anda.</p>
             </div>
             
-            <div className="flex items-center gap-3">
-                {/* Bulk Delete Button — visible when items are selected */}
-                {selectedMediaIds.length > 0 && (
-                  <button 
-                    onClick={() => setBulkDeleteModal(true)}
-                    className="flex items-center gap-2 bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20 animate-in fade-in slide-in-from-right-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Hapus ({selectedMediaIds.length})
-                  </button>
-                )}
-                <button 
-                    onClick={() => setIsCreateFolderOpen(true)}
-                    className="flex items-center gap-2 bg-zinc-100 text-zinc-700 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition-all font-sans active:scale-95 border border-zinc-200"
-                >
-                    <FolderPlus className="w-5 h-5" />
-                    Buat Folder
-                </button>
-                <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                <div className="relative group">
+            {user?.role !== 'guest' && (
+              <div className="flex items-center gap-3">
+                  {/* Bulk Delete Button — visible when items are selected */}
+                  {selectedMediaIds.length > 0 && (
                     <button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
-                    title="Unggah Media (Tanpa Batas Ukuran)"
+                      onClick={() => setBulkDeleteModal(true)}
+                      className="flex items-center gap-2 bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-red-500/20 animate-in fade-in slide-in-from-right-2"
                     >
-                    <Plus className="w-5 h-5 stroke-[3]" />
-                    Unggah Media
+                      <Trash2 className="w-4 h-4" />
+                      Hapus ({selectedMediaIds.length})
                     </button>
-                </div>
-            </div>
+                  )}
+                  <button 
+                      onClick={() => setIsCreateFolderOpen(true)}
+                      className="flex items-center gap-2 bg-zinc-100 text-zinc-700 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-200 transition-all font-sans active:scale-95 border border-zinc-200"
+                  >
+                      <FolderPlus className="w-5 h-5" />
+                      Buat Folder
+                  </button>
+                  <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                  <div className="relative group">
+                      <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-500 shadow-lg shadow-amber-400/20 transition-all font-sans active:scale-95"
+                      title="Unggah Media (Tanpa Batas Ukuran)"
+                      >
+                      <Plus className="w-5 h-5 stroke-[3]" />
+                      Unggah Media
+                      </button>
+                  </div>
+              </div>
+            )}
           </div>
 
           {/* Search & Filters */}
@@ -760,7 +762,7 @@ export function Media() {
                       ) : (
                           <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-zinc-800 truncate" title={folder.name}>{folder.name}</p>
-                              {viewMode === 'list' && (
+                              {viewMode === 'list' && user?.role !== 'guest' && (
                                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                       <button onClick={(e) => { e.stopPropagation(); setEditingFolderId(folder.id); setEditingFolderName(folder.name); }} className="p-1.5 text-zinc-500 hover:text-amber-600"><Edit2 className="w-4 h-4"/></button>
                                       <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ isOpen: true, id: folder.id, type: 'folder' }); }} className="p-1.5 text-zinc-500 hover:text-red-600"><Trash2 className="w-4 h-4"/></button>
@@ -770,7 +772,7 @@ export function Media() {
                       )}
                   </div>
                   
-                  {viewMode === 'grid' && !editingFolderId && (
+                  {viewMode === 'grid' && !editingFolderId && user?.role !== 'guest' && (
                       <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={(e) => { e.stopPropagation(); setEditingFolderId(folder.id); setEditingFolderName(folder.name); }} className="p-1.5 bg-white shadow-sm rounded-md text-zinc-600 hover:text-amber-600"><Edit2 className="w-3.5 h-3.5"/></button>
                           <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ isOpen: true, id: folder.id, type: 'folder' }); }} className="p-1.5 bg-white shadow-sm rounded-md text-zinc-600 hover:text-red-600"><Trash2 className="w-3.5 h-3.5"/></button>
@@ -800,6 +802,7 @@ export function Media() {
                   prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
                 );
               }}
+              user={user}
             />
           ))}
       </div>

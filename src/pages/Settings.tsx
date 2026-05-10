@@ -7,7 +7,7 @@ import { NotificationModal } from '../components/ui/NotificationModal';
 import { MediaPicker } from '../components/MediaPicker';
 
 export function Settings() {
-  const { settings, updateSettings, fetchAllData, media } = useCMS();
+  const { settings, updateSettings, fetchAllData, media, user } = useCMS();
   const [formData, setFormData] = useState({
     site_name: '',
     tagline: '',
@@ -414,13 +414,19 @@ export function Settings() {
                         </div>
                     </div>
                     
-                    <button 
-                        type="submit"
-                        disabled={status === 'saving'}
-                        className="w-full py-4 bg-amber-400 text-zinc-950 rounded-xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
-                    >
-                        {status === 'saving' ? 'Memproses...' : 'Simpan Pengaturan'}
-                    </button>
+                    {user?.role !== 'guest' ? (
+                        <button 
+                            type="submit"
+                            disabled={status === 'saving'}
+                            className="w-full py-4 bg-amber-400 text-zinc-950 rounded-xl font-bold hover:bg-amber-500 transition-all shadow-xl shadow-amber-400/10 active:scale-[0.98] disabled:opacity-50"
+                        >
+                            {status === 'saving' ? 'Memproses...' : 'Simpan Pengaturan'}
+                        </button>
+                    ) : (
+                        <div className="w-full py-4 bg-zinc-800 text-zinc-500 text-center rounded-xl font-bold text-sm">
+                            Akses Hanya Lihat
+                        </div>
+                    )}
 
                     <div className="mt-8 pt-6 border-t border-zinc-800 space-y-4">
                         <div className="flex items-center justify-between">

@@ -17,7 +17,7 @@ const CATEGORIES = [
 ];
 
 export function Posts() {
-  const { posts, savePost, deletePost, togglePostStatus, media, fetchAllData } = useCMS();
+  const { posts, savePost, deletePost, togglePostStatus, media, fetchAllData, user } = useCMS();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [confirmCategoryChange, setConfirmCategoryChange] = useState<{ isOpen: boolean, nextCategory: string | null }>({ isOpen: false, nextCategory: null });
@@ -990,13 +990,15 @@ export function Posts() {
             </div>
           </div>
 
-          <button 
-            onClick={() => openEditor()}
-            className="flex items-center justify-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95 w-full sm:w-auto shrink-0"
-          >
-            <Plus className="w-5 h-5 stroke-[3]" />
-            Buat Konten
-          </button>
+          {user?.role !== 'guest' && (
+            <button 
+              onClick={() => openEditor()}
+              className="flex items-center justify-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95 w-full sm:w-auto shrink-0"
+            >
+              <Plus className="w-5 h-5 stroke-[3]" />
+              Buat Konten
+            </button>
+          )}
         </div>
       </div>
 
@@ -1044,43 +1046,53 @@ export function Posts() {
                             </td>
                             <td className="px-8 py-6">
                                 <div className="flex justify-center">
-                                    <button 
-                                        onClick={() => handleToggle(post.id!, post.status)}
-                                        disabled={toggling[post.id!]}
-                                        className={`relative w-12 h-6 rounded-full transition-colors duration-300 outline-none flex items-center shadow-inner ${
-                                            toggling[post.id!] ? 'opacity-50 cursor-not-allowed' : ''
-                                        } ${post.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}
-                                    >
-                                        {toggling[post.id!] ? (
-                                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        ) : (
-                                            <div className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-300 ${
-                                                post.status === 'published' ? 'translate-x-7' : 'translate-x-1'
-                                            }`} />
-                                        )}
-                                    </button>
+                                    {user?.role !== 'guest' ? (
+                                        <button 
+                                            onClick={() => handleToggle(post.id!, post.status)}
+                                            disabled={toggling[post.id!]}
+                                            className={`relative w-12 h-6 rounded-full transition-colors duration-300 outline-none flex items-center shadow-inner ${
+                                                toggling[post.id!] ? 'opacity-50 cursor-not-allowed' : ''
+                                            } ${post.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}
+                                        >
+                                            {toggling[post.id!] ? (
+                                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <div className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-300 ${
+                                                    post.status === 'published' ? 'translate-x-7' : 'translate-x-1'
+                                                }`} />
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <div className={`relative w-12 h-6 rounded-full opacity-50 flex items-center shadow-inner ${post.status === 'published' ? 'bg-amber-400' : 'bg-zinc-200'}`}>
+                                            <div className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transform ${post.status === 'published' ? 'translate-x-7' : 'translate-x-1'}`} />
+                                        </div>
+                                    )}
                                 </div>
                             </td>
                             <td className="px-8 py-6 font-medium text-zinc-400 tabular-nums">
                                 {post.created_at ? new Date(post.created_at).toLocaleDateString() : new Date().toLocaleDateString()}
                             </td>
                             <td className="px-8 py-6 text-right pr-10">
-                                <div className="flex justify-end gap-1.5">
-                                    <button 
-                                      onClick={() => handleDuplicate(post.id!)}
-                                      disabled={duplicatingIds.has(post.id!)}
-                                      className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                      title="Duplikasi Post"
-                                    >
-                                      {duplicatingIds.has(post.id!) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
-                                    </button>
-                                    <button onClick={() => openEditor(post)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Post">
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => setConfirmDelete({ isOpen: true, id: post.id! })} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Post">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                {user?.role !== 'guest' ? (
+                                    <div className="flex justify-end gap-1.5">
+                                        <button 
+                                          onClick={() => handleDuplicate(post.id!)}
+                                          disabled={duplicatingIds.has(post.id!)}
+                                          className="p-2 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                          title="Duplikasi Post"
+                                        >
+                                          {duplicatingIds.has(post.id!) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />}
+                                        </button>
+                                        <button onClick={() => openEditor(post)} className="p-2 text-zinc-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all" title="Edit Post">
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => setConfirmDelete({ isOpen: true, id: post.id! })} className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete Post">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-zinc-300">-</div>
+                                )}
                             </td>
                         </tr>
                     )) : (

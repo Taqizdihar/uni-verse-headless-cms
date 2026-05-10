@@ -238,6 +238,12 @@ const authenticateToken = (req, res, next) => {
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: 'Forbidden' });
         req.user = user;
+        
+        // Guest Role Read-Only Interceptor
+        if (user.role === 'guest' && req.method !== 'GET' && req.method !== 'OPTIONS') {
+            return res.status(403).json({ error: 'Akses Terbatas: Role Guest hanya dapat melihat data.' });
+        }
+        
         next();
     });
 };
@@ -2112,6 +2118,12 @@ app.post('/api/tenant/invite', async (req, res) => {
 app.delete('/api/users/:user_id', async (req, res) => {
     const { user_id } = req.params;
     const tid = getTenantId(req);
+    
+    // Protect Admin from Deletion by Co-Admin
+    if (req.user && req.user.role === 'co_admin') {
+        return res.status(403).json({ error: 'Akses Terbatas: Hanya Admin utama yang dapat menghapus anggota tim.' });
+    }
+
     try {
         await db.execute('DELETE FROM tenant_users WHERE user_id = ? AND tenant_id = ?', [user_id, tid]);
         res.json({ message: 'User removed successfully' });
