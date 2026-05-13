@@ -247,6 +247,10 @@ router.get('/pages', async (req, res) => {
             if (page.content) {
                 page.content = normalizeContentImages(page.content);
             }
+            // Expose is_contact_form_active at top level for contact pages
+            if (page.content && typeof page.content === 'object') {
+                page.is_contact_form_active = page.content.is_contact_form_active !== false;
+            }
             return page;
         });
 

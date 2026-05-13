@@ -73,6 +73,23 @@ export function PagesEditor() {
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 ml-1">Telepon</label>
               <input type="tel" value={formData.phone || ''} onChange={e => handleInputChange('phone', e.target.value)} className="w-full px-4 py-3 bg-white border border-zinc-200 rounded-xl outline-none focus:border-amber-400" />
             </div>
+            <div className="pt-2 border-t border-zinc-100">
+              <label className="flex items-center justify-between cursor-pointer group">
+                <div>
+                  <span className="text-sm font-bold text-zinc-700 group-hover:text-zinc-900 transition-colors">Aktifkan Form Kontak</span>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">Pengunjung dapat mengirim pesan langsung dari halaman kontak.</p>
+                </div>
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_contact_form_active !== false && formData.is_contact_form_active !== 'false'}
+                    onChange={e => setFormData((prev: any) => ({ ...prev, is_contact_form_active: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-400 shadow-inner"></div>
+                </div>
+              </label>
+            </div>
           </div>
         );
       case 'profile':

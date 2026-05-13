@@ -1,5 +1,5 @@
 // File: src/layouts/Sidebar.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -7,6 +7,7 @@ import {
   FileText, 
   Image as ImageIcon, 
   MessageSquare, 
+  Mail,
   LayoutTemplate, 
   Users, 
   Blocks, 
@@ -31,6 +32,7 @@ const allNavItems = [
   { name: 'Postingan', path: '/posts', icon: FileText, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
   { name: 'Media', path: '/media', icon: ImageIcon, roles: ['admin', 'co_admin', 'content_creative', 'guest'] },
   { name: 'Komentar', path: '/comments', icon: MessageSquare, roles: ['admin', 'co_admin', 'guest'] },
+  { name: 'Pesan Masuk', path: '/inquiries', icon: Mail, roles: ['admin', 'co_admin'] },
 
   { name: 'Pengguna', path: '/users', icon: Users, roles: ['admin', 'co_admin', 'guest'] },
   { name: 'Integrasi API', path: '/api-integration', icon: Terminal, roles: ['admin', 'co_admin', 'guest'] },
@@ -46,7 +48,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
-  const { settings, activeRole } = useCMS();
+  const { settings, activeRole, token, activeTenantId } = useCMS();
+  const [unreadInquiries, setUnreadInquiries] = useState(0);
 
   // Determine effective role (fallback to 'admin' if not set — own workspace)
   const effectiveRole = activeRole || 'admin';
@@ -55,6 +58,30 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
 
   // Filter nav items based on active role
   const navItems = allNavItems.filter(item => item.roles.includes(effectiveRole));
+
+  // Poll unread inquiry count
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const t = token || localStorage.getItem('token');
+        const tid = activeTenantId || localStorage.getItem('active_tenant_id');
+        if (!t) return;
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/inquiries/count`, {
+          headers: {
+            Authorization: `Bearer ${t}`,
+            ...(tid ? { 'x-active-tenant': String(tid) } : {})
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadInquiries(data.unread || 0);
+        }
+      } catch (e) { /* silent */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [token, activeTenantId]);
   
   return (
     <aside className={cn("bg-zinc-900 text-white h-screen flex flex-col relative shadow-xl transition-all duration-300", isCollapsed ? "w-20" : "w-64")}>
@@ -100,7 +127,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
               onClick={onClose}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center py-2.5 rounded-xl transition-all font-bold text-[13px] pointer-events-auto overflow-hidden",
+                  "flex items-center py-2.5 rounded-xl transition-all font-bold text-[13px] pointer-events-auto overflow-hidden relative",
                   isCollapsed ? "justify-center px-0" : "gap-3 px-4",
                   isActive 
                     ? "bg-amber-400 text-zinc-950 shadow-lg shadow-amber-400/20" 
@@ -111,6 +138,14 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
             >
               <Icon className="w-5 h-5 shrink-0" />
               <span className={cn("whitespace-nowrap transition-all duration-300", isCollapsed ? "w-0 opacity-0" : "opacity-100")}>{item.name}</span>
+              {item.name === 'Pesan Masuk' && unreadInquiries > 0 && !isCollapsed && (
+                <span className="ml-auto flex-shrink-0 min-w-[20px] h-5 flex items-center justify-center px-1.5 bg-blue-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-blue-500/30">
+                  {unreadInquiries > 99 ? '99+' : unreadInquiries}
+                </span>
+              )}
+              {item.name === 'Pesan Masuk' && unreadInquiries > 0 && isCollapsed && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-zinc-900 shadow-lg" />
+              )}
             </NavLink>
           );
         })}

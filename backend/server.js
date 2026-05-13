@@ -1,8 +1,10 @@
 const express = require('express');
 const archiver = require('archiver');
+const rateLimit = require('express-rate-limit');
 
 const cors = require('cors');
 require('dotenv').config();
+const { sendInquiryNotification } = require('./services/emailService');
 const JWT_SECRET = process.env.JWT_SECRET || 'uni-inside-secret-key-2026';
 if (!process.env.JWT_SECRET) {
     console.warn('[WARNING] JWT_SECRET is not defined in environment variables. Using fallback key for development.');
@@ -898,6 +900,90 @@ app.post('/api/auth/switch-workspace', authenticateToken, async (req, res) => {
 });
 
 app.get('/', (req, res) => res.send('Server is running'));
+
+// =============================================================
+// ★ PUBLIC INQUIRY ENDPOINT — Rate-Limited, No Auth Required ★
+// =============================================================
+// Receives contact form submissions from startup landing pages.
+// Protected by rate limiting (5 requests per minute per IP).
+// Must be registered BEFORE authenticateToken middleware.
+// =============================================================
+
+const inquiryLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 5,              // 5 requests per window per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Terlalu banyak permintaan. Silakan coba lagi dalam 1 menit.' }
+});
+
+app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
+    try {
+        const { name, email, message, subject } = req.body;
+
+        // 1. Validate required fields
+        if (!name || !name.trim()) return res.status(400).json({ error: 'Nama wajib diisi.' });
+        if (!email || !email.trim()) return res.status(400).json({ error: 'Email wajib diisi.' });
+        if (!message || !message.trim()) return res.status(400).json({ error: 'Pesan wajib diisi.' });
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            return res.status(400).json({ error: 'Format email tidak valid.' });
+        }
+
+        // 2. Resolve tenant from API Key
+        const apiKey = req.headers['x-api-key'];
+        if (!apiKey) return res.status(401).json({ error: 'x-api-key header diperlukan.' });
+
+        const [keys] = await db.execute('SELECT tenant_id FROM api_keys WHERE api_key = ? LIMIT 1', [apiKey]);
+        if (keys.length === 0) return res.status(401).json({ error: 'API Key tidak valid.' });
+
+        const tenantId = keys[0].tenant_id;
+
+        // 3. Insert into contact_inquiries table
+        const [result] = await db.execute(
+            `INSERT INTO contact_inquiries (tenant_id, name, email, subject, message, status)
+             VALUES (?, ?, ?, ?, ?, 'unread')`,
+            [tenantId, name.trim(), email.trim(), (subject || '').trim(), message.trim()]
+        );
+
+        console.log(`[INQUIRY] ✓ New inquiry #${result.insertId} from ${name.trim()} for tenant ${tenantId}`);
+
+        // 4. Lookup admin email for this tenant
+        const [admins] = await db.execute(
+            `SELECT u.email, u.name as admin_name FROM users u
+             JOIN tenant_users tu ON u.id = tu.user_id
+             WHERE tu.tenant_id = ? AND tu.role = 'admin' AND tu.status = 'active'
+             LIMIT 1`,
+            [tenantId]
+        );
+
+        // 5. Get site name for email branding
+        const [settings] = await db.execute('SELECT site_name FROM settings WHERE tenant_id = ?', [tenantId]);
+        const siteName = settings.length > 0 ? settings[0].site_name : 'Website';
+
+        // 6. Send email notification (non-blocking — don't fail the request if email fails)
+        if (admins.length > 0) {
+            sendInquiryNotification({
+                adminEmail: admins[0].email,
+                senderName: name.trim(),
+                senderEmail: email.trim(),
+                subject: (subject || '').trim(),
+                message: message.trim(),
+                siteName,
+                cmsUrl: process.env.APP_URL || 'https://uni-verse-headless-cms.onrender.com'
+            }).catch(err => console.error('[INQUIRY] Email notification error:', err.message));
+        }
+
+        res.status(201).json({
+            message: 'Pesan berhasil dikirim. Terima kasih!',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('[INQUIRY ERROR] Submit inquiry:', error);
+        res.status(500).json({ error: 'Internal Server Error', detail: error.message });
+    }
+});
 
 // ========================================================
 // PUBLIC V1 API GATEWAY — Content Delivery (Data Routes)
@@ -2773,6 +2859,90 @@ app.put('/api/plugins/:id', async (req, res) => {
     }
 });
 
+// =============================================================
+// ★ CONTACT INQUIRIES MANAGEMENT (Protected — JWT required) ★
+// =============================================================
+
+// GET /api/inquiries — List all inquiries for the tenant
+app.get('/api/inquiries', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const [rows] = await db.execute(
+            'SELECT * FROM contact_inquiries WHERE tenant_id = ? ORDER BY created_at DESC',
+            [tid]
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('[API ERROR] Get inquiries:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// GET /api/inquiries/count — Unread count for sidebar badge
+app.get('/api/inquiries/count', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const [rows] = await db.execute(
+            "SELECT COUNT(*) as unread FROM contact_inquiries WHERE tenant_id = ? AND status = 'unread'",
+            [tid]
+        );
+        res.json({ unread: rows[0].unread });
+    } catch (error) {
+        console.error('[API ERROR] Get inquiry count:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// PATCH /api/inquiries/:id/read — Mark as read
+app.patch('/api/inquiries/:id/read', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        await db.execute(
+            "UPDATE contact_inquiries SET status = 'read' WHERE id = ? AND tenant_id = ?",
+            [req.params.id, tid]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[API ERROR] Mark inquiry read:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// DELETE /api/inquiries/:id — Delete a single inquiry
+app.delete('/api/inquiries/:id', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        await db.execute(
+            'DELETE FROM contact_inquiries WHERE id = ? AND tenant_id = ?',
+            [req.params.id, tid]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[API ERROR] Delete inquiry:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// POST /api/inquiries/bulk-delete — Delete multiple inquiries
+app.post('/api/inquiries/bulk-delete', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const { ids } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'ids array is required.' });
+        }
+        const placeholders = ids.map(() => '?').join(',');
+        await db.execute(
+            `DELETE FROM contact_inquiries WHERE id IN (${placeholders}) AND tenant_id = ?`,
+            [...ids, tid]
+        );
+        res.json({ success: true, deleted: ids.length });
+    } catch (error) {
+        console.error('[API ERROR] Bulk delete inquiries:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // Catch-All for 404
 app.use((req, res) => {
     console.log('404 Route Not Found:', req.url);
@@ -2911,5 +3081,30 @@ app.listen(PORT, '0.0.0.0', async () => {
         }
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not add status column to tenant_users:', e.message);
+    }
+
+    // Auto-migration for contact_inquiries table
+    try {
+        const [tables] = await db.execute("SHOW TABLES LIKE 'contact_inquiries'");
+        if (tables.length === 0) {
+            console.log('[MIGRATION] Creating contact_inquiries table...');
+            await db.execute(`
+                CREATE TABLE contact_inquiries (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    tenant_id INT NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    subject VARCHAR(500) DEFAULT '',
+                    message TEXT NOT NULL,
+                    status ENUM('unread', 'read') DEFAULT 'unread',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_inquiry_tenant (tenant_id, status),
+                    INDEX idx_inquiry_date (created_at)
+                )
+            `);
+            console.log('[MIGRATION] ✓ contact_inquiries table created.');
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not create contact_inquiries table:', e.message);
     }
 });
