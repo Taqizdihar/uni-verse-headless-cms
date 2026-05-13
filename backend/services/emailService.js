@@ -15,15 +15,24 @@ let transporter = null;
 const getTransporter = () => {
     if (transporter) return transporter;
 
-    const host = process.env.SMTP_HOST;
+    const host = process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = parseInt(process.env.SMTP_PORT) || 587;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
+    // Support both SMTP_USER/SMTP_PASS and EMAIL_USER/EMAIL_PASS
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
 
-    if (!host || !user || !pass) {
-        console.warn('[EMAIL] ⚠ SMTP credentials not configured. Email notifications will be skipped.');
+    if (!user || !pass) {
+        console.warn('[EMAIL] ⚠ SMTP credentials not configured (SMTP_USER/SMTP_PASS or EMAIL_USER/EMAIL_PASS). Email notifications will be skipped.');
         return null;
     }
+
+    // Reject placeholder credentials
+    if (user === 'your-email@gmail.com' || pass === 'your-app-password') {
+        console.warn('[EMAIL] ⚠ SMTP credentials are still set to placeholder values. Please update EMAIL_USER and EMAIL_PASS with real Gmail App Password credentials.');
+        return null;
+    }
+
+    console.log(`[EMAIL] Initializing SMTP transporter: host=${host}, port=${port}, user=${user}`);
 
     transporter = nodemailer.createTransport({
         host,
@@ -35,8 +44,13 @@ const getTransporter = () => {
 
     // Verify connection on first use
     transporter.verify()
-        .then(() => console.log('[EMAIL] ✓ SMTP connection verified'))
-        .catch(err => console.error('[EMAIL] ✗ SMTP verification failed:', err.message));
+        .then(() => console.log('[EMAIL] ✓ SMTP connection verified successfully'))
+        .catch(err => {
+            console.error('[EMAIL] ✗ SMTP verification failed:', err.message);
+            console.error('[EMAIL] ✗ Full error:', JSON.stringify({ code: err.code, command: err.command, responseCode: err.responseCode }, null, 2));
+            // Reset transporter so next call retries
+            transporter = null;
+        });
 
     return transporter;
 };
@@ -61,10 +75,11 @@ const sendInquiryNotification = async ({ adminEmail, senderName, senderEmail, su
     }
 
     const fromName = process.env.SMTP_FROM_NAME || 'UNI-VERSE CMS';
-    const fromEmail = process.env.SMTP_USER;
+    const fromEmail = process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
         from: `"${fromName}" <${fromEmail}>`,
+        replyTo: `"${senderName}" <${senderEmail}>`,
         to: adminEmail,
         subject: `[UNI-VERSE] Pesan Baru dari ${senderName}`,
         html: `
@@ -123,6 +138,13 @@ const sendInquiryNotification = async ({ adminEmail, senderName, senderEmail, su
         return { success: true, messageId: info.messageId };
     } catch (error) {
         console.error(`[EMAIL] ✗ Failed to send to ${adminEmail}:`, error.message);
+        console.error(`[EMAIL] ✗ SMTP Error Details:`, JSON.stringify({
+            code: error.code,
+            command: error.command,
+            responseCode: error.responseCode,
+            response: error.response,
+            stack: error.stack?.split('\n').slice(0, 3).join(' | ')
+        }, null, 2));
         return { success: false, reason: error.message };
     }
 };

@@ -163,6 +163,23 @@ const PUBLIC_ENDPOINTS = [
   "success": true,
   "message": "Komentar berhasil dikirim dan menunggu persetujuan."
 }`
+  },
+  {
+    name: 'Kirim Pesan Kontak',
+    method: 'POST',
+    path: '/api/v1/inquiries',
+    desc: 'Mengirimkan pesan kontak/inquiry dari pengunjung website ke admin tenant. Endpoint ini dilindungi oleh rate limiter (maks. 5 request/menit per IP). Membutuhkan header x-api-key untuk mengidentifikasi tenant tujuan.',
+    requestBody: `{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "Kerja Sama Bisnis",
+  "message": "Halo, saya tertarik untuk bekerja sama..."
+}`,
+    response: `{
+  "message": "Pesan berhasil dikirim. Terima kasih!",
+  "id": 42
+}`,
+    warning: 'Field yang wajib diisi: name, email, message. Field subject bersifat opsional.'
   }
 ];
 
@@ -328,6 +345,16 @@ export function ApiIntegration() {
                         <div>
                           <span className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest block mb-0.5">PERINGATAN</span>
                           <p className="text-xs text-yellow-800 font-medium">Selalu gunakan field <code className="font-mono bg-yellow-100 px-1 py-0.5 rounded">priority</code> untuk mengurutkan item navigasi dengan benar.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {ep.warning && ep.name !== 'Navigasi' && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+                        <ShieldAlert className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block mb-0.5">INFORMASI</span>
+                          <p className="text-xs text-blue-800 font-medium">{ep.warning}</p>
                         </div>
                       </div>
                     )}

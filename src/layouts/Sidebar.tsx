@@ -151,22 +151,20 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
         })}
       </nav>
 
-      <div className={cn("p-4 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-2" : "px-4")}>
-          <div className={cn("bg-zinc-800/50 rounded-xl transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-3 flex-col gap-3" : "p-4")}>
-              <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)] shrink-0"></div>
+      <div className={cn("px-3 py-2 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-2" : "px-3")}>
+          <div className={cn("bg-zinc-800/50 rounded-lg transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-2 flex-col gap-2" : "px-3 py-2")}>
+              <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.5)] shrink-0"></div>
                   {!isCollapsed && (
-                      <div className="flex flex-col gap-0.5 overflow-hidden">
-                        <span className="text-xs font-bold text-zinc-300 whitespace-nowrap">Sistem Online</span>
-                      </div>
+                      <span className="text-[10px] font-bold text-zinc-400 whitespace-nowrap">Online</span>
                   )}
               </div>
               <button 
                   onClick={onToggleCollapse}
-                  className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                   title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               >
-                  {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
               </button>
           </div>
       </div>

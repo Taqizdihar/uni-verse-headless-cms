@@ -80,6 +80,18 @@ const ENDPOINT_OPTIONS: EndpointOption[] = [
   "content": "Informasi yang sangat bermanfaat!"
 }`,
   },
+  {
+    label: 'Kirim Pesan Kontak',
+    method: 'POST',
+    path: '/api/v1/inquiries',
+    hasBody: true,
+    bodyTemplate: `{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "subject": "Kerja Sama Bisnis",
+  "message": "Halo, saya tertarik untuk bekerja sama..."
+}`,
+  },
 ];
 
 export function ApiSandbox() {
@@ -368,6 +380,22 @@ export function ApiSandbox() {
                   className="w-full px-4 py-3.5 bg-zinc-950 border border-zinc-800 rounded-xl outline-none text-sm font-mono text-green-400 placeholder-zinc-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all resize-none"
                   placeholder='{ "key": "value" }'
                 />
+              </div>
+            )}
+
+            {/* Contact Inquiry Warning */}
+            {selected.label === 'Kirim Pesan Kontak' && (
+              <div className="px-6 pb-2">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest block mb-1">PERINGATAN</span>
+                    <p className="text-xs text-red-700 font-medium leading-relaxed">
+                      Percobaan pengiriman pesan melalui fitur ini akan tercatat secara nyata di menu <strong>'Kotak Masuk'</strong> tenant Anda. 
+                      Admin tenant akan menerima notifikasi email jika SMTP telah dikonfigurasi. Data yang dikirim bersifat permanen.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
