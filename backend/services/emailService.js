@@ -1,9 +1,12 @@
 // =============================================================
-// Email Service — Nodemailer SMTP Wrapper
+// Email Service — Nodemailer SMTP Wrapper (Port 465 / SSL)
 // =============================================================
-// Sends transactional email notifications using SMTP credentials
-// stored in environment variables. Falls back gracefully if
-// SMTP is not configured (logs a warning instead of crashing).
+// Sends transactional email notifications using Gmail SMTP over
+// implicit SSL/TLS (port 465) with forced IPv4 to avoid
+// ENETUNREACH errors on Render's infrastructure.
+//
+// Credentials: process.env.EMAIL_USER + process.env.EMAIL_PASS
+// (Gmail App Password — NOT your regular Google password)
 // =============================================================
 
 const nodemailer = require('nodemailer');
@@ -12,11 +15,15 @@ require('dotenv').config();
 // Create reusable transporter (lazy-initialized)
 let transporter = null;
 
+/**
+ * Build (or return cached) Nodemailer SMTP transporter.
+ * Uses Port 465 with implicit SSL and forces IPv4 (family: 4).
+ */
 const getTransporter = () => {
     if (transporter) return transporter;
 
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const port = parseInt(process.env.SMTP_PORT) || 587;
+    const port = parseInt(process.env.SMTP_PORT) || 465;
     // Primary: EMAIL_USER / EMAIL_PASS — Fallback: SMTP_USER / SMTP_PASS
     const user = process.env.EMAIL_USER || process.env.SMTP_USER;
     const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
@@ -32,22 +39,30 @@ const getTransporter = () => {
         return null;
     }
 
-    console.log(`[EMAIL] Initializing SMTP transporter: host=${host}, port=${port}, user=${user}`);
+    console.log(`[EMAIL] Initializing SMTP transporter: host=${host}, port=${port}, secure=true, family=4, user=${user}`);
 
     transporter = nodemailer.createTransport({
         host,
         port,
-        secure: port === 465, // true for 465, false for other ports
+        secure: true,   // Implicit SSL/TLS on port 465
+        family: 4,       // Force IPv4 — prevents ENETUNREACH on Render (IPv6 not routable)
         auth: { user, pass },
-        tls: { rejectUnauthorized: false }
+        tls: { rejectUnauthorized: false },
+        connectionTimeout: 15000,  // 15s connection timeout
+        greetingTimeout: 15000,    // 15s greeting timeout
+        socketTimeout: 30000       // 30s socket timeout
     });
 
     // Verify connection on first use
     transporter.verify()
-        .then(() => console.log('[EMAIL] ✓ SMTP connection verified successfully'))
+        .then(() => console.log('[EMAIL] ✓ SMTP connection verified (port 465, SSL, IPv4)'))
         .catch(err => {
             console.error('[EMAIL] ✗ SMTP verification failed:', err.message);
-            console.error('[EMAIL] ✗ Full error:', JSON.stringify({ code: err.code, command: err.command, responseCode: err.responseCode }, null, 2));
+            console.error('[EMAIL] ✗ Full error:', JSON.stringify({
+                code: err.code,
+                command: err.command,
+                responseCode: err.responseCode
+            }, null, 2));
             // Reset transporter so next call retries
             transporter = null;
         });
@@ -56,18 +71,69 @@ const getTransporter = () => {
 };
 
 /**
+ * Send an email with automatic retry (up to maxRetries attempts).
+ * Resets the transporter between retries to force a fresh connection.
+ *
+ * @param {object} mailOptions  - Nodemailer mail options
+ * @param {number} maxRetries   - Number of retry attempts (default: 2)
+ * @returns {Promise<{success: boolean, messageId?: string, reason?: string}>}
+ */
+const sendWithRetry = async (mailOptions, maxRetries = 2) => {
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const mailer = getTransporter();
+        if (!mailer) {
+            return { success: false, reason: 'SMTP not configured' };
+        }
+
+        try {
+            const info = await mailer.sendMail(mailOptions);
+            console.log(`[EMAIL] ✓ Sent to ${mailOptions.to} on attempt ${attempt} (ID: ${info.messageId})`);
+            return { success: true, messageId: info.messageId };
+        } catch (error) {
+            lastError = error;
+            console.error(`[EMAIL] ✗ Attempt ${attempt}/${maxRetries} failed for ${mailOptions.to}:`, error.message);
+
+            // Reset transporter for a fresh connection on next attempt
+            transporter = null;
+
+            // If we have retries left, wait briefly before retrying
+            if (attempt < maxRetries) {
+                const delay = attempt * 2000; // 2s, 4s, ...
+                console.log(`[EMAIL] ⏳ Retrying in ${delay / 1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+
+    // All attempts exhausted
+    console.error(`[EMAIL] ✗ All ${maxRetries} attempts failed for ${mailOptions.to}`);
+    console.error(`[EMAIL] ✗ Last error details:`, JSON.stringify({
+        code: lastError?.code,
+        command: lastError?.command,
+        responseCode: lastError?.responseCode,
+        response: lastError?.response,
+        stack: lastError?.stack?.split('\n').slice(0, 3).join(' | ')
+    }, null, 2));
+
+    return { success: false, reason: lastError?.message || 'All retry attempts failed' };
+};
+
+/**
  * Send an inquiry notification email to the tenant admin.
  *
  * @param {Object} options
- * @param {string} options.adminEmail  - Recipient email (tenant admin)
+ * @param {string} options.adminEmail  - Recipient email (tenant admin, fetched from DB)
  * @param {string} options.senderName  - Name of the person who submitted the inquiry
- * @param {string} options.senderEmail - Email of the sender
+ * @param {string} options.senderEmail - Email of the sender (used as Reply-To)
  * @param {string} options.subject     - Inquiry subject (optional)
  * @param {string} options.message     - Inquiry message body
  * @param {string} options.siteName    - Tenant site name (for branding)
  * @param {string} options.cmsUrl      - URL to the CMS dashboard
  */
 const sendInquiryNotification = async ({ adminEmail, senderName, senderEmail, subject, message, siteName, cmsUrl }) => {
+    // Quick guard — if no transporter can be created, skip early
     const mailer = getTransporter();
     if (!mailer) {
         console.log('[EMAIL] Skipping notification — SMTP not configured.');
@@ -132,21 +198,8 @@ const sendInquiryNotification = async ({ adminEmail, senderName, senderEmail, su
         `
     };
 
-    try {
-        const info = await mailer.sendMail(mailOptions);
-        console.log(`[EMAIL] ✓ Notification sent to ${adminEmail} (ID: ${info.messageId})`);
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error(`[EMAIL] ✗ Failed to send to ${adminEmail}:`, error.message);
-        console.error(`[EMAIL] ✗ SMTP Error Details:`, JSON.stringify({
-            code: error.code,
-            command: error.command,
-            responseCode: error.responseCode,
-            response: error.response,
-            stack: error.stack?.split('\n').slice(0, 3).join(' | ')
-        }, null, 2));
-        return { success: false, reason: error.message };
-    }
+    // Use retry mechanism (2 attempts with exponential backoff)
+    return sendWithRetry(mailOptions, 2);
 };
 
 module.exports = { sendInquiryNotification };
