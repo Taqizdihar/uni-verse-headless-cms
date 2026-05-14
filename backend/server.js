@@ -19,6 +19,11 @@ const fs = require('fs');
 
 const app = express();
 
+// Trust the first proxy hop (Render's load balancer).
+// Required for express-rate-limit to read client IPs correctly
+// from the X-Forwarded-For header without ERR_ERL_UNEXPECTED_X_FORWARDED_FOR.
+app.set('trust proxy', 1);
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 

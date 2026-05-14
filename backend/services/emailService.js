@@ -17,18 +17,18 @@ const getTransporter = () => {
 
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = parseInt(process.env.SMTP_PORT) || 587;
-    // Support both SMTP_USER/SMTP_PASS and EMAIL_USER/EMAIL_PASS
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    // Primary: EMAIL_USER / EMAIL_PASS — Fallback: SMTP_USER / SMTP_PASS
+    const user = process.env.EMAIL_USER || process.env.SMTP_USER;
+    const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
 
     if (!user || !pass) {
-        console.warn('[EMAIL] ⚠ SMTP credentials not configured (SMTP_USER/SMTP_PASS or EMAIL_USER/EMAIL_PASS). Email notifications will be skipped.');
+        console.warn('[EMAIL] ⚠ SMTP not configured — check Render Environment Variables (EMAIL_USER and EMAIL_PASS).');
         return null;
     }
 
     // Reject placeholder credentials
     if (user === 'your-email@gmail.com' || pass === 'your-app-password') {
-        console.warn('[EMAIL] ⚠ SMTP credentials are still set to placeholder values. Please update EMAIL_USER and EMAIL_PASS with real Gmail App Password credentials.');
+        console.warn('[EMAIL] ⚠ SMTP not configured — EMAIL_USER and EMAIL_PASS are still set to placeholder values. Update them in Render Environment Variables with a real Gmail + App Password.');
         return null;
     }
 
@@ -75,7 +75,7 @@ const sendInquiryNotification = async ({ adminEmail, senderName, senderEmail, su
     }
 
     const fromName = process.env.SMTP_FROM_NAME || 'UNI-VERSE CMS';
-    const fromEmail = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const fromEmail = process.env.EMAIL_USER || process.env.SMTP_USER;
 
     const mailOptions = {
         from: `"${fromName}" <${fromEmail}>`,
