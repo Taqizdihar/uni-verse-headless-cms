@@ -427,13 +427,17 @@ export function Inquiries() {
 
             {/* Modal Footer */}
             <div className="px-8 py-5 bg-zinc-50/50 border-t border-zinc-100 flex items-center justify-between">
-              <a
-                href={`mailto:${selectedInquiry.email}?subject=Re: ${selectedInquiry.subject || 'Pesan Anda'}`}
-                className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 text-amber-400 rounded-xl font-bold text-sm hover:bg-black transition-all active:scale-95 shadow-lg"
+              <button
+                onClick={() => {
+                  const to = encodeURIComponent(selectedInquiry.email);
+                  const su = encodeURIComponent(`Re: ${selectedInquiry.subject || 'Pesan Anda'}`);
+                  window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}`, '_blank');
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 text-amber-400 rounded-xl font-bold text-sm hover:bg-black transition-all active:scale-95 shadow-lg cursor-pointer"
               >
                 <Mail className="w-4 h-4" />
                 Balas via Email
-              </a>
+              </button>
               <button
                 onClick={() => {
                   setDeleteConfirm({ type: 'single', id: selectedInquiry.id });

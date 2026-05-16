@@ -6,11 +6,12 @@
 // which blocks ports 465 and 587 on free-tier instances.
 //
 // Required environment variables:
-//   SMTP_HOST    — smtp-relay.brevo.com
-//   SMTP_PORT    — 2525
-//   SMTP_USER    — Brevo login email
-//   SMTP_PASS    — Brevo SMTP key
-//   EMAIL_FROM   — Verified sender address
+//   SMTP_HOST      — smtp-relay.brevo.com
+//   SMTP_PORT      — 2525
+//   SMTP_USER      — Brevo login email
+//   SMTP_PASS      — Brevo SMTP key
+//   EMAIL_FROM     — Verified sender address
+//   FRONTEND_URL   — Frontend dashboard URL (Cloudflare pages.dev domain)
 // =============================================================
 
 const nodemailer = require('nodemailer');
@@ -113,7 +114,7 @@ const sendInquiryNotification = async (adminEmail, inquiryData) => {
                         <p style="color: #3f3f46; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message.length > 300 ? message.substring(0, 300) + '...' : message}</p>
                     </div>
 
-                    <a href="${cmsUrl || 'https://uni-verse-headless-cms.onrender.com'}/inquiries" 
+                    <a href="${process.env.FRONTEND_URL || cmsUrl || 'https://uni-verse-headless-cms.onrender.com'}/inquiries" 
                        style="display: inline-block; background: #18181b; color: #fbbf24; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.05em;">
                         Buka Dashboard CMS →
                     </a>
