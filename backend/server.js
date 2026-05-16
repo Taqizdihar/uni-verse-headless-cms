@@ -969,8 +969,7 @@ app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
 
         // 6. Send email notification (non-blocking — don't fail the request if email fails)
         if (admins.length > 0) {
-            sendInquiryNotification({
-                adminEmail: admins[0].email,
+            sendInquiryNotification(admins[0].email, {
                 senderName: name.trim(),
                 senderEmail: email.trim(),
                 subject: (subject || '').trim(),

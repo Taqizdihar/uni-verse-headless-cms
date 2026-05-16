@@ -151,8 +151,8 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
         })}
       </nav>
 
-      <div className={cn("px-3 py-2 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-2" : "px-3")}>
-          <div className={cn("bg-zinc-800/50 rounded-lg transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-2 flex-col gap-2" : "px-3 py-2")}>
+      <div className={cn("px-2 py-1.5 border-t border-zinc-800 flex-shrink-0 transition-all", isCollapsed ? "px-1.5" : "px-2")}>
+          <div className={cn("bg-zinc-800/50 rounded-lg transition-all duration-300 flex items-center justify-between", isCollapsed ? "p-1.5 flex-col gap-1" : "px-2.5 py-1.5")}>
               <div className="flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_6px_rgba(34,197,94,0.5)] shrink-0"></div>
                   {!isCollapsed && (
@@ -161,7 +161,7 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
               </div>
               <button 
                   onClick={onToggleCollapse}
-                  className="p-1 text-zinc-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                  className="p-0.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                   title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               >
                   {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
