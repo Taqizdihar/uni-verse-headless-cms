@@ -15,6 +15,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { deepSanitizeContent } = require('./utils/sanitizeHtml');
 // Cloudinary removed in favor of Kroombox CDN
 
 const app = express();
@@ -103,6 +104,8 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
             if (row.content && typeof row.content === 'string') {
                 try { row.content = JSON.parse(row.content); } catch(e) {}
             }
+            // Sanitize legacy &nbsp; entities from database records
+            if (row.content) row.content = deepSanitizeContent(row.content);
             let globalOptions = {};
             if (row.global_options) {
                 try { globalOptions = typeof row.global_options === 'string' ? JSON.parse(row.global_options) : row.global_options; } catch(e) {}
@@ -140,6 +143,8 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
             if (row.content && typeof row.content === 'string') {
                 try { row.content = JSON.parse(row.content); } catch(e) {}
             }
+            // Sanitize legacy &nbsp; entities from database records
+            if (row.content) row.content = deepSanitizeContent(row.content);
 
             return res.json({
                 type: 'post',
@@ -1200,9 +1205,11 @@ app.post('/api/pages', async (req, res) => {
 
     try {
         // Safely serialize content — default to '{}' if missing or not serializable
+        // Sanitize &nbsp; entities injected by rich text editors before persistence
         let jsonContent = '{}';
         if (content !== undefined && content !== null) {
-            jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
+            const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
+            jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
         }
 
         // Defaults: is_in_navbar syncs with status
@@ -1277,9 +1284,11 @@ app.put('/api/pages/:id', async (req, res) => {
         const finalNavbar = finalStatus === 'published' ? 1 : 0;
 
         // Safely serialize content — default to '{}' if missing
+        // Sanitize &nbsp; entities injected by rich text editors before persistence
         let jsonContent = '{}';
         if (content !== undefined && content !== null) {
-            jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
+            const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
+            jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
         }
 
         // ✅ Priority is intentionally EXCLUDED from this query.
@@ -1551,7 +1560,9 @@ app.post('/api/posts', async (req, res) => {
     const { title, slug, content, excerpt, category, status } = req.body;
     const tid = getTenantId(req);
     try {
-        const jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
+        // Sanitize &nbsp; entities injected by rich text editors before persistence
+        const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
+        const jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
         const [result] = await db.execute(
             'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [tid, title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published']
@@ -1567,7 +1578,9 @@ app.put('/api/posts/:id', async (req, res) => {
     const { id } = req.params;
     const tid = getTenantId(req);
     try {
-        const jsonContent = typeof content === 'object' ? JSON.stringify(content) : content;
+        // Sanitize &nbsp; entities injected by rich text editors before persistence
+        const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
+        const jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
         await db.execute(
             'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, category = ?, status = ? WHERE id = ? AND tenant_id = ?',
             [title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published', id, tid]

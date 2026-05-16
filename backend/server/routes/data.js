@@ -17,6 +17,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
 const apiAuth = require('../../middleware/apiAuth');
+const { deepSanitizeContent } = require('../../utils/sanitizeHtml');
 
 // Apply API-key authentication to all data routes
 router.use(apiAuth);
@@ -104,6 +105,11 @@ router.get('/posts', async (req, res) => {
             }
             if (post.content) {
                 post.content = normalizeContentImages(post.content);
+                // Sanitize legacy &nbsp; entities from database records
+                post.content = deepSanitizeContent(post.content);
+            }
+            if (post.excerpt) {
+                post.excerpt = typeof post.excerpt === 'string' ? post.excerpt.replace(/&nbsp;/g, ' ').replace(/&#160;/g, ' ').replace(/\u00A0/g, ' ') : post.excerpt;
             }
             return post;
         });
@@ -138,6 +144,8 @@ router.get('/posts/:slug', async (req, res) => {
         }
         if (post.content) {
             post.content = normalizeContentImages(post.content);
+            // Sanitize legacy &nbsp; entities from database records
+            post.content = deepSanitizeContent(post.content);
         }
 
         res.json(post);
@@ -246,6 +254,8 @@ router.get('/pages', async (req, res) => {
             }
             if (page.content) {
                 page.content = normalizeContentImages(page.content);
+                // Sanitize legacy &nbsp; entities from database records
+                page.content = deepSanitizeContent(page.content);
             }
             // Expose is_contact_form_active at top level for contact pages
             if (page.content && typeof page.content === 'object') {
@@ -284,6 +294,8 @@ router.get('/pages/:slug', async (req, res) => {
         }
         if (page.content) {
             page.content = normalizeContentImages(page.content);
+            // Sanitize legacy &nbsp; entities from database records
+            page.content = deepSanitizeContent(page.content);
         }
         // Expose is_contact_form_active at top level for contact pages
         if (page.content && typeof page.content === 'object') {
