@@ -430,8 +430,9 @@ export function Inquiries() {
               <button
                 onClick={() => {
                   const to = encodeURIComponent(selectedInquiry.email);
-                  const su = encodeURIComponent(`Re: ${selectedInquiry.subject || 'Pesan Anda'}`);
-                  window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}`, '_blank');
+                  const su = encodeURIComponent('Re: ' + (selectedInquiry.subject || 'Pesan Anda'));
+                  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + to + '&su=' + su;
+                  window.open(gmailUrl, '_blank', 'noopener,noreferrer');
                 }}
                 className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 text-amber-400 rounded-xl font-bold text-sm hover:bg-black transition-all active:scale-95 shadow-lg cursor-pointer"
               >

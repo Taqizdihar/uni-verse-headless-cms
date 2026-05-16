@@ -114,7 +114,7 @@ const sendInquiryNotification = async (adminEmail, inquiryData) => {
                         <p style="color: #3f3f46; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message.length > 300 ? message.substring(0, 300) + '...' : message}</p>
                     </div>
 
-                    <a href="${process.env.FRONTEND_URL || cmsUrl || 'https://uni-verse-headless-cms.onrender.com'}/inquiries" 
+                    <a href="${process.env.FRONTEND_URL || 'https://uni-verse-headless-cms.pages.dev'}/inquiries" 
                        style="display: inline-block; background: #18181b; color: #fbbf24; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.05em;">
                         Buka Dashboard CMS →
                     </a>
