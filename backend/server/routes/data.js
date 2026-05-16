@@ -262,6 +262,42 @@ router.get('/pages', async (req, res) => {
 });
 
 // =============================================================
+// GET /pages/:slug — Get a single published page by slug
+// =============================================================
+router.get('/pages/:slug', async (req, res) => {
+    try {
+        const tenantId = req.publicTenantId;
+        const { slug } = req.params;
+
+        const [rows] = await db.execute(
+            "SELECT * FROM pages WHERE tenant_id = ? AND slug = ? AND status = 'published' LIMIT 1",
+            [tenantId, slug]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Page not found.' });
+        }
+
+        const page = rows[0];
+        if (page.featured_image) {
+            page.featured_image = normalizeUrl(page.featured_image);
+        }
+        if (page.content) {
+            page.content = normalizeContentImages(page.content);
+        }
+        // Expose is_contact_form_active at top level for contact pages
+        if (page.content && typeof page.content === 'object') {
+            page.is_contact_form_active = page.content.is_contact_form_active !== false;
+        }
+
+        res.json(page);
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Get single page:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
 // GET /navigation — Pages visible in the navbar
 // =============================================================
 // Returns title and slug for pages where is_in_navbar = 1 and
