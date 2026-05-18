@@ -10,6 +10,7 @@ const POST_CATEGORIES = [
   { id: 'Produk', label: 'Produk', icon: ShoppingBag, color: 'text-amber-500', bg: 'bg-amber-50' },
   { id: 'Lowongan', label: 'Lowongan', icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50' },
   { id: 'Pengumuman', label: 'Pengumuman', icon: Megaphone, color: 'text-rose-500', bg: 'bg-rose-50' },
+  { id: 'Template Post', label: 'Template Post', icon: LayoutTemplate, color: 'text-indigo-500', bg: 'bg-indigo-50' },
 ];
 
 export interface Block {
@@ -387,7 +388,9 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                   </div>
                 ) : (
                   <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50 divide-y divide-zinc-100">
-                    {availablePosts.map((post: any) => {
+                    {availablePosts
+                      .filter(post => !block.data.category || block.data.category === 'all' || post.category === block.data.category)
+                      .map((post: any) => {
                       const isSelected = selectedIds.includes(post.id);
                       const catMeta = POST_CATEGORIES.find(c => c.id === post.category);
                       return (
