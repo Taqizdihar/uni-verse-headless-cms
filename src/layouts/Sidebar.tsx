@@ -50,6 +50,7 @@ interface SidebarProps {
 export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const { settings, activeRole, token, activeTenantId } = useCMS();
   const [unreadInquiries, setUnreadInquiries] = useState(0);
+  const [pendingComments, setPendingComments] = useState(0);
 
   // Determine effective role (fallback to 'admin' if not set — own workspace)
   const effectiveRole = activeRole || 'admin';
@@ -75,6 +76,20 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
         if (res.ok) {
           const data = await res.json();
           setUnreadInquiries(data.unread || 0);
+        }
+      } catch (e) { /* silent */ }
+
+      // Fetch pending comments count
+      try {
+        const res2 = await fetch(`${import.meta.env.VITE_API_URL}/api/comments/count`, {
+          headers: {
+            Authorization: `Bearer ${t}`,
+            ...(tid ? { 'x-active-tenant': String(tid) } : {})
+          }
+        });
+        if (res2.ok) {
+          const data2 = await res2.json();
+          setPendingComments(data2.pending || 0);
         }
       } catch (e) { /* silent */ }
     };
@@ -145,6 +160,14 @@ export function Sidebar({ onClose, isCollapsed = false, onToggleCollapse }: Side
               )}
               {item.name === 'Pesan Masuk' && unreadInquiries > 0 && isCollapsed && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-zinc-900 shadow-lg" />
+              )}
+              {item.name === 'Komentar' && pendingComments > 0 && !isCollapsed && (
+                <span className="ml-auto flex-shrink-0 min-w-[20px] h-5 flex items-center justify-center px-1.5 bg-amber-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-amber-500/30">
+                  {pendingComments > 99 ? '99+' : pendingComments}
+                </span>
+              )}
+              {item.name === 'Komentar' && pendingComments > 0 && isCollapsed && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-zinc-900 shadow-lg" />
               )}
             </NavLink>
           );

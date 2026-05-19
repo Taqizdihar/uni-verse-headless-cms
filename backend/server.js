@@ -2960,6 +2960,95 @@ app.post('/api/inquiries/bulk-delete', async (req, res) => {
     }
 });
 
+// =============================================================
+// ★ COMMENTS MANAGEMENT (Protected — JWT required) ★
+// =============================================================
+
+// GET /api/comments — List all comments for the tenant (with post title JOIN)
+app.get('/api/comments', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const { search, status } = req.query;
+
+        let query = `
+            SELECT c.*, p.title as post_title
+            FROM comments c
+            LEFT JOIN posts p ON c.post_id = p.id
+            WHERE c.tenant_id = ?
+        `;
+        const params = [tid];
+
+        if (status && status !== 'all') {
+            query += ' AND c.status = ?';
+            params.push(status);
+        }
+
+        if (search) {
+            query += ' AND (c.author_name LIKE ? OR c.author_email LIKE ? OR c.content LIKE ?)';
+            const searchWildcard = `%${search}%`;
+            params.push(searchWildcard, searchWildcard, searchWildcard);
+        }
+
+        query += ' ORDER BY c.created_at DESC';
+
+        const [rows] = await db.execute(query, params);
+        res.json(rows);
+    } catch (error) {
+        console.error('[API ERROR] Get comments:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// GET /api/comments/count — Pending count for sidebar badge
+app.get('/api/comments/count', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const [rows] = await db.execute(
+            "SELECT COUNT(*) as pending FROM comments WHERE tenant_id = ? AND status = 'pending'",
+            [tid]
+        );
+        res.json({ pending: rows[0].pending });
+    } catch (error) {
+        console.error('[API ERROR] Get comment count:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// PATCH /api/comments/:id/status — Update comment status (approved, pending, spam)
+app.patch('/api/comments/:id/status', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        const { status } = req.body;
+        const validStatuses = ['pending', 'approved', 'spam'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+        }
+        await db.execute(
+            'UPDATE comments SET status = ? WHERE id = ? AND tenant_id = ?',
+            [status, req.params.id, tid]
+        );
+        res.json({ success: true, status });
+    } catch (error) {
+        console.error('[API ERROR] Update comment status:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// DELETE /api/comments/:id — Permanently delete a comment
+app.delete('/api/comments/:id', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        await db.execute(
+            'DELETE FROM comments WHERE id = ? AND tenant_id = ?',
+            [req.params.id, tid]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[API ERROR] Delete comment:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // Catch-All for 404
 app.use((req, res) => {
     console.log('404 Route Not Found:', req.url);
@@ -3123,5 +3212,20 @@ app.listen(PORT, '0.0.0.0', async () => {
         }
     } catch (e) {
         console.warn('[MIGRATION ERROR] Could not create contact_inquiries table:', e.message);
+    }
+
+    // Auto-migration: Extend comments status ENUM to include 'spam'
+    try {
+        const [columns] = await db.execute("SHOW COLUMNS FROM comments LIKE 'status'");
+        if (columns.length > 0) {
+            const currentType = columns[0].Type || '';
+            if (!currentType.includes('spam')) {
+                console.log('[MIGRATION] Extending comments.status ENUM to include spam...');
+                await db.execute("ALTER TABLE comments MODIFY COLUMN status ENUM('pending', 'approved', 'rejected', 'spam') DEFAULT 'pending'");
+                console.log('[MIGRATION] ✓ comments.status ENUM updated.');
+            }
+        }
+    } catch (e) {
+        console.warn('[MIGRATION ERROR] Could not update comments status ENUM:', e.message);
     }
 });

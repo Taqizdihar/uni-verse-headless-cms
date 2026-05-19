@@ -45,12 +45,13 @@ export interface MediaItem {
 
 export interface CommentItem {
   id: number;
-  authorName: string;
-  authorEmail: string;
+  post_id: number;
+  author_name: string;
+  author_email: string;
   content: string;
-  postTitle: string;
-  date: string;
-  status: 'Pending' | 'Approved' | 'Spam';
+  post_title: string;
+  created_at: string;
+  status: 'pending' | 'approved' | 'spam';
 }
 
 export interface LayoutBlock {
@@ -128,10 +129,11 @@ interface CMSContextType {
   togglePluginStatus: (id: number, currentStatus: boolean) => Promise<void>;
   
   addActivity: (activity: Omit<ActivityItem, 'id' | 'date'>) => void;
-  // Comment operations kept local for now as not explicitly requested for backend integration yet
-  approveComment: (id: number) => void;
-  markCommentAsSpam: (id: number) => void;
-  deleteComment: (id: number) => void;
+  // Comment operations (backed by real API)
+  approveComment: (id: number) => Promise<void>;
+  markCommentAsSpam: (id: number) => Promise<void>;
+  deleteComment: (id: number) => Promise<void>;
+  fetchComments: () => Promise<void>;
   togglePageStatus: (id: number, currentStatus: string) => Promise<void>;
   togglePostStatus: (id: number, currentStatus: string) => Promise<void>;
 }
@@ -198,7 +200,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         fetch(`${import.meta.env.VITE_API_URL}/api/media`, options),
         fetch(`${import.meta.env.VITE_API_URL}/api/users`, options),
         fetch(`${import.meta.env.VITE_API_URL}/api/plugins`, options),
-        fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats`, options)
+        fetch(`${import.meta.env.VITE_API_URL}/api/dashboard/stats`, options),
+        fetch(`${import.meta.env.VITE_API_URL}/api/comments`, options)
       ]);
 
       // Check for 403 Forbidden on any response
@@ -214,7 +217,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
          return;
       }
 
-      const [settingsRes, pagesRes, layoutRes, postsRes, mediaRes, usersRes, pluginsRes, dashboardRes] = await Promise.all(
+      const [settingsRes, pagesRes, layoutRes, postsRes, mediaRes, usersRes, pluginsRes, dashboardRes, commentsRes] = await Promise.all(
         responses.map(res => res.ok ? res.json() : null)
       );
       
@@ -236,6 +239,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       if (Array.isArray(usersRes)) setUsers(usersRes);
       if (Array.isArray(pluginsRes)) setPlugins(pluginsRes);
       if (dashboardRes && dashboardRes.totalUsers !== undefined) setTotalUsers(dashboardRes.totalUsers);
+      if (Array.isArray(commentsRes)) setComments(commentsRes);
       
     } catch (err) {
       console.error('Error fetching CMS data from backend:', err);
@@ -626,15 +630,53 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setActivities(prev => [newActivity, ...prev]);
   };
 
-  // Local-only state mutators for non-connected features
-  const approveComment = (id: number) => {
-    setComments(prev => prev.map(c => c.id === id ? { ...c, status: 'Approved' } : c));
+  // Backend-backed comment operations
+  const fetchComments = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/comments`, { headers: getHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch comments:', err);
+    }
   };
-  const markCommentAsSpam = (id: number) => {
-    setComments(prev => prev.map(c => c.id === id ? { ...c, status: 'Spam' } : c));
+
+  const approveComment = async (id: number) => {
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/comments/${id}/status`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ status: 'approved' })
+      });
+      if (resp.ok) {
+        setComments(prev => prev.map(c => c.id === id ? { ...c, status: 'approved' } : c));
+      }
+    } catch (err) { console.error('Failed to approve comment:', err); }
   };
-  const deleteComment = (id: number) => {
-    setComments(prev => prev.filter(c => c.id !== id));
+  const markCommentAsSpam = async (id: number) => {
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/comments/${id}/status`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ status: 'spam' })
+      });
+      if (resp.ok) {
+        setComments(prev => prev.map(c => c.id === id ? { ...c, status: 'spam' } : c));
+      }
+    } catch (err) { console.error('Failed to mark comment as spam:', err); }
+  };
+  const deleteComment = async (id: number) => {
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/comments/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      if (resp.ok) {
+        setComments(prev => prev.filter(c => c.id !== id));
+      }
+    } catch (err) { console.error('Failed to delete comment:', err); }
   };
 
   const switchWorkspace = async (tenantId: number, role: string) => {
@@ -716,7 +758,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       savePage, deletePage, 
       savePost, deletePost, 
       addMedia, deleteMedia, 
-      approveComment, markCommentAsSpam, deleteComment, 
+      approveComment, markCommentAsSpam, deleteComment, fetchComments,
       addUser, deleteUser,
       togglePluginStatus, updateSettings, updateLayout,
       togglePageStatus, togglePostStatus,
