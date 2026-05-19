@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Zap, Eye, EyeOff, ChevronDown, Play, Loader2, Copy, Check, Terminal, AlertTriangle, Info } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useCMS } from '../context/CMSContext';
 
 const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
 
@@ -95,6 +96,9 @@ const ENDPOINT_OPTIONS: EndpointOption[] = [
 ];
 
 export function ApiSandbox() {
+  const { user, activeRole } = useCMS();
+  const isGuest = activeRole === 'guest' || user?.role === 'guest';
+
   const [apiKey, setApiKey] = useState('');
   const [isKeyVisible, setIsKeyVisible] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -272,12 +276,14 @@ export function ApiSandbox() {
               </label>
               <div className="relative flex items-center">
                 <input
-                  type={isKeyVisible ? 'text' : 'password'}
+                  type={(!isGuest && isKeyVisible) ? 'text' : 'password'}
                   value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full pl-4 pr-24 py-3.5 bg-white border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-sm"
-                  placeholder="Masukkan API Key Anda..."
+                  onChange={(e) => !isGuest && setApiKey(e.target.value)}
+                  readOnly={isGuest}
+                  className={`w-full pl-4 pr-24 py-3.5 bg-white border border-zinc-200 rounded-xl outline-none font-mono text-zinc-700 text-xs focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-sm ${isGuest ? 'cursor-not-allowed opacity-70 bg-zinc-50' : ''}`}
+                  placeholder={isGuest ? '••••••••••••••••' : 'Masukkan API Key Anda...'}
                 />
+                {!isGuest && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                   <button
                     type="button"
@@ -287,6 +293,7 @@ export function ApiSandbox() {
                     {isKeyVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                )}
               </div>
             </div>
 

@@ -7,7 +7,8 @@ import { NotificationModal } from '../components/ui/NotificationModal';
 import { MediaPicker } from '../components/MediaPicker';
 
 export function Settings() {
-  const { settings, updateSettings, fetchAllData, media, user } = useCMS();
+  const { settings, updateSettings, fetchAllData, media, user, activeRole } = useCMS();
+  const isGuest = activeRole === 'guest' || user?.role === 'guest';
   const [formData, setFormData] = useState({
     site_name: '',
     tagline: '',
@@ -155,7 +156,7 @@ export function Settings() {
         )}
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOpen(true); }} className="space-y-6">
+      <form onSubmit={(e) => { e.preventDefault(); if (!isGuest) setIsConfirmOpen(true); }} className="space-y-6">
         {/* Tabs moved outside the grid to align sidebar height properly */}
         <div className="flex space-x-2 border-b border-zinc-200 mb-6 pb-2">
           <button type="button" onClick={() => setActiveTab('general')} className={`px-4 py-2 font-bold text-sm rounded-t-xl transition-all ${activeTab === 'general' ? 'text-amber-600 border-b-2 border-amber-500' : 'text-zinc-500 hover:text-zinc-800'}`}>Pengaturan Umum</button>
@@ -179,12 +180,12 @@ export function Settings() {
                         <div>
                             <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Logo Website</label>
                             <div className="flex gap-4 items-center">
-                                <div className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center bg-zinc-50 overflow-hidden cursor-pointer hover:border-amber-400 transition-colors" onClick={() => openMediaPicker('logo_url')}>
+                                <div className={`w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 flex items-center justify-center bg-zinc-50 overflow-hidden transition-colors ${isGuest ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:border-amber-400'}`} onClick={() => !isGuest && openMediaPicker('logo_url')}>
                                     {formData.logo_url ? <img src={formData.logo_url} alt="Logo" className="w-full h-full object-contain p-1" /> : <ImageIcon className="w-6 h-6 text-zinc-300" />}
                                 </div>
                                 <div className="flex-1">
                                     <input type="text" readOnly value={formData.logo_url} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs outline-none text-zinc-500 mb-2 cursor-not-allowed" placeholder="Pilih gambar dari Media..." />
-                                    <button type="button" onClick={() => openMediaPicker('logo_url')} className="text-xs font-bold text-amber-600 hover:text-amber-700">Telusuri Media</button>
+                                    {!isGuest && <button type="button" onClick={() => openMediaPicker('logo_url')} className="text-xs font-bold text-amber-600 hover:text-amber-700">Telusuri Media</button>}
                                 </div>
                             </div>
                         </div>
@@ -197,7 +198,8 @@ export function Settings() {
                                     required 
                                     value={formData.site_name} 
                                     onChange={e => handleInputChange('site_name', e.target.value)}
-                                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-zinc-900" 
+                                    disabled={isGuest}
+                                    className={`w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-zinc-900 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                     placeholder="Uni-Inside CMS" 
                                 />
                             </div>
@@ -209,7 +211,8 @@ export function Settings() {
                                         type="email" 
                                         value={formData.support_email} 
                                         onChange={e => handleInputChange('support_email', e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600" 
+                                        disabled={isGuest}
+                                        className={`w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                         placeholder="support@example.com" 
                                     />
                                 </div>
@@ -222,7 +225,8 @@ export function Settings() {
                                 type="text" 
                                 value={formData.tagline} 
                                 onChange={e => handleInputChange('tagline', e.target.value)}
-                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 italic" 
+                                disabled={isGuest}
+                                className={`w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 italic ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                 placeholder="The Next-Gen Headless Engine" 
                             />
                         </div>
@@ -235,7 +239,8 @@ export function Settings() {
                                     type="url" 
                                     value={formData.frontend_url} 
                                     onChange={e => handleInputChange('frontend_url', e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-blue-600" 
+                                    disabled={isGuest}
+                                    className={`w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-bold text-blue-600 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                     placeholder="https://uninside.app | kroombox.com | netlify.app | dll." 
                                 />
                             </div>
@@ -264,7 +269,8 @@ export function Settings() {
                                 type="text" 
                                 value={formData.footer_config.copyright_text} 
                                 onChange={(e) => handleFooterChange('copyright_text', '', e.target.value)}
-                                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600" 
+                                disabled={isGuest}
+                                className={`w-full px-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                 placeholder="© 2026 Uni-Inside. All rights reserved." 
                             />
                         </div>
@@ -273,12 +279,12 @@ export function Settings() {
                         <div className="border-t border-zinc-100 pt-6">
                             <div className="flex justify-between items-center mb-4 ml-1">
                                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Ikon Media Sosial</label>
-                                <button type="button" onClick={() => addFooterItem('social_links')} className="text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"><Plus className="w-3 h-3" /> Tambah Sosial</button>
+                                {!isGuest && <button type="button" onClick={() => addFooterItem('social_links')} className="text-xs text-amber-600 font-bold flex items-center gap-1 hover:text-amber-700"><Plus className="w-3 h-3" /> Tambah Sosial</button>}
                             </div>
                             <div className="space-y-3">
                                 {formData.footer_config.social_links.map((social: any, idx: number) => (
                                     <div key={idx} className="flex gap-3 items-center animate-in slide-in-from-top-2 duration-200">
-                                        <select value={social.icon} onChange={(e) => handleFooterChange('social_links', 'icon', e.target.value, idx)} className="w-32 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 font-bold">
+                                        <select value={social.icon} onChange={(e) => handleFooterChange('social_links', 'icon', e.target.value, idx)} disabled={isGuest} className={`w-32 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 font-bold ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`}>
                                             <option value="instagram">Instagram</option>
                                             <option value="tiktok">TikTok</option>
                                             <option value="youtube">YouTube</option>
@@ -286,8 +292,8 @@ export function Settings() {
                                             <option value="twitter">Twitter / X</option>
                                             <option value="linkedin">LinkedIn</option>
                                         </select>
-                                        <input type="text" value={social.url} onChange={(e) => handleFooterChange('social_links', 'url', e.target.value, idx)} className="flex-1 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" placeholder="URL Lengkap..." />
-                                        <button type="button" onClick={() => removeFooterItem('social_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>
+                                        <input type="text" value={social.url} onChange={(e) => handleFooterChange('social_links', 'url', e.target.value, idx)} disabled={isGuest} className={`flex-1 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} placeholder="URL Lengkap..." />
+                                        {!isGuest && <button type="button" onClick={() => removeFooterItem('social_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>}
                                     </div>
                                 ))}
                                 {formData.footer_config.social_links.length === 0 && <p className="text-xs text-zinc-400 italic ml-1">Belum ada media sosial ditambahkan.</p>}
@@ -298,6 +304,7 @@ export function Settings() {
                         <div className="border-t border-zinc-100 pt-6 mt-6">
                             <div className="flex justify-between items-center mb-4 ml-1">
                                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Tautan Cepat</label>
+                                {!isGuest && (
                                 <button 
                                     type="button" 
                                     onClick={() => addFooterItem('quick_links')} 
@@ -306,6 +313,7 @@ export function Settings() {
                                 >
                                     <Plus className="w-3 h-3" /> Tambah Tautan {formData.footer_config.quick_links.length >= 5 && '(Maks. 5)'}
                                 </button>
+                                )}
                             </div>
                             <div className="space-y-3">
                                 {formData.footer_config.quick_links.map((link: any, idx: number) => (
@@ -314,7 +322,8 @@ export function Settings() {
                                             type="text" 
                                             value={link.label} 
                                             onChange={(e) => handleFooterChange('quick_links', 'label', e.target.value, idx)} 
-                                            className="w-40 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 font-bold" 
+                                            disabled={isGuest}
+                                            className={`w-40 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 font-bold ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                             placeholder="Label Tautan" 
                                         />
                                         <div className="relative flex-1">
@@ -323,11 +332,12 @@ export function Settings() {
                                                 type="text" 
                                                 value={link.url} 
                                                 onChange={(e) => handleFooterChange('quick_links', 'url', e.target.value, idx)} 
-                                                className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400" 
+                                                disabled={isGuest}
+                                                className={`w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-sm outline-none focus:border-amber-400 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                                 placeholder="https://..." 
                                             />
                                         </div>
-                                        <button type="button" onClick={() => removeFooterItem('quick_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>
+                                        {!isGuest && <button type="button" onClick={() => removeFooterItem('quick_links', idx)} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"><Trash className="w-4 h-4" /></button>}
                                     </div>
                                 ))}
                                 {formData.footer_config.quick_links.length === 0 && <p className="text-xs text-zinc-400 italic ml-1">Belum ada tautan cepat ditambahkan.</p>}
@@ -343,7 +353,8 @@ export function Settings() {
                                     type="text" 
                                     value={formData.footer_config.google_maps_url} 
                                     onChange={(e) => handleFooterChange('google_maps_url', '', e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600" 
+                                    disabled={isGuest}
+                                    className={`w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
                                     placeholder="Tempel URL embed Google Maps atau kode <iframe>..." 
                                 />
                             </div>

@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { NotificationModal } from '../components/ui/NotificationModal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
+import { useCMS } from '../context/CMSContext';
 
 const PRODUCTION_BASE_URL = 'https://uni-verse-headless-cms.onrender.com';
 
@@ -184,6 +185,9 @@ const PUBLIC_ENDPOINTS = [
 ];
 
 export function ApiIntegration() {
+  const { user, activeRole } = useCMS();
+  const isGuest = activeRole === 'guest' || user?.role === 'guest';
+
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
   const [isKeyConfirmOpen, setIsKeyConfirmOpen] = useState(false);
@@ -193,6 +197,7 @@ export function ApiIntegration() {
   const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isGuest) return; // Guests must not fetch the API key
     const fetchApiKey = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -208,7 +213,7 @@ export function ApiIntegration() {
       }
     }
     fetchApiKey();
-  }, []);
+  }, [isGuest]);
 
   const handleRegenerateApiKey = async () => {
     setIsKeyConfirmOpen(false);
@@ -402,6 +407,7 @@ export function ApiIntegration() {
         </div>
 
         {/* Sidebar Controls */}
+        {!isGuest && (
         <div className="space-y-6">
           <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm sticky top-8">
             <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
@@ -470,6 +476,7 @@ export function ApiIntegration() {
             </div>
           </div>
         </div>
+        )}
       </div>
       
       <ConfirmModal 
