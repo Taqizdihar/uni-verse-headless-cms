@@ -19,11 +19,12 @@ export function Register() {
     setError('');
     setLoading(true);
     try {
-      console.log('Sending data to backend...', { name, email, password });
+      const cleanEmail = email.trim().toLowerCase();
+      console.log('Sending data to backend...', { name, email: cleanEmail, password });
       
       // 1. Register
       const regRes = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, 
-        { name, email, password },
+        { name, email: cleanEmail, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
       

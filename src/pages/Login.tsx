@@ -62,8 +62,9 @@ export function Login() {
     setError('');
     setLoading(true);
     try {
-      console.log(`[FRONTEND] Attempting login for ${email}`);
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email, password });
+      const cleanEmail = email.trim().toLowerCase();
+      console.log(`[FRONTEND] Attempting login for ${cleanEmail}`);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, { email: cleanEmail, password });
       
       const { token, user } = res.data;
       

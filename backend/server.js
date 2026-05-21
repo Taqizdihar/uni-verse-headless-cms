@@ -630,11 +630,12 @@ app.get('/api/admin/start-migration', authenticateToken, verifySuperAdmin, async
 
 app.post('/api/auth/register', async (req, res) => {
     console.log('[AUTH] Register request received:', req.body);
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
     try {
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
+        email = email.trim().toLowerCase();
         console.log(`[AUTH] Checking for existing user: ${email}`);
         const [existing] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
         if (existing.length > 0) {
@@ -690,12 +691,13 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { email, password } = req.body || {};
+        let { email, password } = req.body || {};
         
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
+        email = email.trim().toLowerCase();
         console.log(`[AUTH] Login attempt for email: ${email}`);
 
         // 1. Search for user by email
