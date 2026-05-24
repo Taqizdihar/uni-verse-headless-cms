@@ -92,6 +92,24 @@ const PUBLIC_ENDPOINTS = [
 }`
   },
   { 
+    name: 'Daftar Kategori Post', 
+    method: 'GET', 
+    path: '/api/v1/post-categories', 
+    desc: 'Mengambil daftar seluruh kategori postingan kustom yang dibuat oleh admin.',
+    response: `{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "tenant_id": 1,
+      "name": "Edukasi",
+      "slug": "edukasi",
+      "created_at": "2026-05-10T09:00:00Z"
+    }
+  ]
+}`
+  },
+  { 
     name: 'Daftar Post/Berita', 
     method: 'GET', 
     path: '/api/v1/public/posts', 

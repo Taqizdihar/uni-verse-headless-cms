@@ -47,6 +47,11 @@ const ENDPOINT_OPTIONS: EndpointOption[] = [
     paramPlaceholder: 'contoh: tentang-kami',
   },
   {
+    label: 'Daftar Kategori Post',
+    method: 'GET',
+    path: '/api/v1/post-categories',
+  },
+  {
     label: 'Daftar Post/Berita',
     method: 'GET',
     path: '/api/v1/public/posts',

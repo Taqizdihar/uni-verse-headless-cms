@@ -400,16 +400,23 @@ export function Posts() {
                 placeholder="Tulis artikel lengkap di sini..."
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tags (Pisahkan dengan koma)</label>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tanggal Artikel</label>
+                <div className="relative">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
+                  <input type="datetime-local" value={formData.article_date || ''} onChange={e => handleInputChange('article_date', e.target.value)} className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Tags (Pisahkan koma)</label>
                 <div className="relative">
                   <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
                   <input type="text" value={formData.tags || ''} onChange={e => handleInputChange('tags', e.target.value)} placeholder="Misal: Teknologi, Edukasi" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Estimasi Waktu Baca</label>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Waktu Baca</label>
                 <div className="relative">
                   <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300" />
                   <input type="text" value={formData.reading_time || ''} onChange={e => handleInputChange('reading_time', e.target.value)} placeholder="Misal: 5 Menit" className="w-full pl-12 pr-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all" />
