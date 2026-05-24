@@ -95,7 +95,11 @@ router.get('/posts', async (req, res) => {
     try {
         const tenantId = req.publicTenantId;
         const [posts] = await db.execute(
-            "SELECT * FROM posts WHERE tenant_id = ? AND status = 'published' ORDER BY created_at DESC", 
+            `SELECT posts.*, post_categories.name AS category_name, post_categories.slug AS category_slug
+             FROM posts
+             LEFT JOIN post_categories ON posts.category_id = post_categories.id
+             WHERE posts.tenant_id = ? AND posts.status = 'published'
+             ORDER BY posts.created_at DESC`, 
             [tenantId]
         );
         
@@ -130,7 +134,11 @@ router.get('/posts/:slug', async (req, res) => {
         const { slug } = req.params;
 
         const [rows] = await db.execute(
-            "SELECT * FROM posts WHERE tenant_id = ? AND slug = ? AND status = 'published' LIMIT 1",
+            `SELECT posts.*, post_categories.name AS category_name, post_categories.slug AS category_slug
+             FROM posts
+             LEFT JOIN post_categories ON posts.category_id = post_categories.id
+             WHERE posts.tenant_id = ? AND posts.slug = ? AND posts.status = 'published'
+             LIMIT 1`,
             [tenantId, slug]
         );
 

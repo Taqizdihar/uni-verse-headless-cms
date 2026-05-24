@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter, DownloadCloud } from 'lucide-react';
+import { Plus, X, Send, Settings, Tag, Trash2, CheckCircle, Image as ImageIcon, Pencil, Calendar, MapPin, Users, Clock, AlignLeft, EyeOff, Eye, Copy, Loader2, Newspaper, ShoppingBag, Briefcase, Megaphone, AlertTriangle, ArrowRight, DollarSign, Info, ListChecks, Star, Globe, Search, Filter, DownloadCloud, ListPlus, Puzzle } from 'lucide-react';
 import api from '../lib/api';
 import { useCMS } from '../context/CMSContext';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NotificationModal } from '../components/ui/NotificationModal';
 import RichTextEditor from '../components/RichTextEditor';
 import { MediaPicker } from '../components/MediaPicker';
+import { PostCategoryModal } from '../components/PostCategoryModal';
+import { BlockBuilder, Block } from '../components/BlockBuilder';
 
-const CATEGORIES = [
+const TEMPLATE_TYPES = [
   { id: 'Artikel', label: 'Artikel', icon: Newspaper, color: 'text-blue-500', bg: 'bg-blue-50', badge: 'bg-blue-100 text-blue-700 border-blue-200', description: 'Berita atau artikel informatif' },
   { id: 'Event', label: 'Event', icon: Calendar, color: 'text-emerald-500', bg: 'bg-emerald-50', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200', description: 'Kegiatan, seminar, atau pertemuan' },
   { id: 'Produk', label: 'Produk', icon: ShoppingBag, color: 'text-amber-500', bg: 'bg-amber-50', badge: 'bg-amber-100 text-amber-700 border-amber-200', description: 'Informasi produk atau jasa' },
   { id: 'Lowongan', label: 'Lowongan', icon: Briefcase, color: 'text-purple-500', bg: 'bg-purple-50', badge: 'bg-purple-100 text-purple-700 border-purple-200', description: 'Kesempatan karir atau pekerjaan' },
   { id: 'Pengumuman', label: 'Pengumuman', icon: Megaphone, color: 'text-rose-500', bg: 'bg-rose-50', badge: 'bg-rose-100 text-rose-700 border-rose-200', description: 'Informasi penting atau siaran' },
   { id: 'Template', label: 'Template', icon: DownloadCloud, color: 'text-indigo-500', bg: 'bg-indigo-50', badge: 'bg-indigo-100 text-indigo-700 border-indigo-200', description: 'Sediakan file, template, atau repositori aset untuk diunduh.' },
+  { id: 'Custom', label: 'Custom', icon: Puzzle, color: 'text-teal-500', bg: 'bg-teal-50', badge: 'bg-teal-100 text-teal-700 border-teal-200', description: 'Gunakan Dynamic Blocks untuk tata letak bebas.' },
 ];
 
 export function Posts() {
@@ -23,6 +26,7 @@ export function Posts() {
   const [confirmCategoryChange, setConfirmCategoryChange] = useState<{ isOpen: boolean, nextCategory: string | null }>({ isOpen: false, nextCategory: null });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Semua Kategori');
+  const [isManageCategoryOpen, setIsManageCategoryOpen] = useState(false);
   
   const [toggling, setToggling] = useState<{ [key: number]: boolean }>({});
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -30,7 +34,19 @@ export function Posts() {
   const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('Artikel');
   const [formData, setFormData] = useState<any>({});
+  const [customBlocks, setCustomBlocks] = useState<Block[]>([]);
+  const [postCategories, setPostCategories] = useState<any[]>([]);
+  const [selectedPostCategoryId, setSelectedPostCategoryId] = useState<number | null>(null);
   const [settings, setSettings] = useState<any>(null);
+
+  const fetchPostCategories = async () => {
+    try {
+      const response = await api.get('/api/v1/post-categories');
+      setPostCategories(response.data);
+    } catch (err) {
+      console.error('Failed to fetch post categories:', err);
+    }
+  };
 
   React.useEffect(() => {
     const fetchSettings = async () => {
@@ -42,6 +58,7 @@ export function Posts() {
       }
     };
     fetchSettings();
+    fetchPostCategories();
   }, []);
   
   // Confirmation State
@@ -56,6 +73,12 @@ export function Posts() {
   // Media Picker State
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [pickerContext, setPickerContext] = useState<{ field: string, index?: number, subField?: string } | null>(null);
+  const [pickerContextForBlock, setPickerContextForBlock] = useState<any>(null);
+
+  const openMediaPickerForBlock = (blockId: string, field: string, index?: number, subIndex?: number) => {
+    setPickerContextForBlock({ blockId, field, index, subIndex });
+    setIsMediaPickerOpen(true);
+  };
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -205,11 +228,13 @@ export function Posts() {
   };
 
   const openEditor = (post: any = null) => {
+    fetchPostCategories();
     if (post) {
       setEditingId(post.id);
       setTitle(post.title);
       setSlug(post.slug);
-      setCategory(post.category || 'Artikel');
+      setCategory(post.template_type || post.category || 'Artikel');
+      setSelectedPostCategoryId(post.category_id || null);
       
       let parsed: any = {};
       if (typeof post.content === 'string') {
@@ -218,13 +243,19 @@ export function Posts() {
         parsed = post.content || {};
       }
       
-      const contentData = Array.isArray(parsed) ? (parsed[0] || {}) : parsed;
-      
-      setFormData({
-        excerpt: post.excerpt || '',
-        featured_image: contentData.featured_image || '',
-        ...contentData
-      });
+      // Custom template stores blocks as array directly
+      if ((post.template_type || post.category) === 'Custom' && Array.isArray(parsed)) {
+        setCustomBlocks(parsed);
+        setFormData({ excerpt: post.excerpt || '', featured_image: '' });
+      } else {
+        const contentData = Array.isArray(parsed) ? (parsed[0] || {}) : parsed;
+        setCustomBlocks([]);
+        setFormData({
+          excerpt: post.excerpt || '',
+          featured_image: contentData.featured_image || '',
+          ...contentData
+        });
+      }
       
       setIsModalOpen(true);
     } else {
@@ -232,6 +263,8 @@ export function Posts() {
       setTitle('');
       setSlug('');
       setCategory('Artikel');
+      setSelectedPostCategoryId(null);
+      setCustomBlocks([]);
       setFormData({
         excerpt: '',
         featured_image: ''
@@ -249,6 +282,7 @@ export function Posts() {
       setIsModalOpen(true);
       
       if (!editingId) {
+          setCustomBlocks([]);
           setFormData({
               excerpt: formData.excerpt || '',
               featured_image: formData.featured_image || '',
@@ -260,6 +294,7 @@ export function Posts() {
   const proceedCategoryChange = () => {
     if (confirmCategoryChange.nextCategory) {
       setCategory(confirmCategoryChange.nextCategory);
+      setCustomBlocks([]);
       setFormData({
         excerpt: formData.excerpt || '',
         featured_image: formData.featured_image || '',
@@ -273,29 +308,39 @@ export function Posts() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const sanitizedData = Object.keys(formData).reduce((acc: any, key) => {
-      const val = formData[key];
-      acc[key] = (val === '' || val === undefined) ? null : val;
-      return acc;
-    }, {});
+    let contentPayload: any;
 
-    if (sanitizedData.event_labels && Array.isArray(sanitizedData.event_labels)) {
-        sanitizedData.event_labels = sanitizedData.event_labels.filter((l: string) => l.trim() !== '');
-    }
-    if (sanitizedData.tags && Array.isArray(sanitizedData.tags)) {
-        sanitizedData.tags = sanitizedData.tags.filter((l: string) => l.trim() !== '');
-    }
+    if (category === 'Custom') {
+      // Custom template: store blocks array directly (same format as Pages)
+      contentPayload = customBlocks;
+    } else {
+      const sanitizedData = Object.keys(formData).reduce((acc: any, key) => {
+        const val = formData[key];
+        acc[key] = (val === '' || val === undefined) ? null : val;
+        return acc;
+      }, {});
 
-    if (category === 'Template') {
-        sanitizedData.type = 'template';
+      if (sanitizedData.event_labels && Array.isArray(sanitizedData.event_labels)) {
+          sanitizedData.event_labels = sanitizedData.event_labels.filter((l: string) => l.trim() !== '');
+      }
+      if (sanitizedData.tags && Array.isArray(sanitizedData.tags)) {
+          sanitizedData.tags = sanitizedData.tags.filter((l: string) => l.trim() !== '');
+      }
+
+      if (category === 'Template') {
+          sanitizedData.type = 'template';
+      }
+      contentPayload = [sanitizedData];
     }
 
     const payload = {
       ...(editingId && { id: editingId }),
       title,
       slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      category,
-      content: [sanitizedData],
+      category: category,
+      template_type: category,
+      category_id: selectedPostCategoryId,
+      content: contentPayload,
       excerpt: formData.excerpt || '',
       status: editingId ? (posts.find((p: any) => p.id === editingId)?.status || 'published') : 'published'
     };
@@ -991,13 +1036,22 @@ export function Posts() {
           </div>
 
           {user?.role !== 'guest' && (
-            <button 
-              onClick={() => openEditor()}
-              className="flex items-center justify-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95 w-full sm:w-auto shrink-0"
-            >
-              <Plus className="w-5 h-5 stroke-[3]" />
-              Buat Konten
-            </button>
+            <>
+              <button 
+                onClick={() => setIsManageCategoryOpen(true)}
+                className="flex items-center justify-center gap-2 bg-white text-zinc-700 border border-zinc-200 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-zinc-50 shadow-sm transition-all active:scale-95 w-full sm:w-auto shrink-0"
+              >
+                <ListPlus className="w-5 h-5" />
+                Kelola Kategori
+              </button>
+              <button 
+                onClick={() => openEditor()}
+                className="flex items-center justify-center gap-2 bg-amber-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 shadow-lg shadow-amber-400/20 transition-all active:scale-95 w-full sm:w-auto shrink-0"
+              >
+                <Plus className="w-5 h-5 stroke-[3]" />
+                Buat Konten
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -1010,6 +1064,7 @@ export function Posts() {
                         <th className="pl-8 pr-3 py-5 w-12 text-center">No</th>
                         <th className="px-8 py-5">Judul Post</th>
                         <th className="px-8 py-5">Format</th>
+                        <th className="px-8 py-5">Kategori</th>
                         <th className="px-8 py-5 text-center">Status</th>
                         <th className="px-8 py-5 text-center">Tampilkan</th>
                         <th className="px-8 py-5">Dibuat Pada</th>
@@ -1027,9 +1082,20 @@ export function Posts() {
                                 <p className="text-amber-600 font-bold text-[10px] mt-1 italic uppercase tracking-tighter">/{post.slug}</p>
                             </td>
                             <td className="px-8 py-6">
-                                <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg border shadow-sm ${CATEGORIES.find(c => c.id === post.category)?.badge || 'bg-zinc-50 text-zinc-600 border-zinc-200'}`}>
-                                    {post.category || 'Lainnya'}
+                                <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg border shadow-sm ${TEMPLATE_TYPES.find(c => c.id === (post.template_type || post.category))?.badge || 'bg-zinc-50 text-zinc-600 border-zinc-200'}`}>
+                                    {post.template_type || post.category || 'Artikel'}
                                 </span>
+                            </td>
+                            <td className="px-8 py-6">
+                                {post.category_name ? (
+                                    <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200">
+                                        {post.category_name}
+                                    </span>
+                                ) : (
+                                    <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-red-50 text-red-500 border border-red-200">
+                                        Tanpa Kategori
+                                    </span>
+                                )}
                             </td>
                             <td className="px-8 py-6">
                                 <div className="flex justify-center">
@@ -1097,7 +1163,7 @@ export function Posts() {
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan={7} className="px-8 py-20 text-center text-zinc-400 italic">Belum ada Post yang dibuat.</td>
+                            <td colSpan={8} className="px-8 py-20 text-center text-zinc-400 italic">Belum ada Post yang dibuat.</td>
                         </tr>
                     )}
                 </tbody>
@@ -1164,25 +1230,52 @@ export function Posts() {
                 </div>
 
                 <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Kategori Konten</label>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Format / Template</label>
                     <button 
                         type="button"
                         onClick={() => setIsCategoryModalOpen(true)}
                         className="w-full flex items-center justify-between px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl hover:border-amber-400 transition-all group"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-xl ${CATEGORIES.find(c => c.id === category)?.bg || 'bg-zinc-100'}`}>
-                                {React.createElement(CATEGORIES.find(c => c.id === category)?.icon || Tag, { 
-                                    className: `w-5 h-5 ${CATEGORIES.find(c => c.id === category)?.color || 'text-zinc-500'}` 
+                            <div className={`p-2 rounded-xl ${TEMPLATE_TYPES.find(c => c.id === category)?.bg || 'bg-zinc-100'}`}>
+                                {React.createElement(TEMPLATE_TYPES.find(c => c.id === category)?.icon || Tag, { 
+                                    className: `w-5 h-5 ${TEMPLATE_TYPES.find(c => c.id === category)?.color || 'text-zinc-500'}` 
                                 })}
                             </div>
                             <div className="text-left">
                                 <p className="text-sm font-black text-zinc-900 uppercase tracking-wider">{category}</p>
-                                <p className="text-[10px] font-bold text-zinc-400 uppercase">Klik untuk mengubah kategori</p>
+                                <p className="text-[10px] font-bold text-zinc-400 uppercase">Klik untuk mengubah template</p>
                             </div>
                         </div>
                         <ArrowRight className="w-5 h-5 text-zinc-300 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
                     </button>
+                </div>
+
+                <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Kategori</label>
+                    {postCategories.length === 0 ? (
+                      <div className="flex items-center gap-3 px-5 py-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-amber-700">Belum ada kategori kustom.</p>
+                          <p className="text-[10px] text-amber-600 mt-0.5">Buat kategori terlebih dahulu melalui tombol "Kelola Kategori".</p>
+                        </div>
+                        <button type="button" onClick={() => setIsManageCategoryOpen(true)} className="text-[10px] font-black text-amber-700 hover:text-amber-800 bg-amber-100 px-3 py-1.5 rounded-lg transition-colors shrink-0">
+                          + BUAT
+                        </button>
+                      </div>
+                    ) : (
+                      <select 
+                        value={selectedPostCategoryId || ''} 
+                        onChange={e => setSelectedPostCategoryId(e.target.value ? parseInt(e.target.value, 10) : null)}
+                        className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-bold transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="">— Pilih Kategori —</option>
+                        {postCategories.map((cat: any) => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
+                    )}
                 </div>
 
                 <div>
@@ -1196,8 +1289,12 @@ export function Posts() {
                 </div>
 
                 <div className="pt-6 border-t border-zinc-100">
-                    <h3 className="text-[10px] font-black text-zinc-300 mb-6 uppercase tracking-[0.25em]">Detail Konten Terstruktur</h3>
-                    {renderDynamicInputs()}
+                    <h3 className="text-[10px] font-black text-zinc-300 mb-6 uppercase tracking-[0.25em]">{category === 'Custom' ? 'Dynamic Blocks' : 'Detail Konten Terstruktur'}</h3>
+                    {category === 'Custom' ? (
+                      <BlockBuilder blocks={customBlocks} onChange={setCustomBlocks} onOpenMediaPicker={openMediaPickerForBlock} />
+                    ) : (
+                      renderDynamicInputs()
+                    )}
                 </div>
               </form>
             </div>
@@ -1216,7 +1313,7 @@ export function Posts() {
         </div>
       )}
 
-      {/* Category Selection Modal */}
+      {/* Template Selection Modal */}
       {isCategoryModalOpen && (
         <div 
           className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-300"
@@ -1228,8 +1325,8 @@ export function Posts() {
           >
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Pilih Kategori Konten</h3>
-                <p className="text-sm text-zinc-500 font-bold mt-1 uppercase tracking-wider opacity-60">Pilih format konten yang sesuai</p>
+                <h3 className="text-2xl font-black text-zinc-900 tracking-tight">Pilih Format/Template Postingan</h3>
+                <p className="text-sm text-zinc-500 font-bold mt-1 uppercase tracking-wider opacity-60">Pilih tata letak visual untuk konten Anda</p>
               </div>
               <button onClick={() => setIsCategoryModalOpen(false)} className="p-3 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 rounded-xl transition-all">
                 <X className="w-6 h-6" />
@@ -1237,7 +1334,7 @@ export function Posts() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {CATEGORIES.map(cat => (
+              {TEMPLATE_TYPES.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.id)}
@@ -1277,11 +1374,39 @@ export function Posts() {
       {/* Media Picker Modal */}
       <MediaPicker
         isOpen={isMediaPickerOpen}
-        onClose={() => { setIsMediaPickerOpen(false); setPickerContext(null); }}
+        onClose={() => { setIsMediaPickerOpen(false); setPickerContext(null); setPickerContextForBlock(null); }}
         onSelect={(mediaUrl) => {
-            if (pickerContext) {
+            // Block-level media pick (Custom template BlockBuilder)
+            if (pickerContextForBlock) {
+                const { blockId, field, index } = pickerContextForBlock;
+                if (blockId) {
+                    setCustomBlocks(prev => prev.map(block => {
+                        if (block.id !== blockId) return block;
+                        if (field === 'activities' && typeof index === 'number') {
+                            const newActivities = [...block.data.activities]; newActivities[index] = { ...newActivities[index], image: mediaUrl }; return { ...block, data: { ...block.data, activities: newActivities } };
+                        }
+                        if (field === 'features_icon' && typeof index === 'number') {
+                            const newItems = [...(block.data.items || [])]; newItems[index] = { ...newItems[index], icon_url: mediaUrl }; return { ...block, data: { ...block.data, items: newItems } };
+                        }
+                        if (field === 'testimonial_image' && typeof index === 'number') {
+                            const newItems = [...(block.data.items || [])]; newItems[index] = { ...newItems[index], author_image: mediaUrl }; return { ...block, data: { ...block.data, items: newItems } };
+                        }
+                        if (field === 'partner_logo' && typeof index === 'number') {
+                            const newLogos = [...(block.data.logos || [])]; newLogos[index] = { ...newLogos[index], logo_url: mediaUrl }; return { ...block, data: { ...block.data, logos: newLogos } };
+                        }
+                        if (field === 'team_photo' && typeof index === 'number') {
+                            const newMembers = [...(block.data.members || [])]; newMembers[index] = { ...newMembers[index], photo_url: mediaUrl }; return { ...block, data: { ...block.data, members: newMembers } };
+                        }
+                        if (field === 'gallery_image' && typeof index === 'number') {
+                            const newImages = [...(block.data.images || [])]; newImages[index] = { ...newImages[index], url: mediaUrl }; return { ...block, data: { ...block.data, images: newImages } };
+                        }
+                        return { ...block, data: { ...block.data, [field]: mediaUrl } };
+                    }));
+                }
+            }
+            // Form-level media pick (structured templates)
+            else if (pickerContext) {
                 const { field, index, subField } = pickerContext;
-
                 if (field) {
                     if (index !== undefined && subField) {
                         const currentArr = [...(formData[field] || [])];
@@ -1298,6 +1423,7 @@ export function Posts() {
             }
             setIsMediaPickerOpen(false);
             setPickerContext(null);
+            setPickerContextForBlock(null);
         }}
       />
       {/* Confirmation Modal */}
@@ -1320,6 +1446,11 @@ export function Posts() {
         message={notification.message}
         type={notification.type}
         onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <PostCategoryModal 
+        isOpen={isManageCategoryOpen} 
+        onClose={() => { setIsManageCategoryOpen(false); fetchPostCategories(); }} 
       />
     </div>
   );

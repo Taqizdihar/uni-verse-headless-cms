@@ -121,8 +121,10 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
         // Post lookup (if no page matches)
         const [posts] = await db.execute(
-            `SELECT p.*, s.site_name, s.tagline, s.global_options, s.logo_url
+            `SELECT p.*, pc.name AS category_name, pc.slug AS category_slug,
+                    s.site_name, s.tagline, s.global_options, s.logo_url
              FROM posts p
+             LEFT JOIN post_categories pc ON p.category_id = pc.id
              LEFT JOIN settings s ON p.tenant_id = s.tenant_id
              WHERE p.slug = ? AND p.tenant_id = ?
              LIMIT 1`,
@@ -148,7 +150,7 @@ app.get(['/api/public/site/:subdomain', '/api/public/site/:subdomain/:slug'], as
 
             return res.json({
                 type: 'post',
-                page: { id: row.id, title: row.title, slug: row.slug, category: row.category, content: row.content, created_at: row.created_at, tenant_id: tenantId },
+                page: { id: row.id, title: row.title, slug: row.slug, category: row.category, category_name: row.category_name, category_slug: row.category_slug, template_type: row.template_type, category_id: row.category_id, content: row.content, created_at: row.created_at, tenant_id: tenantId },
                 settings: { site_name: row.site_name || 'Uni-Inside', tagline: row.tagline || '', logo_url: row.logo_url || null, global_options: globalOptions },
                 navPages
             });
@@ -1095,6 +1097,12 @@ const validateTenantAccess = async (req, res, next) => {
 const { router: authRoutes } = require('./server/routes/auth');
 app.use('/api/settings', authRoutes);
 
+// ========================================================
+// POST CATEGORIES (Protected — JWT required)
+// ========================================================
+const postCategoryRoutes = require('./routes/postCategoryRoutes');
+app.use('/api/v1/post-categories', postCategoryRoutes);
+
 // Task 5: Apply tenant access validation globally for all /api routes
 // Exempts: user profile, notifications, workspaces (not tenant-scoped)
 app.use('/api', (req, res, next) => {
@@ -1551,44 +1559,69 @@ app.put('/api/layout', async (req, res) => {
 app.get('/api/posts', async (req, res) => {
     try {
         const tid = getTenantId(req);
-        const [rows] = await db.execute('SELECT * FROM posts WHERE tenant_id = ?', [tid]);
+        const [rows] = await db.execute(
+            `SELECT posts.*, post_categories.name AS category_name, post_categories.slug AS category_slug
+             FROM posts
+             LEFT JOIN post_categories ON posts.category_id = post_categories.id
+             WHERE posts.tenant_id = ?`,
+            [tid]
+        );
         res.json(rows);
     } catch (error) {
+        console.error('[API ERROR] Get posts:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 app.post('/api/posts', async (req, res) => {
-    const { title, slug, content, excerpt, category, status } = req.body;
+    const { title, slug, content, excerpt, category, template_type, category_id, status } = req.body;
     const tid = getTenantId(req);
     try {
         // Sanitize &nbsp; entities injected by rich text editors before persistence
         const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
         const jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
+
+        // Resolve category_id: if provided use it, otherwise keep NULL
+        const finalCategoryId = category_id ? parseInt(category_id, 10) : null;
+        // template_type defaults to 'artikel' for backward compatibility
+        const finalTemplateType = template_type || 'artikel';
+        // Preserve legacy category string for backward compat (nullable)
+        const finalCategory = category || null;
+
         const [result] = await db.execute(
-            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [tid, title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published']
+            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, template_type, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [tid, title, slug, jsonContent, excerpt || '', finalCategory, finalTemplateType, finalCategoryId, status || 'published']
         );
         res.status(201).json({ message: 'Post created successfully', id: result.insertId });
     } catch (error) {
+        console.error('[API ERROR] Create post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 app.put('/api/posts/:id', async (req, res) => {
-    const { title, slug, content, excerpt, category, status } = req.body;
+    const { title, slug, content, excerpt, category, template_type, category_id, status } = req.body;
     const { id } = req.params;
     const tid = getTenantId(req);
     try {
         // Sanitize &nbsp; entities injected by rich text editors before persistence
         const sanitized = typeof content === 'object' ? deepSanitizeContent(content) : content;
         const jsonContent = typeof sanitized === 'object' ? JSON.stringify(sanitized) : sanitized;
+
+        // Resolve category_id: if provided use it, otherwise keep NULL
+        const finalCategoryId = category_id ? parseInt(category_id, 10) : null;
+        // template_type defaults to 'artikel' for backward compatibility
+        const finalTemplateType = template_type || 'artikel';
+        // Preserve legacy category string for backward compat (nullable)
+        const finalCategory = category || null;
+
         await db.execute(
-            'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, category = ?, status = ? WHERE id = ? AND tenant_id = ?',
-            [title, slug, jsonContent, excerpt || '', category || 'Berita', status || 'published', id, tid]
+            'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, category = ?, template_type = ?, category_id = ?, status = ? WHERE id = ? AND tenant_id = ?',
+            [title, slug, jsonContent, excerpt || '', finalCategory, finalTemplateType, finalCategoryId, status || 'published', id, tid]
         );
         res.json({ message: 'Post updated successfully' });
     } catch (error) {
+        console.error('[API ERROR] Update post:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -1640,8 +1673,8 @@ app.post('/api/posts/:id/duplicate', async (req, res) => {
             : (original.content || '{}');
 
         const [result] = await db.execute(
-            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [tid, newTitle, finalSlug, contentStr, original.excerpt || '', original.category || 'Berita', 'draft']
+            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, template_type, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [tid, newTitle, finalSlug, contentStr, original.excerpt || '', original.category || null, original.template_type || 'artikel', original.category_id || null, 'draft']
         );
 
         // 5. Return success with new post data
