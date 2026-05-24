@@ -1585,12 +1585,10 @@ app.post('/api/posts', async (req, res) => {
         const finalCategoryId = category_id ? parseInt(category_id, 10) : null;
         // template_type defaults to 'artikel' for backward compatibility
         const finalTemplateType = template_type || 'artikel';
-        // Preserve legacy category string for backward compat (nullable)
-        const finalCategory = category || null;
 
         const [result] = await db.execute(
-            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, category, template_type, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [tid, title, slug, jsonContent, excerpt || '', finalCategory, finalTemplateType, finalCategoryId, status || 'published']
+            'INSERT INTO posts (tenant_id, title, slug, content, excerpt, template_type, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [tid, title, slug, jsonContent, excerpt || '', finalTemplateType, finalCategoryId, status || 'published']
         );
         res.status(201).json({ message: 'Post created successfully', id: result.insertId });
     } catch (error) {
@@ -1612,12 +1610,10 @@ app.put('/api/posts/:id', async (req, res) => {
         const finalCategoryId = category_id ? parseInt(category_id, 10) : null;
         // template_type defaults to 'artikel' for backward compatibility
         const finalTemplateType = template_type || 'artikel';
-        // Preserve legacy category string for backward compat (nullable)
-        const finalCategory = category || null;
 
         await db.execute(
-            'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, category = ?, template_type = ?, category_id = ?, status = ? WHERE id = ? AND tenant_id = ?',
-            [title, slug, jsonContent, excerpt || '', finalCategory, finalTemplateType, finalCategoryId, status || 'published', id, tid]
+            'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, template_type = ?, category_id = ?, status = ? WHERE id = ? AND tenant_id = ?',
+            [title, slug, jsonContent, excerpt || '', finalTemplateType, finalCategoryId, status || 'published', id, tid]
         );
         res.json({ message: 'Post updated successfully' });
     } catch (error) {
