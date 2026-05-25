@@ -96,7 +96,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
     } else if (type === 'gallery') {
       newBlock.data = { title: null, subtitle: null, images: [] };
     } else if (type === 'cta-banner') {
-      newBlock.data = { headline: null, sub_headline: null, button_text: null, button_link: null, background_image_url: null, background_color: null };
+      newBlock.data = { headline: null, sub_headline: null, button_text: null, button_link: null, buttons: [], background_image_url: null, background_color: null };
     }
 
     onChange([...(blocks || []), newBlock]);
@@ -763,16 +763,158 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Sub-headline</label>
               <input type="text" value={block.data.sub_headline || ''} onChange={(e) => updateBlockData(block.id, 'sub_headline', e.target.value)} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400" placeholder="Join thousands of happy customers" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Button Text</label>
-                <input type="text" value={block.data.button_text || ''} onChange={(e) => updateBlockData(block.id, 'button_text', e.target.value)} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-xs" placeholder="Get Started" />
+            
+            {/* Buttons list */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Buttons List</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const buttons = block.data.buttons || [];
+                    let newButtons = [...buttons];
+                    if (buttons.length === 0 && block.data.button_text) {
+                      newButtons = [{ text: block.data.button_text, link: block.data.button_link || '' }];
+                    }
+                    const updatedButtons = [...newButtons, { text: '', link: '' }];
+                    
+                    const newBlocks = blocks.map(b => {
+                      if (b.id === block.id) {
+                        const firstBtn = updatedButtons[0] || {};
+                        return {
+                          ...b,
+                          data: {
+                            ...b.data,
+                            buttons: updatedButtons,
+                            button_text: firstBtn.text || null,
+                            button_link: firstBtn.link || null
+                          }
+                        };
+                      }
+                      return b;
+                    });
+                    onChange(newBlocks);
+                  }}
+                  className="text-xs font-bold text-amber-600 hover:text-amber-700"
+                >
+                  + Add Button
+                </button>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Button Link</label>
-                <input type="url" value={block.data.button_link || ''} onChange={(e) => updateBlockData(block.id, 'button_link', e.target.value)} className="w-full px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-xs" placeholder="https://..." />
-              </div>
+
+              {(() => {
+                let buttons = block.data.buttons;
+                if (!buttons || !Array.isArray(buttons)) {
+                  if (block.data.button_text || block.data.button_link) {
+                    buttons = [{ text: block.data.button_text || '', link: block.data.button_link || '' }];
+                  } else {
+                    buttons = [];
+                  }
+                }
+
+                return (
+                  <div className="space-y-2">
+                    {buttons.map((btn: any, btnIdx: number) => (
+                      <div key={btnIdx} className="flex gap-2 items-center bg-zinc-50/50 p-2.5 border border-zinc-100 rounded-xl">
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Button Text</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Learn More"
+                              value={btn.text || ''}
+                              onChange={(e) => {
+                                const updatedButtons = [...buttons];
+                                updatedButtons[btnIdx] = { ...updatedButtons[btnIdx], text: e.target.value };
+                                
+                                const newBlocks = blocks.map(b => {
+                                  if (b.id === block.id) {
+                                    const firstBtn = updatedButtons[0] || {};
+                                    return {
+                                      ...b,
+                                      data: {
+                                        ...b.data,
+                                        buttons: updatedButtons,
+                                        button_text: firstBtn.text || null,
+                                        button_link: firstBtn.link || null
+                                      }
+                                    };
+                                  }
+                                  return b;
+                                });
+                                onChange(newBlocks);
+                              }}
+                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold outline-none focus:border-amber-400"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Button Link</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. /about or https://..."
+                              value={btn.link || ''}
+                              onChange={(e) => {
+                                const updatedButtons = [...buttons];
+                                updatedButtons[btnIdx] = { ...updatedButtons[btnIdx], link: e.target.value };
+                                
+                                const newBlocks = blocks.map(b => {
+                                  if (b.id === block.id) {
+                                    const firstBtn = updatedButtons[0] || {};
+                                    return {
+                                      ...b,
+                                      data: {
+                                        ...b.data,
+                                        buttons: updatedButtons,
+                                        button_text: firstBtn.text || null,
+                                        button_link: firstBtn.link || null
+                                      }
+                                    };
+                                  }
+                                  return b;
+                                });
+                                onChange(newBlocks);
+                              }}
+                              className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:border-amber-400"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedButtons = buttons.filter((_: any, idx: number) => idx !== btnIdx);
+                            
+                            const newBlocks = blocks.map(b => {
+                              if (b.id === block.id) {
+                                const firstBtn = updatedButtons[0] || {};
+                                return {
+                                  ...b,
+                                  data: {
+                                    ...b.data,
+                                    buttons: updatedButtons,
+                                    button_text: firstBtn.text || null,
+                                    button_link: firstBtn.link || null
+                                  }
+                                };
+                              }
+                              return b;
+                            });
+                            onChange(newBlocks);
+                          }}
+                          className="mt-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    {buttons.length === 0 && (
+                      <p className="text-xs text-zinc-400 italic py-2 bg-zinc-50 border border-zinc-100 rounded-xl text-center">
+                        No buttons added yet. Click "+ Add Button" to configure calls-to-action.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
+
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Background Image</label>
               <div className="flex gap-2">

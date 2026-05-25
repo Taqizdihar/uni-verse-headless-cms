@@ -258,9 +258,33 @@ export function LandingPagePreview() {
             <div className="relative z-10 max-w-2xl mx-auto">
               <h2 className="text-4xl font-black text-white mb-4">{d.headline || 'Ready to Start?'}</h2>
               {d.sub_headline && <p className="text-white/70 mb-8">{d.sub_headline}</p>}
-              {d.button_text && (
-                <a href={d.button_link || '#'} className="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity">{d.button_text}</a>
-              )}
+              {(() => {
+                let buttons = d.buttons;
+                if (!buttons || !Array.isArray(buttons) || buttons.length === 0) {
+                  if (d.button_text) {
+                    buttons = [{ text: d.button_text, link: d.button_link || '#' }];
+                  } else {
+                    buttons = [];
+                  }
+                }
+                if (buttons.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-4 justify-center items-center">
+                    {buttons.map((btn: any, bIdx: number) => {
+                      if (!btn.text) return null;
+                      return (
+                        <a
+                          key={bIdx}
+                          href={btn.link || '#'}
+                          className="inline-block bg-white text-black px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity shadow-lg"
+                        >
+                          {btn.text}
+                        </a>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           </section>
         );
