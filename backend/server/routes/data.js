@@ -374,12 +374,17 @@ router.get('/settings', async (req, res) => {
             title: row.title,
             tagline: row.tagline,
             logo_url: row.logo_url ? normalizeUrl(row.logo_url) : null,
-            // Frontend
+            // Frontend & General Settings
             frontend_url: globalOptions.frontend_url || '',
+            support_email: globalOptions.support_email || '',
             // Footer
             copyright_text: globalOptions.footer_config?.copyright_text || '',
+            footer_text: globalOptions.footer_config?.footer_text || '',
             social_links: globalOptions.footer_config?.social_links || [],
             quick_links: globalOptions.footer_config?.quick_links || null,
+            footer_nav_1: globalOptions.footer_config?.footer_nav_1 || [],
+            footer_nav_2: globalOptions.footer_config?.footer_nav_2 || [],
+            footer_contacts: globalOptions.footer_config?.footer_contacts || [],
             google_maps_url: globalOptions.footer_config?.google_maps_url || null
         };
 
