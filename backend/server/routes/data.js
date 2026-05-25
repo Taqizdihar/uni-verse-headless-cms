@@ -381,7 +381,6 @@ router.get('/settings', async (req, res) => {
             copyright_text: globalOptions.footer_config?.copyright_text || '',
             footer_text: globalOptions.footer_config?.footer_text || '',
             social_links: globalOptions.footer_config?.social_links || [],
-            quick_links: globalOptions.footer_config?.quick_links || null,
             footer_nav_1: globalOptions.footer_config?.footer_nav_1 || [],
             footer_nav_2: globalOptions.footer_config?.footer_nav_2 || [],
             footer_contacts: globalOptions.footer_config?.footer_contacts || [],
