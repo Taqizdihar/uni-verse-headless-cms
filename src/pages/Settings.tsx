@@ -479,63 +479,6 @@ export function Settings() {
                         </div>
                     </Card>
 
-                    <Card className="p-8">
-                        <h3 className="text-lg font-bold text-zinc-900 mb-6 flex items-center gap-2">
-                            <Eye className="w-5 h-5 text-amber-500" />
-                            Pratinjau Footer
-                        </h3>
-                        <div className="bg-zinc-900 text-zinc-400 p-12 rounded-xl text-xs space-y-4 font-mono shadow-xl overflow-hidden relative">
-                            <div className="flex flex-col md:flex-row justify-between items-start gap-8 border-t border-zinc-800 pt-12 mt-12">
-                                <div>
-                                    <h4 className="font-bold mb-4 text-sm text-amber-400">{formData.site_name || 'Logo / Judul'}</h4>
-                                    <p className="opacity-70 leading-relaxed mb-6 text-[11px] max-w-xs">{formData.footer_config.footer_text || formData.tagline || 'Tagline tertera di sini...'}</p>
-                                    <div className="flex gap-3 items-center">
-                                        {formData.footer_config.social_links.map((s: any, i: number) => (
-                                           <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center opacity-80 transition-transform hover:scale-110 bg-zinc-800 text-amber-400 border border-zinc-700">
-                                              {s.icon[0].toUpperCase()}
-                                           </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                {formData.footer_config.footer_nav_1.length > 0 && (
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-3">Navigasi</p>
-                                        <ul className="space-y-1.5">
-                                            {formData.footer_config.footer_nav_1.map((l: any, i: number) => (
-                                                <li key={i} className="text-[11px] text-zinc-400 hover:text-amber-400 transition-colors">{l.label || 'Tanpa Label'}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {formData.footer_config.footer_nav_2.length > 0 && (
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-3">Legal</p>
-                                        <ul className="space-y-1.5">
-                                            {formData.footer_config.footer_nav_2.map((l: any, i: number) => (
-                                                <li key={i} className="text-[11px] text-zinc-400 hover:text-amber-400 transition-colors">{l.label || 'Tanpa Label'}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {formData.footer_config.footer_contacts.length > 0 && (
-                                    <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-3">Kontak</p>
-                                        <ul className="space-y-1.5">
-                                            {formData.footer_config.footer_contacts.map((c: any, i: number) => (
-                                                <li key={i} className="text-[11px] text-zinc-400 hover:text-amber-400 transition-colors">
-                                                    <span className="font-bold mr-1">{c.label}:</span>{c.value}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                <div className="text-center md:text-right">
-                                    <p className="opacity-50 text-[10px] uppercase tracking-widest mb-2">Didukung oleh UNI-VERSE CMS</p>
-                                    <p className="text-zinc-300 font-bold">{formData.footer_config.copyright_text || `© ${new Date().getFullYear()} ${formData.site_name || 'My Site'}. All rights reserved.`}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </Card>
                 </div>
             )}
             </div>
