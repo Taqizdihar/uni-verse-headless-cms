@@ -45,6 +45,22 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
   const [showMenu, setShowMenu] = useState(false);
   const [availablePosts, setAvailablePosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [postCategories, setPostCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPostCategories = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/post-categories`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPostCategories(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch post categories:', err);
+      }
+    };
+    fetchPostCategories();
+  }, []);
 
   // Fetch posts for manual selection mode
   const fetchPostsForPicker = async () => {
@@ -267,8 +283,21 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
         );
 
       case 'dynamic-post-feed': {
-        const currentCat = POST_CATEGORIES.find(c => c.id === (block.data.category || 'all')) || POST_CATEGORIES[0];
-        const CurrentCatIcon = currentCat.icon;
+        const getCategoryMeta = (catId: any) => {
+          if (!catId || catId === 'all') {
+            return { label: 'Semua Kategori', icon: Newspaper, color: 'text-zinc-500', bg: 'bg-zinc-100' };
+          }
+          const found = postCategories.find(c => c.id == catId);
+          return {
+            label: found ? found.name : 'Kategori Tidak Diketahui',
+            icon: Newspaper,
+            color: 'text-amber-500',
+            bg: 'bg-amber-50'
+          };
+        };
+
+        const currentCatMeta = getCategoryMeta(block.data.category);
+        const CurrentCatIcon = currentCatMeta.icon;
         const isManualMode = block.data.selection_mode === 'manual';
         const selectedIds: number[] = block.data.selected_post_ids || [];
 
@@ -278,8 +307,8 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
             <div>
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Filter Kategori</label>
               <div className="relative">
-                <div className={`absolute left-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg ${currentCat.bg}`}>
-                  <CurrentCatIcon className={`w-4 h-4 ${currentCat.color}`} />
+                <div className={`absolute left-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg ${currentCatMeta.bg}`}>
+                  <CurrentCatIcon className={`w-4 h-4 ${currentCatMeta.color}`} />
                 </div>
                 <select
                   value={block.data.category || 'all'}
@@ -289,8 +318,9 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                   }}
                   className="w-full pl-12 pr-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-lg outline-none focus:border-amber-400 text-sm font-bold text-zinc-800 appearance-none cursor-pointer hover:bg-zinc-100 transition-colors"
                 >
-                  {POST_CATEGORIES.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  <option value="all">Semua Kategori</option>
+                  {postCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
                 <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -389,10 +419,9 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                 ) : (
                   <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-100 bg-zinc-50 divide-y divide-zinc-100">
                     {availablePosts
-                      .filter(post => !block.data.category || block.data.category === 'all' || post.category === block.data.category)
+                      .filter(post => !block.data.category || block.data.category === 'all' || post.category_id == block.data.category)
                       .map((post: any) => {
                       const isSelected = selectedIds.includes(post.id);
-                      const catMeta = POST_CATEGORIES.find(c => c.id === post.category);
                       return (
                         <button
                           key={post.id}
@@ -419,9 +448,13 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                             <p className={`text-xs font-bold truncate ${isSelected ? 'text-amber-700' : 'text-zinc-700'}`}>{post.title}</p>
                             <p className="text-[10px] text-zinc-400 font-mono truncate">/{post.slug}</p>
                           </div>
-                          {catMeta && (
-                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${catMeta.bg} ${catMeta.color} flex-shrink-0`}>
-                              {catMeta.label}
+                          {post.category_name ? (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-500 border border-amber-100 flex-shrink-0">
+                              {post.category_name}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-400 flex-shrink-0">
+                              Tanpa Kategori
                             </span>
                           )}
                         </button>
