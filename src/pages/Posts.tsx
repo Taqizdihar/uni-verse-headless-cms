@@ -1320,7 +1320,7 @@ export function Posts() {
       {/* Template Selection Modal */}
       {isCategoryModalOpen && (
         <div 
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:pl-64 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in duration-300"
           onMouseDown={(e) => { if (e.target === e.currentTarget) setIsCategoryModalOpen(false); }}
         >
           <div 
