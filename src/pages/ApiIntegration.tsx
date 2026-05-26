@@ -510,7 +510,7 @@ export function ApiIntegration() {
                       <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Contoh Permintaan (Fetch)</span>
                     </div>
                     <div className="p-4 overflow-x-auto text-sm [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700 [&::-webkit-scrollbar-thumb]:rounded-full">
-                      <SyntaxHighlighter language="javascript" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
+                      <SyntaxHighlighter language="javascript" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent', overflow: 'visible' }}>
                         {snippet}
                       </SyntaxHighlighter>
                     </div>
@@ -522,7 +522,7 @@ export function ApiIntegration() {
                       <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Respon Berhasil</span>
                     </div>
                     <div className="p-4 overflow-x-auto text-sm [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700 [&::-webkit-scrollbar-thumb]:rounded-full">
-                      <SyntaxHighlighter language="json" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
+                      <SyntaxHighlighter language="json" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent', overflow: 'visible' }}>
                         {ep.response}
                       </SyntaxHighlighter>
                     </div>
