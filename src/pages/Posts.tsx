@@ -1324,7 +1324,7 @@ export function Posts() {
           onMouseDown={(e) => { if (e.target === e.currentTarget) setIsCategoryModalOpen(false); }}
         >
           <div 
-            className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 p-8"
+            className="relative w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-8">
@@ -1337,7 +1337,7 @@ export function Posts() {
               </button>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {TEMPLATE_TYPES.map(cat => (
                 <button
                   key={cat.id}
