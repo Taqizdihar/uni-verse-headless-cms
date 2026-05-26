@@ -14,7 +14,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Health Check', 
     method: 'GET', 
     path: '/api/v1/health', 
-    desc: 'Mengecek apakah server dan database sedang aktif.',
+    desc: 'Mengecek apakah server UNI-VERSE dan database sedang aktif dan berjalan normal. Berguna untuk memastikan tidak ada gangguan jaringan.',
+    info: 'Endpoint ini bersifat publik penuh. Anda tidak memerlukan header x-api-key untuk memanggilnya.',
     response: `{
   "success": true,
   "message": "Service is healthy"
@@ -24,7 +25,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Pengaturan Global', 
     method: 'GET', 
     path: '/api/v1/public/settings', 
-    desc: 'Mengambil data identitas situs (Logo, Nama, Tagline, dan Pengaturan Global).',
+    desc: 'Mengambil seluruh pengaturan dasar website Anda, seperti nama perusahaan, logo, deskripsi footer, tautan legal, dan informasi kontak.',
+    info: 'Gunakan data ini untuk membangun bagian Header (Logo) dan Footer website Anda agar selalu sinkron dengan CMS.',
     response: `{
   "success": true,
   "data": {
@@ -38,7 +40,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Navigasi', 
     method: 'GET', 
     path: '/api/v1/public/navigation', 
-    desc: 'Mengambil daftar menu untuk Navbar (Halaman yang ditandai masuk menu).',
+    desc: 'Mengambil daftar menu navigasi yang telah Anda atur di CMS.',
+    info: 'Data dikembalikan dalam bentuk urutan (array). Gunakan fungsi map() di frontend untuk merender menu navbar secara otomatis.',
     response: `{
   "success": true,
   "data": [
@@ -56,7 +59,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Daftar Halaman', 
     method: 'GET', 
     path: '/api/v1/public/pages', 
-    desc: 'Mengambil daftar semua halaman yang berstatus Published.',
+    desc: 'Mengambil daftar seluruh Halaman (Pages) dinamis yang berstatus publik/dipublikasikan.',
+    info: 'Biasanya digunakan jika Anda ingin membuat daftar isi atau sitemap halaman.',
     response: `{
   "success": true,
   "data": [
@@ -73,7 +77,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Detail Halaman', 
     method: 'GET', 
     path: '/api/v1/public/pages/:slug', 
-    desc: 'Mengambil detail konten halaman (blok-blok JSON) berdasarkan slug-nya.',
+    desc: 'Mengambil isi konten secara detail dari satu Halaman spesifik berdasarkan URL/Slug-nya (contoh: \'home\' atau \'tentang-kami\').',
+    info: 'Ganti \':slug\' di URL dengan slug halaman yang dituju. Ini adalah endpoint paling penting untuk merender komponen Landing Page Anda.',
     response: `{
   "success": true,
   "data": {
@@ -96,7 +101,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Daftar Kategori Post', 
     method: 'GET', 
     path: '/api/v1/post-categories', 
-    desc: 'Mengambil daftar seluruh kategori postingan kustom yang dibuat oleh admin.',
+    desc: 'Mengambil daftar seluruh kategori postingan yang telah dibuat secara kustom oleh admin (misal: Baju, Makanan, Event).',
+    info: 'Sangat berguna untuk membuat tombol filter kategori di halaman Blog atau Katalog Produk Anda.',
     response: `{
   "success": true,
   "data": [
@@ -114,7 +120,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Daftar Post/Berita', 
     method: 'GET', 
     path: '/api/v1/public/posts', 
-    desc: 'Mengambil daftar berita/artikel yang berstatus Published.',
+    desc: 'Mengambil daftar seluruh postingan/artikel, atau mengambil detail satu postingan spesifik berdasarkan slug-nya.',
+    info: 'Data ini sudah mencakup nama kategori (category_name) dan format template yang digunakan (template_type).',
     response: `{
   "success": true,
   "data": [
@@ -133,7 +140,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Detail Post/Berita', 
     method: 'GET', 
     path: '/api/v1/public/posts/:slug', 
-    desc: 'Mengambil isi lengkap berita berdasarkan slug.',
+    desc: 'Mengambil daftar seluruh postingan/artikel, atau mengambil detail satu postingan spesifik berdasarkan slug-nya.',
+    info: 'Data ini sudah mencakup nama kategori (category_name) dan format template yang digunakan (template_type).',
     response: `{
   "success": true,
   "data": {
@@ -156,7 +164,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Daftar Komentar',
     method: 'GET',
     path: '/api/v1/public/posts/:id/comments',
-    desc: 'Mengambil daftar komentar yang sudah disetujui untuk post tertentu.',
+    desc: 'Mengambil semua komentar pengunjung untuk suatu postingan yang telah disetujui (Approved) oleh Admin.',
+    info: 'Ganti \':id\' dengan ID postingan. Komentar yang masih berstatus \'Menunggu\' atau \'Spam\' tidak akan ditampilkan di sini.',
     response: `{
   "success": true,
   "data": [
@@ -173,7 +182,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Kirim Komentar',
     method: 'POST',
     path: '/api/v1/public/posts/:id/comments',
-    desc: 'Mengirimkan komentar baru dari pengunjung website.',
+    desc: 'Mengirimkan komentar baru dari pengunjung website ke dalam suatu postingan.',
+    info: 'Wajib menyertakan author_name, author_email, dan content di dalam body JSON. Komentar akan masuk dengan status \'Pending\' (Menunggu Persetujuan Admin).',
     requestBody: `{
   "author_name": "Budi Santoso",
   "author_email": "budi@example.com",
@@ -188,7 +198,8 @@ const PUBLIC_ENDPOINTS = [
     name: 'Kirim Pesan Kontak',
     method: 'POST',
     path: '/api/v1/inquiries',
-    desc: 'Mengirimkan pesan kontak/inquiry dari pengunjung website ke admin tenant. Endpoint ini dilindungi oleh rate limiter (maks. 5 request/menit per IP). Membutuhkan header x-api-key untuk mengidentifikasi tenant tujuan.',
+    desc: 'Mengirimkan pesan dari formulir \'Hubungi Kami\' di website Anda langsung ke panel \'Pesan Masuk\' di CMS.',
+    info: 'Field yang wajib diisi: name, email, dan message. Endpoint ini dilindungi oleh pembatas akses (maks. 5 request/menit per IP) untuk mencegah spam.',
     requestBody: `{
   "name": "John Doe",
   "email": "john@example.com",
@@ -198,8 +209,7 @@ const PUBLIC_ENDPOINTS = [
     response: `{
   "message": "Pesan berhasil dikirim. Terima kasih!",
   "id": 42
-}`,
-    warning: 'Field yang wajib diisi: name, email, message. Field subject bersifat opsional.'
+}`
   }
 ];
 
@@ -342,8 +352,8 @@ export function ApiIntegration() {
         {/* API Key Management Card */}
         {!isGuest && (
         <div className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm flex flex-col">
-          <h3 className="text-sm font-bold text-zinc-900 mb-2 flex items-center gap-2">
-              <Key className="w-4 h-4 text-amber-500" />
+          <h3 className="text-3xl font-bold text-zinc-900 mb-2 flex items-center gap-2">
+              <Key className="w-8 h-8 text-amber-500" />
               Manajemen API Key
           </h3>
           <p className="text-zinc-500 text-xs font-medium mb-6">Kelola API key yang dibutuhkan untuk otorisasi frontend.</p>
@@ -417,14 +427,28 @@ export function ApiIntegration() {
           const isCopiedUrl = copiedEndpoint === `url_${idx}`;
           const isPost = ep.method === 'POST';
           
-          const snippet = `fetch("${fullUrl}", {
-  method: "${ep.method}",
-  headers: {
-    "x-api-key": "YOUR_API_KEY"${isPost ? ',\n    "Content-Type": "application/json"' : ''}
-  }${isPost && ep.requestBody ? `,\n  body: JSON.stringify(${ep.requestBody.replace(/\n/g, '\n  ')})` : ''}
+          let snippet = '';
+          if (ep.path === '/api/v1/health') {
+            snippet = `fetch("${fullUrl}", {
+  method: "${ep.method}"
 })
   .then(res => res.json())
   .then(data => console.log(data));`;
+          } else {
+            let bodyStr = '';
+            if (isPost && ep.requestBody) {
+              bodyStr = `,\n  body: JSON.stringify(${ep.requestBody.split('\\n').join('\\n  ')})`;
+            }
+            snippet = `fetch("${fullUrl}", {
+  method: "${ep.method}",
+  headers: {
+    "x-api-key": "YOUR_API_KEY",
+    "Content-Type": "application/json"
+  }${bodyStr}
+})
+  .then(res => res.json())
+  .then(data => console.log(data));`;
+          }
 
           return (
             <details key={idx} className="group bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
@@ -459,22 +483,12 @@ export function ApiIntegration() {
                     </div>
                   </div>
 
-                  {ep.name === 'Navigasi' && (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
-                      <ShieldAlert className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <span className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest block mb-0.5">PERINGATAN</span>
-                        <p className="text-xs text-yellow-800 font-medium">Selalu gunakan field <code className="font-mono bg-yellow-100 px-1 py-0.5 rounded">priority</code> untuk mengurutkan item navigasi dengan benar.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {ep.warning && ep.name !== 'Navigasi' && (
+                  {ep.info && (
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
                       <ShieldAlert className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                       <div>
                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest block mb-0.5">INFORMASI</span>
-                        <p className="text-xs text-blue-800 font-medium">{ep.warning}</p>
+                        <p className="text-xs text-blue-800 font-medium">{ep.info}</p>
                       </div>
                     </div>
                   )}
@@ -495,7 +509,7 @@ export function ApiIntegration() {
                     <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Contoh Permintaan (Fetch)</span>
                     </div>
-                    <div className="p-4 overflow-x-auto text-sm">
+                    <div className="p-4 overflow-x-auto text-sm [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700 [&::-webkit-scrollbar-thumb]:rounded-full">
                       <SyntaxHighlighter language="javascript" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
                         {snippet}
                       </SyntaxHighlighter>
@@ -507,7 +521,7 @@ export function ApiIntegration() {
                     <div className="px-4 py-2 bg-zinc-900 border-b border-zinc-800">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Respon Berhasil</span>
                     </div>
-                    <div className="p-4 overflow-x-auto text-sm">
+                    <div className="p-4 overflow-x-auto text-sm [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-700 [&::-webkit-scrollbar-thumb]:rounded-full">
                       <SyntaxHighlighter language="json" style={vscDarkPlus} customStyle={{ margin: 0, padding: 0, background: 'transparent' }}>
                         {ep.response}
                       </SyntaxHighlighter>
