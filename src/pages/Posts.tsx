@@ -25,7 +25,7 @@ export function Posts() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [confirmCategoryChange, setConfirmCategoryChange] = useState<{ isOpen: boolean, nextCategory: string | null }>({ isOpen: false, nextCategory: null });
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('Semua Kategori');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
   const [isManageCategoryOpen, setIsManageCategoryOpen] = useState(false);
   
   const [toggling, setToggling] = useState<{ [key: number]: boolean }>({});
@@ -996,7 +996,7 @@ export function Posts() {
 
   const filteredPosts = useMemo(() => posts?.filter((post: any) => {
     const matchesSearch = post.title?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategoryFilter === 'Semua Kategori' || post.category === selectedCategoryFilter;
+    const matchesCategory = selectedCategoryFilter === 'all' || post.category_id == selectedCategoryFilter;
     return matchesSearch && matchesCategory;
   }) || [], [posts, searchQuery, selectedCategoryFilter]);
 
@@ -1029,13 +1029,10 @@ export function Posts() {
               onChange={e => setSelectedCategoryFilter(e.target.value)}
               className="w-full pl-10 pr-8 py-2.5 bg-white border border-zinc-200 rounded-xl outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-sm font-medium appearance-none transition-all cursor-pointer"
             >
-              <option value="Semua Kategori">Semua Kategori</option>
-              <option value="Artikel">Artikel</option>
-              <option value="Event">Event</option>
-              <option value="Produk">Produk</option>
-              <option value="Lowongan">Lowongan</option>
-              <option value="Pengumuman">Pengumuman</option>
-              <option value="Template">Template</option>
+              <option value="all">Semua Kategori</option>
+              {postCategories.map((cat: any) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
