@@ -154,13 +154,15 @@ export function Users() {
           <h2 className="text-2xl font-bold tracking-tight text-brand-black">Pengguna</h2>
           <p className="text-gray-500 mt-1">Kelola anggota tim dan peran mereka.</p>
         </div>
-        <button 
-          onClick={() => { setIsInviteOpen(true); setInviteError(''); setInviteSuccess(''); }}
-          className="flex items-center gap-2 bg-brand-yellow text-brand-black px-4 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all shadow-sm group"
-        >
-          <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-          Tambah Pengguna
-        </button>
+        {user?.role !== 'guest' && (
+          <button 
+            onClick={() => { setIsInviteOpen(true); setInviteError(''); setInviteSuccess(''); }}
+            className="flex items-center gap-2 bg-brand-yellow text-brand-black px-4 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all shadow-sm group"
+          >
+            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+            Tambah Pengguna
+          </button>
+        )}
       </div>
 
       <Card className="border-none shadow-sm shadow-gray-200 overflow-hidden">
@@ -172,13 +174,13 @@ export function Users() {
                   <th scope="col" className="px-6 py-4">Pengguna</th>
                   <th scope="col" className="px-6 py-4">Peran</th>
                   <th scope="col" className="px-6 py-4">Status</th>
-                  <th scope="col" className="px-6 py-4 text-right pr-6">Aksi</th>
+                  {user?.role !== 'guest' && <th scope="col" className="px-6 py-4 text-right pr-6">Aksi</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center">
+                    <td colSpan={user?.role !== 'guest' ? 4 : 3} className="px-6 py-12 text-center">
                       <Loader2 className="w-6 h-6 animate-spin text-amber-400 mx-auto mb-2" />
                       <span className="text-sm text-zinc-400 font-medium">Memuat data pengguna...</span>
                     </td>
@@ -192,7 +194,7 @@ export function Users() {
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm flex-shrink-0">
                               {u.profile_picture_url ? (
-                                <img src={u.profile_picture_url} alt={u.name} className="w-full h-full object-cover" />
+                                <img src={u.profile_picture_url} alt={u.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                               ) : (
                                 <div className={`w-full h-full flex items-center justify-center ${
                                   ['admin', 'co_admin'].includes(u.role.toLowerCase()) ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'
@@ -224,26 +226,28 @@ export function Users() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-right pr-6">
-                          <div className="flex items-center justify-end gap-2">
-                            {/* Only admin can delete team members, and cannot delete themselves */}
-                            {u.user_id !== user?.id && user?.role === 'admin' && (
-                              <button 
-                                onClick={() => handleDelete(u.user_id, u.name)}
-                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
-                                title="Hapus dari tenant"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                        {user?.role !== 'guest' && (
+                          <td className="px-6 py-4 text-right pr-6">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* Only admin can delete team members, and cannot delete themselves */}
+                              {u.user_id !== user?.id && user?.role === 'admin' && (
+                                <button 
+                                  onClick={() => handleDelete(u.user_id, u.name)}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
+                                  title="Hapus dari tenant"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500 italic">
+                      <td colSpan={user?.role !== 'guest' ? 4 : 3} className="px-6 py-12 text-center text-gray-500 italic">
                         Pengguna tidak ditemukan.
                       </td>
                   </tr>

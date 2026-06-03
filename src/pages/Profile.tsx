@@ -173,12 +173,12 @@ export function Profile() {
         {/* Profile Card */}
         <Card className="lg:col-span-1 border-none shadow-2xl bg-white overflow-hidden rounded-xl flex flex-col">
           <div className="h-32 bg-[#0B0B0B] relative flex items-center justify-center">
-             <img src={universeLogo} alt="UNI-VERSE" className="w-64 opacity-[0.15] object-contain pointer-events-none" />
+             <img src={universeLogo} alt="UNI-VERSE" className="w-64 opacity-[0.15] object-contain pointer-events-none" referrerPolicy="no-referrer" />
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-xl bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                     {profile.profile_picture_url ? (
-                      <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" />
+                      <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : (
                       <User className="w-12 h-12 text-zinc-300" />
                     )}
