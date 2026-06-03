@@ -14,14 +14,23 @@ interface Workspace {
 }
 
 export function Profile() {
-  const { user, setUser, token, activeTenantId, switchWorkspace } = useCMS();
+  const { user, setUser, token, activeTenantId, switchWorkspace, uploadAvatar, isAvatarUploading } = useCMS();
   const [profile, setProfile] = useState({ name: '', email: '', profile_picture_url: '' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
-  const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
   const [showPassForm, setShowPassForm] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Null-safe avatar URL validator — prevents <img src="null" /> 404 errors
+  const getValidAvatarUrl = (url: any): string | null => {
+    if (!url) return null;
+    if (typeof url !== 'string') return null;
+    if (url === 'null' || url === 'undefined') return null;
+    if (url.startsWith('processing:')) return null;
+    if (url.includes('/null') || url.endsWith('/null')) return null;
+    return url;
+  };
 
   // Workspace state
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -97,36 +106,23 @@ export function Profile() {
     }
   };
 
+  // Delegate avatar upload to global context (persists across navigation)
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('avatar', file);
-
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/upload-avatar`, formData, {
-        headers: { 
-          ...headers, 
-          'Content-Type': 'multipart/form-data' 
-        }
-      });
-      const newUrl = res.data.url;
-      setProfile(prev => ({ ...prev, profile_picture_url: newUrl }));
-      
-      // Update local context
-      const updatedUser = { ...user, profile_picture_url: newUrl };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      setMessage({ type: 'success', text: 'Foto profil berhasil diunggah!' });
-    } catch (err: any) {
-      setMessage({ type: 'error', text: 'Gagal mengunggah foto.' });
-    } finally {
-      setIsUploading(false);
-    }
+    setMessage({ type: 'success', text: 'Mengunggah foto profil...' });
+    await uploadAvatar(file);
   };
+
+  // Sync profile picture URL from global user state when CDN finishes
+  useEffect(() => {
+    if (user?.profile_picture_url && !isAvatarUploading) {
+      const validUrl = getValidAvatarUrl(user.profile_picture_url);
+      if (validUrl) {
+        setProfile(prev => ({ ...prev, profile_picture_url: validUrl }));
+      }
+    }
+  }, [user?.profile_picture_url, isAvatarUploading]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,20 +173,20 @@ export function Profile() {
              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
                 <div className="relative group">
                   <div className="w-32 h-32 rounded-xl bg-zinc-100 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
-                    {profile.profile_picture_url ? (
-                      <img src={profile.profile_picture_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    {isAvatarUploading ? (
+                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-8 h-8 text-white animate-spin" />
+                        <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest">Memproses Foto...</span>
+                      </div>
+                    ) : getValidAvatarUrl(profile.profile_picture_url) ? (
+                      <img src={getValidAvatarUrl(profile.profile_picture_url)!} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     ) : (
                       <User className="w-12 h-12 text-zinc-300" />
-                    )}
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 text-white animate-spin" />
-                      </div>
                     )}
                   </div>
                   <label className="absolute bottom-0 right-0 p-2.5 bg-zinc-900 text-white rounded-xl shadow-lg cursor-pointer hover:bg-zinc-800 transition-all border-2 border-white group-hover:scale-110">
                     <Camera className="w-5 h-5" />
-                    <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploading} />
+                    <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isAvatarUploading} />
                   </label>
                 </div>
              </div>

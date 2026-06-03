@@ -103,6 +103,7 @@ interface CMSContextType {
   isAuthenticated: boolean;
   activeTenantId: number | null;
   activeRole: string | null;
+  isAvatarUploading: boolean;
   setUser: (u: any) => void;
   setToken: (t: string | null) => void;
   setPages: (p: PageItem[]) => void;
@@ -110,6 +111,7 @@ interface CMSContextType {
   setMedia: (m: MediaItem[]) => void;
   fetchAllData: () => Promise<void>;
   switchWorkspace: (tenantId: number, role: string) => Promise<void>;
+  uploadAvatar: (file: File) => Promise<void>;
   
   savePage: (pageData: any) => Promise<void>;
   deletePage: (id: number) => Promise<void>;
@@ -163,6 +165,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [isSwitchingWorkspace, setIsSwitchingWorkspace] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [evictionNotification, setEvictionNotification] = useState<{tenantName: string} | null>(null);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const avatarPollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Helper for headers
   const getHeaders = () => {
@@ -630,6 +634,97 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     setActivities(prev => [newActivity, ...prev]);
   };
 
+  // =============================================================
+  // Global Avatar Upload & Background CDN Polling
+  // =============================================================
+  // Persists across route navigation — user can leave the Profile
+  // page and the avatar will still finish processing.
+  // =============================================================
+  const uploadAvatar = async (file: File) => {
+    setIsAvatarUploading(true);
+    const currentToken = token || localStorage.getItem('token');
+
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/upload-avatar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentToken}`,
+          ...(activeTenantId ? { 'x-active-tenant': String(activeTenantId) } : {})
+        },
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await res.json();
+
+      if (data.status === 'ready' && data.url) {
+        // CDN was instant — update immediately
+        const updatedUser = { ...user, profile_picture_url: data.url };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setIsAvatarUploading(false);
+        return;
+      }
+
+      // CDN is processing — start background polling
+      const fileId = data.fileId;
+      if (!fileId) {
+        console.error('[AVATAR] No fileId returned from upload');
+        setIsAvatarUploading(false);
+        return;
+      }
+
+      // Clear any existing poll
+      if (avatarPollRef.current) clearInterval(avatarPollRef.current);
+
+      avatarPollRef.current = setInterval(async () => {
+        try {
+          const pollRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/avatar-status/${fileId}`, {
+            headers: {
+              'Authorization': `Bearer ${currentToken || localStorage.getItem('token')}`
+            }
+          });
+
+          if (!pollRes.ok) return;
+          const pollData = await pollRes.json();
+
+          if (pollData.status === 'ready' && pollData.url) {
+            // CDN is done — update global user state
+            if (avatarPollRef.current) clearInterval(avatarPollRef.current);
+            avatarPollRef.current = null;
+
+            setUser((prev: any) => {
+              const updated = { ...prev, profile_picture_url: pollData.url };
+              localStorage.setItem('user', JSON.stringify(updated));
+              return updated;
+            });
+            setIsAvatarUploading(false);
+            console.log('[AVATAR] ✅ CDN ready, avatar updated globally');
+          }
+        } catch (pollErr) {
+          console.error('[AVATAR] Poll error:', pollErr);
+        }
+      }, 3000); // Poll every 3 seconds
+
+    } catch (err) {
+      console.error('[AVATAR] Upload error:', err);
+      setIsAvatarUploading(false);
+    }
+  };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (avatarPollRef.current) clearInterval(avatarPollRef.current);
+    };
+  }, []);
+
   // Backend-backed comment operations
   const fetchComments = async () => {
     try {
@@ -752,9 +847,9 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   return (
     <CMSContext.Provider value={{ 
       pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers,
-      user, token, isAuthenticated, activeTenantId, activeRole, setUser, setToken, 
+      user, token, isAuthenticated, activeTenantId, activeRole, isAvatarUploading, setUser, setToken, 
       setPages, setPosts, setMedia,
-      fetchAllData, switchWorkspace,
+      fetchAllData, switchWorkspace, uploadAvatar,
       savePage, deletePage, 
       savePost, deletePost, 
       addMedia, deleteMedia, 

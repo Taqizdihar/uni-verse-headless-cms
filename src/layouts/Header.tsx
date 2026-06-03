@@ -20,7 +20,17 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-  const { user, setUser, setToken, settings, activeRole, activeTenantId } = useCMS();
+  const { user, setUser, setToken, settings, activeRole, activeTenantId, isAvatarUploading } = useCMS();
+
+  // Null-safe avatar URL validator — prevents <img src="null" /> 404 errors
+  const getValidAvatarUrl = (url: any): string | null => {
+    if (!url) return null;
+    if (typeof url !== 'string') return null;
+    if (url === 'null' || url === 'undefined') return null;
+    if (url.startsWith('processing:')) return null;
+    if (url.includes('/null') || url.endsWith('/null')) return null;
+    return url;
+  };
   const navigate = useNavigate();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
@@ -334,9 +344,13 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => navigate('/profile')}
           >
-            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm">
-                {user?.profile_picture_url ? (
-                    <img src={user.profile_picture_url} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-zinc-100 group-hover:border-amber-400 transition-all shadow-sm relative">
+                {isAvatarUploading ? (
+                    <div className="w-full h-full bg-zinc-100 flex items-center justify-center" title="Memproses Foto...">
+                        <Loader2 className="w-5 h-5 text-amber-500 animate-spin" />
+                    </div>
+                ) : getValidAvatarUrl(user?.profile_picture_url) ? (
+                    <img src={getValidAvatarUrl(user.profile_picture_url)!} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
                     <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
                         <UserCircle className="w-8 h-8" />

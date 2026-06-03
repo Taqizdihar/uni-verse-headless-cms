@@ -254,7 +254,10 @@ const authenticateToken = (req, res, next) => {
         req.user = user;
         
         // Guest Role Read-Only Interceptor
-        if (user.role === 'guest' && req.method !== 'GET' && req.method !== 'OPTIONS') {
+        // Exemption: Personal profile endpoints (/api/user/*) are user-scoped,
+        // not tenant-content-scoped, so guests can manage their own account.
+        const isPersonalRoute = req.originalUrl.startsWith('/api/user/');
+        if (user.role === 'guest' && req.method !== 'GET' && req.method !== 'OPTIONS' && !isPersonalRoute) {
             return res.status(403).json({ error: 'Akses Terbatas: Role Guest hanya dapat melihat data.' });
         }
         
@@ -2459,14 +2462,61 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
             return res.status(500).json({ error: 'Failed to upload avatar to CDN' });
         }
 
-        const avatarUrl = cdnResponse.url;
-        
-        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [avatarUrl, userId]);
-        console.log(`[AVATAR] ✅ User ${userId} avatar → ${avatarUrl}`);
-        res.json({ url: avatarUrl });
+        const fileId = cdnResponse.fileId;
+        const cdnStatus = cdnResponse.status || 'processing';
+        const rawUrl = cdnResponse.url || '';
+
+        // If CDN already reports ready, build final URL and persist immediately
+        if (cdnStatus === 'ready' && rawUrl) {
+            // Extract Google Drive ID for the canonical lh3 format
+            let finalUrl = rawUrl;
+            const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveIdMatch) {
+                finalUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}=w1200?authuser=0`;
+            }
+            
+            await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [finalUrl, userId]);
+            console.log(`[AVATAR] ✅ User ${userId} avatar (ready) → ${finalUrl}`);
+            return res.json({ url: finalUrl, fileId, status: 'ready' });
+        }
+
+        // CDN still processing — persist fileId as temporary marker so we can poll
+        const tempUrl = `processing:${fileId}`;
+        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [tempUrl, userId]);
+        console.log(`[AVATAR] ⏳ User ${userId} avatar uploaded (processing) → fileId: ${fileId}`);
+        res.json({ url: null, fileId, status: 'processing' });
     } catch (error) {
         console.error('[PROFILE ERROR] Upload avatar:', error);
         res.status(500).json({ error: 'Gagal mengunggah foto profil' });
+    }
+});
+
+// Avatar CDN Status Check — allows frontend to poll avatar processing state
+app.get('/api/user/avatar-status/:fileId', async (req, res) => {
+    const { fileId } = req.params;
+    const userId = req.user.userId;
+    try {
+        const statusData = await cdnService.getStatus(fileId, 'image/jpeg');
+        
+        if (statusData.status === 'ready') {
+            const rawUrl = statusData.url || '';
+            // Build canonical lh3 Google Drive URL
+            let finalUrl = rawUrl;
+            const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveIdMatch) {
+                finalUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}=w1200?authuser=0`;
+            }
+            
+            // Persist the final URL
+            await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [finalUrl, userId]);
+            console.log(`[AVATAR] ✅ User ${userId} avatar CDN ready → ${finalUrl}`);
+            return res.json({ status: 'ready', url: finalUrl });
+        }
+        
+        res.json({ status: statusData.status || 'processing', url: null });
+    } catch (error) {
+        console.error('[AVATAR STATUS ERROR]', error);
+        res.status(500).json({ error: 'Failed to check avatar CDN status' });
     }
 });
 
