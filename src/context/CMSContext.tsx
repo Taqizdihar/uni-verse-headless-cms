@@ -166,7 +166,6 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [evictionNotification, setEvictionNotification] = useState<{tenantName: string} | null>(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const avatarPollRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Helper for headers
   const getHeaders = () => {
@@ -635,10 +634,10 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   // =============================================================
-  // Global Avatar Upload & Background CDN Polling
+  // Global Avatar Upload (Synchronous Await — mirrors Media module)
   // =============================================================
-  // Persists across route navigation — user can leave the Profile
-  // page and the avatar will still finish processing.
+  // No polling. The backend fully awaits CDN processing and returns
+  // the finalized URL in a single request/response cycle.
   // =============================================================
   const uploadAvatar = async (file: File) => {
     setIsAvatarUploading(true);
@@ -658,72 +657,27 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        throw new Error('Upload failed');
+        const errData = await res.json().catch(() => ({ error: 'Upload failed' }));
+        throw new Error(errData.error || 'Upload failed');
       }
 
       const data = await res.json();
 
-      if (data.status === 'ready' && data.url) {
-        // CDN was instant — update immediately
+      if (data.url) {
+        // Backend has fully resolved the URL — update global user state
         const updatedUser = { ...user, profile_picture_url: data.url };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        setIsAvatarUploading(false);
-        return;
+        console.log('[AVATAR] ✅ Avatar updated successfully:', data.url);
       }
-
-      // CDN is processing — start background polling
-      const fileId = data.fileId;
-      if (!fileId) {
-        console.error('[AVATAR] No fileId returned from upload');
-        setIsAvatarUploading(false);
-        return;
-      }
-
-      // Clear any existing poll
-      if (avatarPollRef.current) clearInterval(avatarPollRef.current);
-
-      avatarPollRef.current = setInterval(async () => {
-        try {
-          const pollRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/avatar-status/${fileId}`, {
-            headers: {
-              'Authorization': `Bearer ${currentToken || localStorage.getItem('token')}`
-            }
-          });
-
-          if (!pollRes.ok) return;
-          const pollData = await pollRes.json();
-
-          if (pollData.status === 'ready' && pollData.url) {
-            // CDN is done — update global user state
-            if (avatarPollRef.current) clearInterval(avatarPollRef.current);
-            avatarPollRef.current = null;
-
-            setUser((prev: any) => {
-              const updated = { ...prev, profile_picture_url: pollData.url };
-              localStorage.setItem('user', JSON.stringify(updated));
-              return updated;
-            });
-            setIsAvatarUploading(false);
-            console.log('[AVATAR] ✅ CDN ready, avatar updated globally');
-          }
-        } catch (pollErr) {
-          console.error('[AVATAR] Poll error:', pollErr);
-        }
-      }, 3000); // Poll every 3 seconds
-
     } catch (err) {
-      console.error('[AVATAR] Upload error:', err);
+      console.error('[AVATAR] ❌ Upload error:', err);
+    } finally {
+      // ALWAYS clear loading state — prevents infinite spinner
       setIsAvatarUploading(false);
     }
   };
 
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (avatarPollRef.current) clearInterval(avatarPollRef.current);
-    };
-  }, []);
 
   // Backend-backed comment operations
   const fetchComments = async () => {

@@ -2455,68 +2455,42 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
         // Avatars go to tenant root (no folder hierarchy needed)
         const cdnPath = `tenant_${tid}`;
         
+        // Synchronous CDN upload — await the full response (mirrors Media module)
         let cdnResponse;
         try {
             cdnResponse = await cdnService.upload(req.file.buffer, req.file.originalname, req.file.mimetype, cdnPath);
         } catch (cdnErr) {
+            console.error('[AVATAR] ❌ CDN upload failed:', cdnErr.message);
             return res.status(500).json({ error: 'Failed to upload avatar to CDN' });
         }
 
         const fileId = cdnResponse.fileId;
-        const cdnStatus = cdnResponse.status || 'processing';
-        const rawUrl = cdnResponse.url || '';
-
-        // If CDN already reports ready, build final URL and persist immediately
-        if (cdnStatus === 'ready' && rawUrl) {
-            // Extract Google Drive ID for the canonical lh3 format
-            let finalUrl = rawUrl;
-            const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (driveIdMatch) {
-                finalUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}=w1200?authuser=0`;
-            }
-            
-            await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [finalUrl, userId]);
-            console.log(`[AVATAR] ✅ User ${userId} avatar (ready) → ${finalUrl}`);
-            return res.json({ url: finalUrl, fileId, status: 'ready' });
+        if (!fileId) {
+            console.error('[AVATAR] ❌ CRITICAL: CDN returned no fileId!', cdnResponse);
+            return res.status(500).json({ error: 'CDN returned no file identifier' });
         }
 
-        // CDN still processing — persist fileId as temporary marker so we can poll
-        const tempUrl = `processing:${fileId}`;
-        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [tempUrl, userId]);
-        console.log(`[AVATAR] ⏳ User ${userId} avatar uploaded (processing) → fileId: ${fileId}`);
-        res.json({ url: null, fileId, status: 'processing' });
+        const rawUrl = cdnResponse.url || '';
+
+        // Build the final Google Drive lh3 URL from the CDN response
+        let finalUrl = rawUrl;
+        const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveIdMatch) {
+            finalUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}=w1200?authuser=0`;
+        }
+        
+        // Failsafe: NEVER save "null" or empty string to database
+        if (!finalUrl || finalUrl === 'null' || finalUrl === 'undefined') {
+            console.error('[AVATAR] ❌ FAILSAFE: Resolved URL is null/empty, refusing to save.');
+            return res.status(500).json({ error: 'CDN returned an invalid URL' });
+        }
+
+        await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [finalUrl, userId]);
+        console.log(`[AVATAR] ✅ User ${userId} avatar saved → ${finalUrl}`);
+        return res.json({ url: finalUrl, status: 'ready' });
     } catch (error) {
         console.error('[PROFILE ERROR] Upload avatar:', error);
         res.status(500).json({ error: 'Gagal mengunggah foto profil' });
-    }
-});
-
-// Avatar CDN Status Check — allows frontend to poll avatar processing state
-app.get('/api/user/avatar-status/:fileId', async (req, res) => {
-    const { fileId } = req.params;
-    const userId = req.user.userId;
-    try {
-        const statusData = await cdnService.getStatus(fileId, 'image/jpeg');
-        
-        if (statusData.status === 'ready') {
-            const rawUrl = statusData.url || '';
-            // Build canonical lh3 Google Drive URL
-            let finalUrl = rawUrl;
-            const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if (driveIdMatch) {
-                finalUrl = `https://lh3.googleusercontent.com/d/${driveIdMatch[1]}=w1200?authuser=0`;
-            }
-            
-            // Persist the final URL
-            await db.execute('UPDATE users SET profile_picture_url = ? WHERE id = ?', [finalUrl, userId]);
-            console.log(`[AVATAR] ✅ User ${userId} avatar CDN ready → ${finalUrl}`);
-            return res.json({ status: 'ready', url: finalUrl });
-        }
-        
-        res.json({ status: statusData.status || 'processing', url: null });
-    } catch (error) {
-        console.error('[AVATAR STATUS ERROR]', error);
-        res.status(500).json({ error: 'Failed to check avatar CDN status' });
     }
 });
 

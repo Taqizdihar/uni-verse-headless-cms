@@ -193,15 +193,19 @@ export function Users() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm flex-shrink-0">
-                              {u.profile_picture_url ? (
-                                <img src={u.profile_picture_url} alt={u.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                              ) : (
-                                <div className={`w-full h-full flex items-center justify-center ${
-                                  ['admin', 'co_admin'].includes(u.role.toLowerCase()) ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'
-                                }`}>
-                                  {(u.name || 'U').charAt(0).toUpperCase()}
-                                </div>
-                              )}
+                              {(() => {
+                                const url = u.profile_picture_url;
+                                const isValid = url && typeof url === 'string' && url !== 'null' && url !== 'undefined' && !url.startsWith('processing:') && !url.includes('/null');
+                                return isValid ? (
+                                  <img src={url} alt={u.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                ) : (
+                                  <div className={`w-full h-full flex items-center justify-center ${
+                                    ['admin', 'co_admin'].includes(u.role.toLowerCase()) ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400'
+                                  }`}>
+                                    {(u.name || 'U').charAt(0).toUpperCase()}
+                                  </div>
+                                );
+                              })()}
                             </div>
                             <div>
                               <p className="font-bold text-brand-black">{u.name}</p>
