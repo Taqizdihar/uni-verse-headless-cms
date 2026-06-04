@@ -35,4 +35,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor — handle 401 Unauthorized gracefully
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('active_tenant_id');
+      localStorage.removeItem('active_role');
+      
+      // Ensure we only redirect if we aren't already on the login page to avoid flickering loops
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

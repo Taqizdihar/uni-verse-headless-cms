@@ -1,43 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useCMS } from '../context/CMSContext';
 import { useTenantGuard } from '../hooks/useTenantGuard';
 import { ShieldAlert } from 'lucide-react';
 
 export function ProtectedRoute() {
-  const { setToken, setUser, fetchAllData } = useCMS();
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isLoading, user, isAuthenticated } = useCMS();
   const { isEvicted, handleEvictionAck } = useTenantGuard();
 
   // Super Admin immunity: never show eviction modal
-  const userStr = localStorage.getItem('user');
   let isSuperAdmin = false;
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      isSuperAdmin = user.role === 'super_admin';
-    } catch (e) {}
+  if (user) {
+    isSuperAdmin = user.role === 'super_admin';
   }
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-
-    if (token && userStr) {
-      setToken(token);
-      setUser(JSON.parse(userStr));
-      setIsAuthenticated(true);
-    }
-    
-    setIsChecking(false);
-  }, [setToken, setUser]);
-
-  if (isChecking) {
+  if (isLoading) {
     return <div className="h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 flex animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" /></div>;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 

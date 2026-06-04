@@ -138,6 +138,7 @@ interface CMSContextType {
   fetchComments: () => Promise<void>;
   togglePageStatus: (id: number, currentStatus: string) => Promise<void>;
   togglePostStatus: (id: number, currentStatus: string) => Promise<void>;
+  isLoading: boolean;
 }
 
 const CMSContext = createContext<CMSContextType | undefined>(undefined);
@@ -351,13 +352,14 @@ export function CMSProvider({ children }: { children: ReactNode }) {
              console.error('Eviction check error:', e);
            }
         }
-      } catch (err) {
-        console.error('Failed to verify workspaces on init:', err);
-      }
 
-      // Fetch the data after verifying the tenant context
-      await fetchAllData();
-      setIsLoading(false);
+        // Fetch the data after verifying the tenant context
+        await fetchAllData();
+      } catch (err) {
+        console.error('Failed to verify workspaces or fetch data on init:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initializeSession();
@@ -771,28 +773,39 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('active_role', data.user.role);
         localStorage.setItem('primary_tenant_id', String(primaryTid));
 
-        // 6. Force full page reload to wipe all React state and re-initialize
-        // Using window.location.href ensures complete re-initialization
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1200);
+        // Update state context immediately
+        setToken(data.token);
+        setUser(data.user);
+        setActiveTenantId(data.tenant_id);
+        setActiveRole(data.user.role);
+
+        import('../lib/api').then(({ default: api }) => {
+          api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+        }).catch(() => {});
+
+        // Fetch user data & tenant data
+        await fetchAllData();
+
+        setIsSwitchingWorkspace(false);
       } else {
         // Fallback: if API fails, do the old behavior
         console.error('[switchWorkspace] API failed, falling back to local switch');
         localStorage.setItem('active_tenant_id', String(tenantId));
         localStorage.setItem('active_role', role);
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1200);
+        setActiveTenantId(tenantId);
+        setActiveRole(role);
+        await fetchAllData();
+        setIsSwitchingWorkspace(false);
       }
     } catch (err) {
       console.error('[switchWorkspace] Network error:', err);
       // Fallback: do local switch on network error
       localStorage.setItem('active_tenant_id', String(tenantId));
       localStorage.setItem('active_role', role);
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1200);
+      setActiveTenantId(tenantId);
+      setActiveRole(role);
+      await fetchAllData();
+      setIsSwitchingWorkspace(false);
     }
   };
 
@@ -811,7 +824,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       addUser, deleteUser,
       togglePluginStatus, updateSettings, updateLayout,
       togglePageStatus, togglePostStatus,
-      addActivity 
+      addActivity,
+      isLoading
     }}>
       {/* Task 1: Loading Guard */}
       {isLoading ? (
