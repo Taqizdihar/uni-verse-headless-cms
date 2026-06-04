@@ -92,7 +92,6 @@ export function Profile() {
     try {
       await axios.put(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
         name: profile.name,
-        email: profile.email,
         recipient_email: profile.recipient_email
       }, { headers });
       
@@ -267,13 +266,14 @@ export function Profile() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Email Login</label>
-                  <div className="relative group">
-                    <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
+                  <div className="relative group opacity-70">
+                    <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
                     <input 
                       type="email" 
                       value={profile.email}
-                      onChange={e => setProfile({...profile, email: e.target.value})}
-                      className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                      readOnly
+                      disabled
+                      className="w-full pl-11 pr-4 py-3 bg-zinc-100 border border-zinc-200 rounded-xl outline-none font-bold text-zinc-500 cursor-not-allowed" 
                       placeholder="email@contoh.com"
                     />
                   </div>

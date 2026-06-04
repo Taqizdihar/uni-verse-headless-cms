@@ -2438,11 +2438,11 @@ app.get('/api/user/profile', async (req, res) => {
 });
 
 app.put('/api/user/profile', async (req, res) => {
-    const { name, email, recipient_email } = req.body;
+    const { name, recipient_email } = req.body;
     const userId = req.user.userId;
     try {
         const finalRecipientEmail = (recipient_email && recipient_email.trim() !== '') ? recipient_email.trim() : null;
-        await db.execute('UPDATE users SET name = ?, email = ?, recipient_email = ? WHERE id = ?', [name, email, finalRecipientEmail, userId]);
+        await db.execute('UPDATE users SET name = ?, recipient_email = ? WHERE id = ?', [name, finalRecipientEmail, userId]);
         res.json({ message: 'Profil diperbarui' });
     } catch (error) {
         console.error('[PROFILE ERROR] Update profile:', error);
