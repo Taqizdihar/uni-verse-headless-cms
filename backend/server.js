@@ -2470,9 +2470,32 @@ app.post('/api/user/upload-avatar', upload.single('avatar'), async (req, res) =>
             return res.status(500).json({ error: 'CDN returned no file identifier' });
         }
 
-        const rawUrl = cdnResponse.url || '';
+        // True Synchronous Await: Pause and wait for CDN processing to complete
+        let cdnStatus = cdnResponse.status || 'processing';
+        let rawUrl = cdnResponse.url || '';
+        let attempts = 0;
 
-        // Build the final Google Drive lh3 URL from the CDN response
+        while (cdnStatus !== 'ready' && attempts < 15) {
+            // Pause for 2 seconds
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            try {
+                const statusData = await cdnService.getStatus(fileId, req.file.mimetype);
+                cdnStatus = statusData.status;
+                if (cdnStatus === 'ready' && statusData.url) {
+                    rawUrl = statusData.url;
+                }
+            } catch (err) {
+                console.error('[AVATAR] Error polling status:', err.message);
+            }
+            attempts++;
+        }
+
+        if (cdnStatus !== 'ready') {
+            console.error('[AVATAR] ❌ Timed out waiting for CDN to process avatar.');
+            return res.status(500).json({ error: 'Gagal memproses gambar di CDN (Timeout)' });
+        }
+
+        // Build the final Google Drive lh3 URL from the finalized CDN response
         let finalUrl = rawUrl;
         const driveIdMatch = rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (driveIdMatch) {
