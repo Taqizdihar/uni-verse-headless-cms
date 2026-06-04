@@ -159,7 +159,7 @@ export function Profile() {
 
       {/* Global Message Modal */}
       {message.text && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setMessage({ type: '', text: '' })}>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-transparent p-4" onClick={() => setMessage({ type: '', text: '' })}>
           <div 
             className="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200"
             onClick={e => e.stopPropagation()}
