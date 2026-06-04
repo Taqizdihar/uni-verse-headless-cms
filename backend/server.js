@@ -968,7 +968,7 @@ app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
 
         // 4. Lookup admin email for this tenant
         const [admins] = await db.execute(
-            `SELECT u.email, u.name as admin_name FROM users u
+            `SELECT u.email, u.recipient_email, u.name as admin_name FROM users u
              JOIN tenant_users tu ON u.id = tu.user_id
              WHERE tu.tenant_id = ? AND tu.role = 'admin' AND tu.status = 'active'
              LIMIT 1`,
@@ -981,7 +981,10 @@ app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
 
         // 6. Send email notification (non-blocking — don't fail the request if email fails)
         if (admins.length > 0) {
-            sendInquiryNotification(admins[0].email, {
+            const adminUser = admins[0];
+            const targetEmail = adminUser.recipient_email || adminUser.email;
+            
+            sendInquiryNotification(targetEmail, {
                 senderName: name.trim(),
                 senderEmail: email.trim(),
                 subject: (subject || '').trim(),
@@ -2425,7 +2428,7 @@ app.post('/api/notifications/respond', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [rows] = await db.execute('SELECT name, email, profile_picture_url FROM users WHERE id = ?', [userId]);
+        const [rows] = await db.execute('SELECT name, email, recipient_email, profile_picture_url FROM users WHERE id = ?', [userId]);
         if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
         res.json(rows[0]);
     } catch (error) {
@@ -2435,10 +2438,11 @@ app.get('/api/user/profile', async (req, res) => {
 });
 
 app.put('/api/user/profile', async (req, res) => {
-    const { name, email } = req.body;
+    const { name, email, recipient_email } = req.body;
     const userId = req.user.userId;
     try {
-        await db.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, userId]);
+        const finalRecipientEmail = (recipient_email && recipient_email.trim() !== '') ? recipient_email.trim() : null;
+        await db.execute('UPDATE users SET name = ?, email = ?, recipient_email = ? WHERE id = ?', [name, email, finalRecipientEmail, userId]);
         res.json({ message: 'Profil diperbarui' });
     } catch (error) {
         console.error('[PROFILE ERROR] Update profile:', error);

@@ -15,7 +15,7 @@ interface Workspace {
 
 export function Profile() {
   const { user, setUser, token, activeTenantId, switchWorkspace, uploadAvatar, isAvatarUploading } = useCMS();
-  const [profile, setProfile] = useState({ name: '', email: '', profile_picture_url: '' });
+  const [profile, setProfile] = useState({ name: '', email: '', recipient_email: '', profile_picture_url: '' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
@@ -45,7 +45,9 @@ export function Profile() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/profile`, { headers });
-        setProfile(res.data);
+        const data = res.data;
+        if (data.recipient_email === null) data.recipient_email = '';
+        setProfile(data);
       } catch (err) {
         console.error('Fetch profile error:', err);
       }
@@ -90,7 +92,8 @@ export function Profile() {
     try {
       await axios.put(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
         name: profile.name,
-        email: profile.email
+        email: profile.email,
+        recipient_email: profile.recipient_email
       }, { headers });
       
       // Update local user context
@@ -263,7 +266,7 @@ export function Profile() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Alamat Email</label>
+                  <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Email Login</label>
                   <div className="relative group">
                     <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
                     <input 
@@ -275,6 +278,21 @@ export function Profile() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Email Penerima Pesan (Opsional)</label>
+                <div className="relative group">
+                  <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
+                  <input 
+                    type="email" 
+                    value={profile.recipient_email || ''}
+                    onChange={e => setProfile({...profile, recipient_email: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                    placeholder="kontak@websiteanda.com"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 italic ml-1">Jika dikosongkan, semua pesan dari formulir website akan dikirim ke email login Anda.</p>
               </div>
               <div className="flex justify-end">
                 <button 
