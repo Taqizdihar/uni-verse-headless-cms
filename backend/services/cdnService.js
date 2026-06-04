@@ -222,28 +222,42 @@ const cdnService = {
       });
 
       let result = response.data;
+
+      // Handle Kroombox Server-Sent Events (SSE) format
+      if (typeof result === 'string') {
+        const events = result.split('\n\n').filter(Boolean);
+        for (let i = events.length - 1; i >= 0; i--) {
+          const event = events[i].trim();
+          if (event.startsWith('data: ')) {
+            try {
+              result = JSON.parse(event.substring(6));
+              break;
+            } catch (err) {
+              console.error('[CDN] Failed to parse SSE chunk:', event);
+            }
+          }
+        }
+      }
       
       // Task 1: If ready, fetch full details to get the physical URL, then transform it
       if (result.status === 'ready') {
-        try {
-          const detailRes = await axios.get(`${CDN_BASE_URL}/files/${fileId}`, {
-            headers: { 'x-api-key': apiKey },
-          });
-          const detail = detailRes.data;
-          
-          // Capture physical URL
-          const physicalUrl = detail.url || detail.webContentLink || detail.directUrl;
-          // Detect mime from detail response or use passed-in mimeType
-          const detectedMime = detail.mimeType || detail.contentType || mimeType || '';
-
-          // Transform to viewable URL instead of download URL
-          result.url = transformToViewableUrl(physicalUrl, detectedMime, fileId);
-
-          console.log(`[CDN] 🔗 Status ready — transformed URL: ${result.url}`);
-        } catch(detailErr) {
-          console.error('[CDN] Failed to fetch full details for physical URL, using bridge view fallback:', detailErr.message);
-          result.url = `${CDN_BASE_URL}/view/${fileId}`;
+        let physicalUrl = result.url; // Prefer the URL directly from the SSE stream if available
+        
+        if (!physicalUrl || physicalUrl.includes('/api/bridge/view/')) {
+          try {
+            const detailRes = await axios.get(`${CDN_BASE_URL}/files/${fileId}`, {
+              headers: { 'x-api-key': apiKey },
+            });
+            const detail = detailRes.data;
+            physicalUrl = detail.url || detail.webContentLink || detail.directUrl;
+          } catch(detailErr) {
+            console.error('[CDN] Failed to fetch full details for physical URL, using stream fallback:', detailErr.message);
+          }
         }
+        
+        // Transform to viewable URL instead of download URL
+        result.url = transformToViewableUrl(physicalUrl, mimeType || '', fileId);
+        console.log(`[CDN] 🔗 Status ready — transformed URL: ${result.url}`);
       }
 
       return result;
