@@ -112,7 +112,6 @@ export function Profile() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setMessage({ type: 'success', text: 'Mengunggah foto profil...' });
     await uploadAvatar(file);
   };
 
@@ -158,12 +157,29 @@ export function Profile() {
         </div>
       </div>
 
+      {/* Global Message Modal */}
       {message.text && (
-        <div className={`p-4 rounded-xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm ${
-          message.type === 'success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
-        }`}>
-          {message.type === 'success' ? <ShieldCheck className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
-          <span className="text-sm font-bold">{message.text}</span>
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={() => setMessage({ type: '', text: '' })}>
+          <div 
+            className="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center ${message.type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                {message.type === 'success' ? <ShieldCheck className="w-8 h-8" /> : <Lock className="w-8 h-8" />}
+              </div>
+              <h3 className="text-xl font-black text-zinc-900">
+                {message.type === 'success' ? 'Berhasil' : 'Peringatan'}
+              </h3>
+              <p className="text-zinc-500 font-medium">{message.text}</p>
+              <button 
+                onClick={() => setMessage({ type: '', text: '' })}
+                className="w-full py-3 mt-2 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -282,15 +298,24 @@ export function Profile() {
 
               <div className="space-y-2">
                 <label className="text-xs font-black text-zinc-400 uppercase tracking-widest ml-1">Email Penerima Pesan (Opsional)</label>
-                <div className="relative group">
+                <div className="relative group flex items-center">
                   <Mail className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-amber-500 transition-colors" />
                   <input 
                     type="email" 
                     value={profile.recipient_email || ''}
                     onChange={e => setProfile({...profile, recipient_email: e.target.value})}
-                    className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
+                    className="w-full pl-11 pr-24 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all font-bold text-zinc-900" 
                     placeholder="kontak@websiteanda.com"
                   />
+                  {profile.recipient_email && (
+                    <button
+                      type="button"
+                      onClick={() => setProfile({...profile, recipient_email: ''})}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      Hapus
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-zinc-500 italic ml-1">Jika dikosongkan, semua pesan dari formulir website akan dikirim ke email login Anda.</p>
               </div>
