@@ -260,27 +260,6 @@ export function CMSProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initializeSession = async () => {
-      // Task 4: Emergency Logout Button (Force Reset logic)
-      const now = Date.now();
-      const countStr = sessionStorage.getItem('redirect_count') || '0';
-      const timeStr = sessionStorage.getItem('redirect_timestamp') || String(now);
-      
-      let count = parseInt(countStr, 10);
-      const timestamp = parseInt(timeStr, 10);
-      
-      if (now - timestamp < 2000) {
-        count += 1;
-        sessionStorage.setItem('redirect_count', String(count));
-        if (count > 5) {
-          sessionStorage.removeItem('redirect_count');
-          localStorage.clear();
-          window.location.href = '/login';
-          return;
-        }
-      } else {
-        sessionStorage.setItem('redirect_count', '1');
-        sessionStorage.setItem('redirect_timestamp', String(now));
-      }
 
       const currentToken = token || localStorage.getItem('token');
       if (!currentToken) {
@@ -306,29 +285,33 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         });
 
         if (!profileRes.ok) {
-          // Token is invalid or expired — clear everything
-          console.warn(`[CMSContext] Token validation failed (${profileRes.status}). Clearing session.`);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('active_tenant_id');
-          localStorage.removeItem('active_role');
-          try {
-            const { default: api } = await import('../lib/api');
-            delete api.defaults.headers.common['Authorization'];
-          } catch (e) {}
-          setToken(null);
-          setUser(null);
-          setIsLoading(false);
-          return;
+          if (profileRes.status === 401 || profileRes.status === 403) {
+            // Token is invalid or expired — clear everything
+            console.warn(`[CMSContext] Token validation failed (${profileRes.status}). Clearing session.`);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('active_tenant_id');
+            localStorage.removeItem('active_role');
+            try {
+              const { default: api } = await import('../lib/api');
+              delete api.defaults.headers.common['Authorization'];
+            } catch (e) {}
+            setToken(null);
+            setUser(null);
+            setIsLoading(false);
+            return;
+          } else {
+            console.warn(`[CMSContext] Profile validation returned non-401 error: ${profileRes.status}`);
+          }
+        } else {
+          // Token is valid — hydrate user from the authoritative profile response
+          const profileData = await profileRes.json();
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          // Merge profile fields with stored session fields
+          const hydratedUser = { ...storedUser, name: profileData.name, email: profileData.email, profile_picture_url: profileData.profile_picture_url };
+          setUser(hydratedUser);
+          localStorage.setItem('user', JSON.stringify(hydratedUser));
         }
-
-        // Token is valid — hydrate user from the authoritative profile response
-        const profileData = await profileRes.json();
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        // Merge profile fields (name, email, profile_picture_url) with stored session fields (role, tenant_id, site_name)
-        const hydratedUser = { ...storedUser, name: profileData.name, email: profileData.email, profile_picture_url: profileData.profile_picture_url };
-        setUser(hydratedUser);
-        localStorage.setItem('user', JSON.stringify(hydratedUser));
       } catch (err) {
         console.error('[CMSContext] Token validation network error:', err);
         // On network error, keep the existing session (offline-friendly)
