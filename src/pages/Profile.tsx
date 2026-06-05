@@ -14,7 +14,7 @@ interface Workspace {
 }
 
 export function Profile() {
-  const { user, setUser, token, activeTenantId, switchWorkspace, uploadAvatar, isAvatarUploading } = useCMS();
+  const { user, setUser, token, activeTenantId, switchWorkspace, uploadAvatar, isAvatarUploading, isSwitchingWorkspace } = useCMS();
   const [profile, setProfile] = useState({ name: '', email: '', recipient_email: '', profile_picture_url: '' });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [isSaving, setIsSaving] = useState(false);
@@ -74,6 +74,7 @@ export function Profile() {
 
   const handleWorkspaceSwitch = (tenantId: number) => {
     if (tenantId === activeTenantId) return;
+    if (isSwitchingWorkspace) return; // Prevent overlapping switch calls
     const ws = workspaces.find(w => w.tenant_id === tenantId);
     if (ws) {
       switchWorkspace(ws.tenant_id, ws.role);
@@ -241,7 +242,8 @@ export function Profile() {
                   <select
                     value={activeTenantId || ''}
                     onChange={(e) => handleWorkspaceSwitch(Number(e.target.value))}
-                    className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 transition-all appearance-none cursor-pointer pr-10"
+                    disabled={isSwitchingWorkspace}
+                    className={`w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl text-sm font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 transition-all appearance-none cursor-pointer pr-10 ${isSwitchingWorkspace ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {workspaces.filter(w => w.status === 'active').map(ws => (
                       <option key={ws.tenant_id} value={ws.tenant_id}>

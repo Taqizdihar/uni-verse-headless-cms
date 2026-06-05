@@ -19,6 +19,14 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
+// Bootstrap: Synchronously inject token from localStorage at module load.
+// This covers the gap between page refresh and React context hydration,
+// ensuring the very first API call carries the Authorization header.
+const bootstrapToken = localStorage.getItem('token');
+if (bootstrapToken) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${bootstrapToken}`;
+}
+
 // Request interceptor — inject auth + tenant headers on every call
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');

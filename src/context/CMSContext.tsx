@@ -103,6 +103,7 @@ interface CMSContextType {
   isAuthenticated: boolean;
   activeTenantId: number | null;
   activeRole: string | null;
+  isSwitchingWorkspace: boolean;
   isAvatarUploading: boolean;
   setUser: (u: any) => void;
   setToken: (t: string | null) => void;
@@ -154,8 +155,15 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>({});
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
-  const [user, setUser] = useState<any>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [activeTenantId, setActiveTenantId] = useState<number | null>(() => {
     const stored = localStorage.getItem('active_tenant_id');
     return stored ? parseInt(stored, 10) : null;
@@ -280,21 +288,54 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Task 3: Ensure user object (including role) is re-hydrated from JWT
+      // Task 4: Immediately inject token into Axios defaults BEFORE any API call.
+      // This ensures all downstream requests (profile validation, workspace fetch,
+      // data loading) carry the correct Authorization header from the first request.
       try {
-        const payload = JSON.parse(atob(currentToken.split('.')[1]));
-        if (payload && payload.id) {
-           setUser((prev: any) => ({ ...prev, ...payload }));
-           const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-           const rehydrated = { ...currentUser, ...payload };
-           localStorage.setItem('user', JSON.stringify(rehydrated));
-        }
+        const { default: api } = await import('../lib/api');
+        api.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
       } catch (e) {
-        console.warn('Failed to parse JWT for rehydration');
+        console.warn('[CMSContext] Failed to pre-inject Axios headers');
+      }
+
+      // Task 4: Validate token by calling /api/user/profile.
+      // If the token is expired or invalid (401/403), clear session and stop.
+      try {
+        const profileRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+
+        if (!profileRes.ok) {
+          // Token is invalid or expired — clear everything
+          console.warn(`[CMSContext] Token validation failed (${profileRes.status}). Clearing session.`);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('active_tenant_id');
+          localStorage.removeItem('active_role');
+          try {
+            const { default: api } = await import('../lib/api');
+            delete api.defaults.headers.common['Authorization'];
+          } catch (e) {}
+          setToken(null);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        // Token is valid — hydrate user from the authoritative profile response
+        const profileData = await profileRes.json();
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        // Merge profile fields (name, email, profile_picture_url) with stored session fields (role, tenant_id, site_name)
+        const hydratedUser = { ...storedUser, name: profileData.name, email: profileData.email, profile_picture_url: profileData.profile_picture_url };
+        setUser(hydratedUser);
+        localStorage.setItem('user', JSON.stringify(hydratedUser));
+      } catch (err) {
+        console.error('[CMSContext] Token validation network error:', err);
+        // On network error, keep the existing session (offline-friendly)
       }
 
       try {
-        // Fetch full list of workspaces to verify identity
+        // Fetch full list of workspaces to verify tenant context
         const wsRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/workspaces`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
@@ -731,6 +772,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   };
 
   const switchWorkspace = async (tenantId: number, role: string) => {
+    if (isSwitchingWorkspace) return; // Prevent rapid-switch race condition
+
     // 1. Show branded loading overlay
     setIsSwitchingWorkspace(true);
 
@@ -773,20 +816,20 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('active_role', data.user.role);
         localStorage.setItem('primary_tenant_id', String(primaryTid));
 
-        // Update state context immediately
+        // 6. Synchronously update Axios default headers before any subsequent calls
+        try {
+          const { default: api } = await import('../lib/api');
+          api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+        } catch (e) {}
+
+        // 7. Update state context atomically — FULL replacement, not merge
         setToken(data.token);
         setUser(data.user);
         setActiveTenantId(data.tenant_id);
         setActiveRole(data.user.role);
 
-        import('../lib/api').then(({ default: api }) => {
-          api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-        }).catch(() => {});
-
         // Fetch user data & tenant data
         await fetchAllData();
-
-        setIsSwitchingWorkspace(false);
       } else {
         // Fallback: if API fails, do the old behavior
         console.error('[switchWorkspace] API failed, falling back to local switch');
@@ -795,7 +838,6 @@ export function CMSProvider({ children }: { children: ReactNode }) {
         setActiveTenantId(tenantId);
         setActiveRole(role);
         await fetchAllData();
-        setIsSwitchingWorkspace(false);
       }
     } catch (err) {
       console.error('[switchWorkspace] Network error:', err);
@@ -805,6 +847,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       setActiveTenantId(tenantId);
       setActiveRole(role);
       await fetchAllData();
+    } finally {
+      // ALWAYS release the lock — prevents permanent UI freeze
       setIsSwitchingWorkspace(false);
     }
   };
@@ -814,7 +858,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   return (
     <CMSContext.Provider value={{ 
       pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers,
-      user, token, isAuthenticated, activeTenantId, activeRole, isAvatarUploading, setUser, setToken, 
+      user, token, isAuthenticated, activeTenantId, activeRole, isSwitchingWorkspace, isAvatarUploading, setUser, setToken, 
       setPages, setPosts, setMedia,
       fetchAllData, switchWorkspace, uploadAvatar,
       savePage, deletePage, 

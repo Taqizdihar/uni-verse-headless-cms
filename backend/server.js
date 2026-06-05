@@ -680,7 +680,7 @@ app.post('/api/auth/register', async (req, res) => {
             })]
         );
 
-        const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId, email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
 
         res.status(201).json({ 
             message: 'Success', 
@@ -759,7 +759,7 @@ app.post('/api/auth/login', async (req, res) => {
             }
         }
 
-        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id: primary_tenant_id, role: role || 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId: user.id, email: user.email, tenant_id: primary_tenant_id, role: role || 'admin' }, JWT_SECRET, { expiresIn: '7d' });
         
         console.log(`[AUTH] Login successful for ${email}. Tenant: ${tenant_id || 'NONE'}, Role: ${role}`);
 
@@ -822,7 +822,7 @@ app.post('/api/auth/setup', authenticateToken, async (req, res) => {
         );
 
         // Sign fresh token
-        const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ userId, email: req.user.email, tenant_id: tenantId, role: 'admin' }, JWT_SECRET, { expiresIn: '7d' });
         
         console.log(`[AUTH] Setup finalized. Tenant ID: ${tenantId}, Subdomain: ${generatedSubdomain}`);
         res.status(200).json({ 
@@ -886,7 +886,7 @@ app.post('/api/auth/switch-workspace', authenticateToken, async (req, res) => {
         const newToken = jwt.sign(
             { userId, email: req.user.email, tenant_id: parseInt(tenant_id, 10), role: targetRole },
             JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         );
 
         // 5. Fetch user details for frontend context
