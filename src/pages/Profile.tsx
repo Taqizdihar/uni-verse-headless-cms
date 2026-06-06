@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { User, Mail, Lock, Camera, Save, Key, ShieldCheck, Loader2, Building2, ChevronDown, RefreshCw } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 import axios from 'axios';
@@ -159,7 +160,7 @@ export function Profile() {
       </div>
 
       {/* Global Message Modal */}
-      {message.text && (
+      {message.text && createPortal(
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setMessage({ type: '', text: '' })}>
           <div 
             className="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200"
@@ -181,7 +182,8 @@ export function Profile() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

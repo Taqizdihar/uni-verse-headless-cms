@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 
 interface NotificationModalProps {
@@ -50,7 +51,7 @@ export function NotificationModal({
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200" onMouseDown={onClose}>
       <div className="relative w-full max-w-sm bg-white rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" onMouseDown={e => e.stopPropagation()}>
         <div className="p-8 text-center">
@@ -71,6 +72,7 @@ export function NotificationModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
