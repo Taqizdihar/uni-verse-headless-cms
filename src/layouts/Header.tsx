@@ -196,7 +196,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <button 
-          onClick={() => window.open('https://drive.google.com/file/d/1ZaUlAvkTbGGBH8zTmLKxSJhAPoPO7ik7/view?usp=sharing', '_blank')}
+          onClick={() => navigate('/panduan')}
           className="flex items-center gap-2 hover:bg-zinc-50 p-2 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300"
         >
           <BookOpen className="w-5 h-5 text-zinc-500" />

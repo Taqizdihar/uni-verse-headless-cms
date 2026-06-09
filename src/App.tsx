@@ -24,6 +24,7 @@ import { Notifications } from './pages/Notifications';
 import { Inquiries } from './pages/Inquiries';
 import { Profile } from './pages/Profile';
 import { LogAktivitas } from './pages/LogAktivitas';
+import { Panduan } from './pages/Panduan';
 import { SuperAdminDashboard } from './pages/SuperAdminDashboard';
 import { TenantManagement } from './pages/TenantManagement';
 import { GlobalFaqManager } from './pages/GlobalFaqManager';
@@ -85,6 +86,7 @@ export default function App() {
                   <Route path="/inquiries" element={<Inquiries />} />
                   <Route path="/faq" element={<FaqCenter />} />
                   <Route path="/log-aktivitas" element={<LogAktivitas />} />
+                  <Route path="/panduan" element={<Panduan />} />
                 </Route>
               </Route>
 
