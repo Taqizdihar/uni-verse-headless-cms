@@ -115,7 +115,7 @@ export function Dashboard() {
       ) : chartsData ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Area Chart */}
-          <Card className="border-none shadow-sm overflow-hidden bg-white lg:col-span-2 flex flex-col">
+          <Card className="border-none shadow-sm overflow-hidden bg-white lg:col-span-2 lg:h-[500px] flex flex-col">
             <CardHeader className="border-b border-zinc-50 p-6 flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-lg font-bold text-zinc-900">Tren Aktivitas</CardTitle>
               <select
@@ -129,9 +129,9 @@ export function Dashboard() {
                 <option value="all">Semua Waktu</option>
               </select>
             </CardHeader>
-            <CardContent className="p-6 flex-1 flex flex-col">
+            <CardContent className="p-6 flex-1 flex flex-col justify-center">
               {chartsData.activityTrend && chartsData.activityTrend.length > 0 ? (
-                <div className="h-[200px] lg:h-full min-h-[200px] w-full flex-1">
+                <div className="h-[250px] lg:h-full min-h-[200px] w-full flex-1">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartsData.activityTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
@@ -155,21 +155,21 @@ export function Dashboard() {
           </Card>
 
           {/* Right Column: Two Stacked Charts */}
-          <div className="flex flex-col gap-6 lg:col-span-1">
+          <div className="flex flex-col gap-6 lg:col-span-1 lg:h-[500px]">
             {/* Doughnut Chart */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-              <CardHeader className="border-b border-zinc-50 p-6">
+            <Card className="border-none shadow-sm overflow-hidden bg-white lg:h-[238px] flex flex-col">
+              <CardHeader className="border-b border-zinc-50 py-4 px-6 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-bold text-zinc-900">Komposisi Tim</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 flex-1 flex flex-col justify-center">
                 {chartsData.roleDistribution && chartsData.roleDistribution.length > 0 ? (
-                  <div className="h-[180px] w-full">
+                  <div className="h-[130px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={chartsData.roleDistribution}
-                          innerRadius={40}
-                          outerRadius={60}
+                          innerRadius={30}
+                          outerRadius={45}
                           paddingAngle={5}
                           dataKey="value"
                         >
@@ -179,36 +179,36 @@ export function Dashboard() {
                           })}
                         </Pie>
                         <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #f4f4f5', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                        <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 600, color: '#71717a' }} />
+                        <Legend verticalAlign="bottom" height={24} iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: 600, color: '#71717a' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[180px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[130px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
 
             {/* Bar Chart */}
-            <Card className="border-none shadow-sm overflow-hidden bg-white">
-              <CardHeader className="border-b border-zinc-50 p-6">
+            <Card className="border-none shadow-sm overflow-hidden bg-white lg:h-[238px] flex flex-col">
+              <CardHeader className="border-b border-zinc-50 py-4 px-6 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-bold text-zinc-900">Distribusi Konten</CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 flex-1 flex flex-col justify-center">
                 {chartsData.contentDistribution && chartsData.contentDistribution.some((d: any) => d.total > 0) ? (
-                  <div className="h-[180px] w-full">
+                  <div className="h-[130px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartsData.contentDistribution} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                      <BarChart data={chartsData.contentDistribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                        <XAxis dataKey="name" tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
-                        <YAxis tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                        <XAxis dataKey="name" tick={{fontSize: 11, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                        <YAxis tick={{fontSize: 11, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
                         <Tooltip cursor={{fill: '#f4f4f5'}} contentStyle={{ borderRadius: '12px', border: '1px solid #f4f4f5', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                        <Bar dataKey="total" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={40} />
+                        <Bar dataKey="total" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={30} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[180px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[130px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
