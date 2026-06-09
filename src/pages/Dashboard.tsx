@@ -111,15 +111,15 @@ export function Dashboard() {
           <p className="text-sm font-medium text-zinc-400">Memuat visualisasi data...</p>
         </div>
       ) : chartsData ? (
-        <div className="space-y-6">
-          {/* Row 1: Area Chart */}
-          <Card className="border-none shadow-sm overflow-hidden bg-white">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column: Area Chart */}
+          <Card className="border-none shadow-sm overflow-hidden bg-white lg:col-span-2 flex flex-col">
             <CardHeader className="border-b border-zinc-50 p-6">
               <CardTitle className="text-lg font-bold text-zinc-900">Tren Aktivitas (7 Hari Terakhir)</CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex-1 flex flex-col">
               {chartsData.activityTrend && chartsData.activityTrend.length > 0 ? (
-                <div className="h-[300px] w-full">
+                <div className="h-[300px] lg:h-full min-h-[300px] w-full flex-1">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartsData.activityTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
@@ -137,13 +137,13 @@ export function Dashboard() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                <div className="flex-1 flex items-center justify-center text-zinc-400 font-medium italic min-h-[300px]">Belum ada data yang cukup untuk visualisasi</div>
               )}
             </CardContent>
           </Card>
 
-          {/* Row 2: Two Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Right Column: Two Stacked Charts */}
+          <div className="flex flex-col gap-6 lg:col-span-1">
             {/* Doughnut Chart */}
             <Card className="border-none shadow-sm overflow-hidden bg-white">
               <CardHeader className="border-b border-zinc-50 p-6">
@@ -151,13 +151,13 @@ export function Dashboard() {
               </CardHeader>
               <CardContent className="p-6">
                 {chartsData.roleDistribution && chartsData.roleDistribution.length > 0 ? (
-                  <div className="h-[300px] w-full">
+                  <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={chartsData.roleDistribution}
-                          innerRadius={70}
-                          outerRadius={90}
+                          innerRadius={60}
+                          outerRadius={80}
                           paddingAngle={5}
                           dataKey="value"
                         >
@@ -172,7 +172,7 @@ export function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[250px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
@@ -184,7 +184,7 @@ export function Dashboard() {
               </CardHeader>
               <CardContent className="p-6">
                 {chartsData.contentDistribution && chartsData.contentDistribution.some((d: any) => d.total > 0) ? (
-                  <div className="h-[300px] w-full">
+                  <div className="h-[250px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartsData.contentDistribution} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
@@ -196,7 +196,7 @@ export function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[250px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
