@@ -8,6 +8,38 @@ export function LogAktivitas() {
   const { user, token, activeTenantId } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [timeFilter, setTimeFilter] = useState('all');
+
+  const filteredLogs = activityLogs.filter(log => {
+    if (timeFilter === 'all') return true;
+    
+    const logDate = new Date(log.created_at);
+    const now = new Date();
+    
+    // start of today
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // start of yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (timeFilter === 'today') {
+      return logDate.getTime() >= today.getTime();
+    }
+    if (timeFilter === 'yesterday') {
+      return logDate.getTime() >= yesterday.getTime() && logDate.getTime() < today.getTime();
+    }
+    if (timeFilter === '7days') {
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return logDate.getTime() >= sevenDaysAgo.getTime();
+    }
+    if (timeFilter === '30days') {
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return logDate.getTime() >= thirtyDaysAgo.getTime();
+    }
+    return true;
+  });
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -61,11 +93,24 @@ export function LogAktivitas() {
       </div>
 
       <Card className="border-none shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-zinc-50 p-6">
-          <CardTitle className="text-lg font-bold">Semua Aktivitas</CardTitle>
-          <CardDescription className="mt-0.5 text-zinc-500 italic">
-            Catatan jejak audit lengkap dari aksi para anggota workspace.
-          </CardDescription>
+        <CardHeader className="border-b border-zinc-50 p-6 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-bold">Semua Aktivitas</CardTitle>
+            <CardDescription className="mt-0.5 text-zinc-500 italic">
+              Catatan jejak audit lengkap dari aksi para anggota workspace.
+            </CardDescription>
+          </div>
+          <select 
+            value={timeFilter}
+            onChange={(e) => setTimeFilter(e.target.value)}
+            className="text-sm px-3 py-2 border border-zinc-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent bg-white text-zinc-600 font-medium cursor-pointer"
+          >
+            <option value="all">Semua Waktu</option>
+            <option value="today">Hari Ini</option>
+            <option value="yesterday">Kemarin</option>
+            <option value="7days">7 Hari Terakhir</option>
+            <option value="30days">30 Hari Terakhir</option>
+          </select>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -86,7 +131,7 @@ export function LogAktivitas() {
                         Akses log aktivitas dibatasi untuk peran Guest.
                     </td>
                   </tr>
-                ) : activityLogs && activityLogs.length > 0 ? activityLogs.map((activity) => (
+                ) : filteredLogs && filteredLogs.length > 0 ? filteredLogs.map((activity) => (
                   <tr key={activity.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4 font-bold text-zinc-900">{activity.real_actor_name || activity.actor_name}</td>
                     <td className="px-6 py-4 text-zinc-600 font-medium">{

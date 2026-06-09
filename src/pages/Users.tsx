@@ -191,8 +191,8 @@ export function Users() {
                     return (
                       <tr key={u.user_id} className="hover:bg-gray-50/30 transition-colors group">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center font-bold text-sm flex-shrink-0">
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center font-bold text-2xl flex-shrink-0">
                               {(() => {
                                 const url = u.profile_picture_url;
                                 const isValid = url && typeof url === 'string' && url !== 'null' && url !== 'undefined' && !url.startsWith('processing:') && !url.includes('/null');
@@ -208,9 +208,9 @@ export function Users() {
                               })()}
                             </div>
                             <div>
-                              <p className="font-bold text-brand-black">{u.name}</p>
-                              <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
-                                <Mail className="w-3 h-3" />
+                              <p className="text-xl font-bold text-brand-black">{u.name}</p>
+                              <div className="flex items-center gap-1.5 text-sm text-gray-400 font-medium mt-0.5">
+                                <Mail className="w-4 h-4" />
                                 {u.email}
                               </div>
                             </div>
