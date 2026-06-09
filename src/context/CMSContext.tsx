@@ -307,10 +307,20 @@ export function CMSProvider({ children }: { children: ReactNode }) {
           // Token is valid — hydrate user from the authoritative profile response
           const profileData = await profileRes.json();
           const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-          // Merge profile fields with stored session fields
-          const hydratedUser = { ...storedUser, name: profileData.name, email: profileData.email, profile_picture_url: profileData.profile_picture_url };
+          // Merge profile fields with stored session fields (overwrite entirely)
+          const hydratedUser = { 
+            ...storedUser, 
+            ...profileData,
+            role: profileData.role || storedUser.role,
+            tenant_id: profileData.tenant_id || storedUser.tenant_id
+          };
           setUser(hydratedUser);
           localStorage.setItem('user', JSON.stringify(hydratedUser));
+          
+          if (profileData.role) {
+             setActiveRole(profileData.role);
+             localStorage.setItem('active_role', profileData.role);
+          }
         }
       } catch (err) {
         console.error('[CMSContext] Token validation network error:', err);

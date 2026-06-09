@@ -861,13 +861,15 @@ app.post('/api/auth/switch-workspace', authenticateToken, async (req, res) => {
         );
 
         // Super Admin bypass: always allow switching
-        const isSuperAdmin = req.user.userId === 1 || req.user.role === 'super_admin';
+        // Super Admin bypass: strictly check user ID and explicit email rather than stale JWT role
+        const [userCheck] = await db.execute('SELECT email FROM users WHERE id = ?', [userId]);
+        const isSuperAdmin = userId === 1 || (userCheck.length > 0 && userCheck[0].email === 'm.taqizdihar@gmail.com');
 
         if (membership.length === 0 && !isSuperAdmin) {
             return res.status(403).json({ error: 'Anda tidak memiliki akses aktif ke workspace ini.' });
         }
 
-        const targetRole = isSuperAdmin ? 'super_admin' : membership[0].role;
+        const targetRole = isSuperAdmin ? 'super_admin' : (membership.length > 0 ? membership[0].role : 'guest');
 
         // 2. Fetch site_name for the target workspace
         let site_name = 'My Site';
@@ -2464,9 +2466,35 @@ app.post('/api/notifications/respond', async (req, res) => {
 app.get('/api/user/profile', async (req, res) => {
     try {
         const userId = req.user.userId;
-        const [rows] = await db.execute('SELECT name, email, recipient_email, profile_picture_url FROM users WHERE id = ?', [userId]);
+        const override = req.headers['x-active-tenant'];
+        const tid = override ? parseInt(override, 10) : req.user.tenant_id;
+
+        const [rows] = await db.execute('SELECT id, name, email, recipient_email, profile_picture_url FROM users WHERE id = ?', [userId]);
         if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-        res.json(rows[0]);
+        
+        const user = rows[0];
+
+        let role = 'guest';
+        if (tid) {
+            const [membership] = await db.execute(
+                "SELECT role FROM tenant_users WHERE tenant_id = ? AND user_id = ? AND status = 'active'",
+                [tid, userId]
+            );
+            if (membership.length > 0) {
+                role = membership[0].role;
+            }
+        }
+        
+        const isSuperAdmin = userId === 1 || user.email === 'm.taqizdihar@gmail.com';
+        if (isSuperAdmin) {
+             role = 'super_admin';
+        }
+        
+        res.json({
+            ...user,
+            tenant_id: tid,
+            role: role
+        });
     } catch (error) {
         console.error('[PROFILE ERROR] Get profile:', error);
         res.status(500).json({ error: 'Internal Server Error' });

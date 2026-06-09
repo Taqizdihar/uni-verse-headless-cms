@@ -14,7 +14,7 @@ export function ProtectedRoute() {
     isSuperAdmin = user.role === 'super_admin';
   }
 
-  if (isLoading) {
+  if (isLoading || isSwitchingWorkspace) {
     return <div className="h-screen flex items-center justify-center bg-gray-50"><div className="w-8 h-8 flex animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" /></div>;
   }
 
