@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 require('dotenv').config();
 const { sendInquiryNotification } = require('./services/emailService');
+const { logActivity } = require('./services/loggerService');
 const JWT_SECRET = process.env.JWT_SECRET || 'uni-inside-secret-key-2026';
 if (!process.env.JWT_SECRET) {
     console.warn('[WARNING] JWT_SECRET is not defined in environment variables. Using fallback key for development.');
@@ -1272,6 +1273,7 @@ app.post('/api/pages', async (req, res) => {
             );
         }
 
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Saved page: ${title.trim()}`, 'success');
         res.status(201).json({ message: 'Page saved successfully', id: pageId });
     } catch (error) {
         console.error('Save Page Error:', error);
@@ -1314,6 +1316,7 @@ app.put('/api/pages/:id', async (req, res) => {
             [title.trim(), finalSlug, jsonContent, finalStatus, finalNavbar, id, tid]
         );
 
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Updated page: ${title.trim()}`, 'success');
         res.json({ message: 'Page updated successfully' });
     } catch (error) {
         console.error('Update Page Error:', error);
@@ -1325,7 +1328,12 @@ app.delete('/api/pages/:id', async (req, res) => {
     const { id } = req.params;
     const tid = getTenantId(req);
     try {
+        const [rows] = await db.execute('SELECT title FROM pages WHERE id = ? AND tenant_id = ?', [id, tid]);
+        const title = rows.length > 0 ? rows[0].title : `ID ${id}`;
+
         await db.execute('DELETE FROM pages WHERE id = ? AND tenant_id = ?', [id, tid]);
+
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Deleted page: ${title}`, 'success');
         res.json({ message: 'Page deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -1596,6 +1604,7 @@ app.post('/api/posts', async (req, res) => {
             'INSERT INTO posts (tenant_id, title, slug, content, excerpt, template_type, category_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             [tid, title, slug, jsonContent, excerpt || '', finalTemplateType, finalCategoryId, status || 'published']
         );
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Saved post: ${title}`, 'success');
         res.status(201).json({ message: 'Post created successfully', id: result.insertId });
     } catch (error) {
         console.error('[API ERROR] Create post:', error);
@@ -1621,6 +1630,7 @@ app.put('/api/posts/:id', async (req, res) => {
             'UPDATE posts SET title = ?, slug = ?, content = ?, excerpt = ?, template_type = ?, category_id = ?, status = ? WHERE id = ? AND tenant_id = ?',
             [title, slug, jsonContent, excerpt || '', finalTemplateType, finalCategoryId, status || 'published', id, tid]
         );
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Updated post: ${title}`, 'success');
         res.json({ message: 'Post updated successfully' });
     } catch (error) {
         console.error('[API ERROR] Update post:', error);
@@ -1632,7 +1642,12 @@ app.delete('/api/posts/:id', async (req, res) => {
     const { id } = req.params;
     const tid = getTenantId(req);
     try {
+        const [rows] = await db.execute('SELECT title FROM posts WHERE id = ? AND tenant_id = ?', [id, tid]);
+        const title = rows.length > 0 ? rows[0].title : `ID ${id}`;
+
         await db.execute('DELETE FROM posts WHERE id = ? AND tenant_id = ?', [id, tid]);
+
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Deleted post: ${title}`, 'success');
         res.json({ message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
@@ -1831,6 +1846,8 @@ app.post('/api/media', upload.single('file'), async (req, res) => {
 
             console.log(`[MEDIA] ✅ Record Created: ID ${result.insertId} | fileId ${fileId} | folder_id ${folder_id}`);
 
+            logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Uploaded media: ${display_name}`, 'success');
+
             res.status(201).json({ 
                 success: true,
                 message: 'Aset berhasil diunggah dan direkam',
@@ -1862,7 +1879,7 @@ app.delete('/api/media/:id', async (req, res) => {
     const tid = getTenantId(req);
     try {
         // Find file identity first
-        const [rows] = await db.execute('SELECT filename FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
+        const [rows] = await db.execute('SELECT filename, file_name FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
         if (rows.length === 0) return res.status(404).json({ error: 'Resource not found or unauthorized' });
         
         const filename = rows[0].filename; // This holds Kroombox fileId now
@@ -1878,6 +1895,10 @@ app.delete('/api/media/:id', async (req, res) => {
 
         // Registry Deletion
         await db.execute('DELETE FROM media WHERE id = ? AND tenant_id = ?', [id, tid]);
+        
+        const display_name = rows[0].file_name || rows[0].filename;
+        logActivity(tid, req.user?.userId, req.user?.name || req.user?.email, req.user?.role, `Deleted media: ${display_name}`, 'success');
+
         res.json({ message: 'Media asset successfully purged' });
     } catch (error) {
         console.error('Purge Error:', error);
@@ -2160,6 +2181,21 @@ app.delete('/api/folders/:id', async (req, res) => {
     } catch (error) {
         console.error('Delete Folder Error:', error);
         res.status(500).json({ error: 'Failed to delete folder' });
+    }
+});
+
+// --- Activity Logs ---
+app.get('/api/v1/activity-logs', authenticateToken, async (req, res) => {
+    try {
+        const tid = req.user.tenant_id;
+        const [logs] = await db.execute(
+            'SELECT * FROM activity_logs WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 50',
+            [tid]
+        );
+        res.json(logs);
+    } catch (error) {
+        console.error('[API ERROR] Get activity logs:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

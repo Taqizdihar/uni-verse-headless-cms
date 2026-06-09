@@ -5,8 +5,9 @@ import { Users, FileText, CheckCircle, TrendingUp, Loader2, Image as ImageIcon, 
 import { useCMS } from '@/context/CMSContext';
 
 export function Dashboard() {
-  const { activities, pages, posts, media, comments, totalUsers, settings } = useCMS();
+  const { pages, posts, media, comments, totalUsers, settings, user, token, activeTenantId } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
 
   const pendingCommentsCount = comments ? comments.filter(c => c.status === 'Pending').length : 0;
 
@@ -14,6 +15,32 @@ export function Dashboard() {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (user?.role === 'guest') return;
+      if (!token) return;
+      
+      try {
+        const headers: Record<string, string> = {
+          'Authorization': `Bearer ${token}`
+        };
+        if (activeTenantId) {
+          headers['x-active-tenant'] = String(activeTenantId);
+        }
+        
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/activity-logs`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          setActivityLogs(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch activity logs', err);
+      }
+    };
+    
+    fetchLogs();
+  }, [token, activeTenantId, user?.role]);
 
   if (isLoading) {
     return (
@@ -94,14 +121,29 @@ export function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
-                {activities && activities.length > 0 ? activities.map((activity) => (
+                {user?.role === 'guest' ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-zinc-400 italic">
+                        Akses log aktivitas dibatasi untuk peran Guest.
+                    </td>
+                  </tr>
+                ) : activityLogs && activityLogs.length > 0 ? activityLogs.map((activity) => (
                   <tr key={activity.id} className="hover:bg-zinc-50/50 transition-colors group">
-                    <td className="px-6 py-4 font-bold text-zinc-900 italic uppercase tracking-tighter">{activity.tenant}</td>
+                    <td className="px-6 py-4 font-bold text-zinc-900 italic uppercase tracking-tighter">{activity.actor_role || activity.actor_name}</td>
                     <td className="px-6 py-4 text-zinc-600 group-hover:text-zinc-900 transition-colors font-medium italic">{activity.action}</td>
-                    <td className="px-6 py-4 text-zinc-400 text-xs">{activity.date}</td>
+                    <td className="px-6 py-4 text-zinc-400 text-xs">{
+                      (() => {
+                        const date = new Date(activity.created_at);
+                        const diffInSeconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+                        if (diffInSeconds < 60) return 'Baru saja';
+                        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} menit yang lalu`;
+                        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} jam yang lalu`;
+                        return `${Math.floor(diffInSeconds / 86400)} hari yang lalu`;
+                      })()
+                    }</td>
                     <td className="px-6 py-4 text-right pr-10">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                        activity.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        activity.status?.toLowerCase() === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       }`}>
                         {activity.status}
                       </span>
