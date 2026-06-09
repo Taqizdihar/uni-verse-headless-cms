@@ -259,7 +259,14 @@ const authenticateToken = async (req, res, next) => {
 
     try {
         const override = req.headers['x-active-tenant'];
-        const activeTenantId = override ? parseInt(override, 10) : user.tenant_id;
+        let activeTenantId = user.tenant_id;
+        
+        if (override && override !== 'undefined' && override !== 'null') {
+            const parsed = parseInt(override, 10);
+            if (!isNaN(parsed)) {
+                activeTenantId = parsed;
+            }
+        }
         
         const [userCheck] = await db.execute('SELECT email FROM users WHERE id = ?', [user.userId]);
         const isSuperAdmin = user.userId === 1 || (userCheck.length > 0 && userCheck[0].email === 'm.taqizdihar@gmail.com');

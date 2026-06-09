@@ -178,11 +178,11 @@ export function CMSProvider({ children }: { children: ReactNode }) {
 
   // Helper for headers
   const getHeaders = () => {
-     const t = token || localStorage.getItem('token');
-     let tid = activeTenantId || localStorage.getItem('active_tenant_id');
+     const t = localStorage.getItem('token') || token;
+     let tid = localStorage.getItem('active_tenant_id') || activeTenantId;
      
      // Fallback to user's primary tenant if missing
-     if (!tid) {
+     if (!tid || tid === 'undefined' || tid === 'null') {
        const storedUser = localStorage.getItem('user');
        if (storedUser) {
          try {
@@ -194,8 +194,8 @@ export function CMSProvider({ children }: { children: ReactNode }) {
      
      return {
         'Content-Type': 'application/json',
-        ...(t ? { 'Authorization': `Bearer ${t}` } : {}),
-        ...(tid ? { 'x-active-tenant': String(tid) } : {})
+        ...(t && t !== 'undefined' && t !== 'null' ? { 'Authorization': `Bearer ${t}` } : {}),
+        ...(tid && tid !== 'undefined' && tid !== 'null' ? { 'x-active-tenant': String(tid) } : {})
      };
   };
 
@@ -281,7 +281,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       // If the token is expired or invalid (401/403), clear session and stop.
       try {
         const profileRes = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
-          headers: { 'Authorization': `Bearer ${currentToken}` }
+          headers: getHeaders()
         });
 
         if (!profileRes.ok) {
