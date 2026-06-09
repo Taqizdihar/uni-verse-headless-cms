@@ -245,15 +245,42 @@ app.get('/api/v1/public/faqs', async (req, res) => {
 });
 
 // Auth Middleware
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Forbidden' });
-        req.user = user;
+    let user;
+    try {
+        user = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    try {
+        const override = req.headers['x-active-tenant'];
+        const activeTenantId = override ? parseInt(override, 10) : user.tenant_id;
         
+        const [userCheck] = await db.execute('SELECT email FROM users WHERE id = ?', [user.userId]);
+        const isSuperAdmin = user.userId === 1 || (userCheck.length > 0 && userCheck[0].email === 'm.taqizdihar@gmail.com');
+        
+        if (isSuperAdmin) {
+            user.role = 'super_admin';
+        } else if (activeTenantId) {
+            const [membership] = await db.execute(
+                "SELECT role FROM tenant_users WHERE tenant_id = ? AND user_id = ? AND status = 'active'",
+                [activeTenantId, user.userId]
+            );
+            if (membership.length > 0) {
+                user.role = membership[0].role;
+            } else {
+                user.role = 'guest';
+            }
+        }
+        
+        req.user = user;
+        req.user.tenant_id = activeTenantId;
+
         // Guest Role Read-Only Interceptor
         // Exemption: Personal profile endpoints (/api/user/*) are user-scoped,
         // not tenant-content-scoped, so guests can manage their own account.
@@ -263,7 +290,10 @@ const authenticateToken = (req, res, next) => {
         }
         
         next();
-    });
+    } catch (dbError) {
+        console.error('[AUTH] Dynamic role resolution failed:', dbError);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
 // Super Admin Middleware (Strict check for user_id === 1)
