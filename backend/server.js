@@ -268,7 +268,11 @@ const authenticateToken = async (req, res, next) => {
             }
         }
         
-        const [userCheck] = await db.execute('SELECT email FROM users WHERE id = ?', [user.userId]);
+        const [userCheck] = await db.execute('SELECT name, email FROM users WHERE id = ?', [user.userId]);
+        if (userCheck.length > 0) {
+            user.name = userCheck[0].name;
+            user.email = userCheck[0].email;
+        }
         const isSuperAdmin = user.userId === 1 || (userCheck.length > 0 && userCheck[0].email === 'm.taqizdihar@gmail.com');
         
         if (isSuperAdmin) {
@@ -2228,7 +2232,11 @@ app.get('/api/v1/activity-logs', authenticateToken, async (req, res) => {
     try {
         const tid = req.user.tenant_id;
         const [logs] = await db.execute(
-            'SELECT * FROM activity_logs WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 50',
+            `SELECT al.*, u.name as real_actor_name 
+             FROM activity_logs al 
+             LEFT JOIN users u ON al.user_id = u.id 
+             WHERE al.tenant_id = ? 
+             ORDER BY al.created_at DESC LIMIT 50`,
             [tid]
         );
         res.json(logs);

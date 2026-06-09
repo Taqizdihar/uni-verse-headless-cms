@@ -77,7 +77,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
@@ -133,7 +133,7 @@ export function Dashboard() {
                   </tr>
                 ) : activityLogs && activityLogs.length > 0 ? activityLogs.slice(0, 10).map((activity) => (
                   <tr key={activity.id} className="hover:bg-zinc-50/50 transition-colors group">
-                    <td className="px-6 py-4 font-bold text-zinc-900">{activity.actor_name}</td>
+                    <td className="px-6 py-4 font-bold text-zinc-900">{activity.real_actor_name || activity.actor_name}</td>
                     <td className="px-6 py-4 text-zinc-600 font-medium">{
                       activity.actor_role ? activity.actor_role.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : 'Unknown'
                     }</td>

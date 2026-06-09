@@ -88,7 +88,7 @@ export function LogAktivitas() {
                   </tr>
                 ) : activityLogs && activityLogs.length > 0 ? activityLogs.map((activity) => (
                   <tr key={activity.id} className="hover:bg-zinc-50/50 transition-colors group">
-                    <td className="px-6 py-4 font-bold text-zinc-900">{activity.actor_name}</td>
+                    <td className="px-6 py-4 font-bold text-zinc-900">{activity.real_actor_name || activity.actor_name}</td>
                     <td className="px-6 py-4 text-zinc-600 font-medium">{
                       activity.actor_role ? activity.actor_role.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : 'Unknown'
                     }</td>
