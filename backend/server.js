@@ -2265,6 +2265,67 @@ app.get('/api/dashboard/stats', async (req, res) => {
     }
 });
 
+app.get('/api/v1/dashboard/charts', async (req, res) => {
+    try {
+        const tid = getTenantId(req);
+        if (!tid) return res.status(400).json({ error: 'Tenant ID required' });
+
+        // 1. Activity Trend (Last 7 Days)
+        const [activityRows] = await db.execute(`
+            SELECT DATE(created_at) as date, COUNT(*) as aktivitas 
+            FROM activity_logs 
+            WHERE tenant_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
+            GROUP BY DATE(created_at) 
+            ORDER BY DATE(created_at) ASC
+        `, [tid]);
+
+        const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const activityTrend = activityRows.map(row => {
+            const dateObj = new Date(row.date);
+            return {
+                date: daysOfWeek[dateObj.getDay()],
+                aktivitas: row.aktivitas
+            };
+        });
+
+        // 2. Role Distribution
+        const [roleRows] = await db.execute(`
+            SELECT role as name, COUNT(*) as value 
+            FROM tenant_users 
+            WHERE tenant_id = ? AND status = 'active'
+            GROUP BY role
+        `, [tid]);
+
+        const roleDistribution = roleRows.map(r => ({
+            name: r.name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+            value: r.value
+        }));
+
+        // 3. Content Distribution
+        const [pages] = await db.execute('SELECT COUNT(*) as total FROM pages WHERE tenant_id = ?', [tid]);
+        const [posts] = await db.execute('SELECT COUNT(*) as total FROM posts WHERE tenant_id = ?', [tid]);
+        const [inquiries] = await db.execute('SELECT COUNT(*) as total FROM contact_inquiries WHERE tenant_id = ?', [tid]);
+        const [comments] = await db.execute('SELECT COUNT(*) as total FROM comments WHERE tenant_id = ? AND status = ?', [tid, 'approved']);
+
+        const contentDistribution = [
+            { name: 'Halaman', total: pages[0].total },
+            { name: 'Post', total: posts[0].total },
+            { name: 'Inquiries', total: inquiries[0].total },
+            { name: 'Komentar', total: comments[0].total }
+        ];
+
+        res.json({
+            activityTrend,
+            roleDistribution,
+            contentDistribution
+        });
+    } catch (error) {
+        console.error('[API ERROR] Get Dashboard Charts:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 // --- Users (Tenant Users) ---
 app.get('/api/users', async (req, res) => {
     try {

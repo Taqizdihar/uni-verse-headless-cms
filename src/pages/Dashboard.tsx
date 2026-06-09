@@ -5,11 +5,14 @@ import { Link } from 'react-router-dom';
 import { Users, FileText, CheckCircle, TrendingUp, Loader2, Image as ImageIcon, MessageSquare, TrendingUp as Up, TrendingDown as Down, Mail } from 'lucide-react';
 import { useCMS } from '@/context/CMSContext';
 import { formatActivityDate } from '@/utils/dateFormatter';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
 
 export function Dashboard() {
   const { pages, posts, media, comments, totalUsers, totalInquiries, settings, user, token, activeTenantId } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [chartsData, setChartsData] = useState<any>(null);
+  const [isChartsLoading, setIsChartsLoading] = useState(true);
 
   const pendingCommentsCount = comments ? comments.filter(c => c.status === 'Pending').length : 0;
 
@@ -40,8 +43,32 @@ export function Dashboard() {
         console.error('Failed to fetch activity logs', err);
       }
     };
+
+    const fetchCharts = async () => {
+      if (!token || !activeTenantId) {
+        setIsChartsLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/dashboard/charts`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'x-active-tenant': String(activeTenantId)
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setChartsData(data);
+        }
+      } catch (e) {
+        console.error('Failed to fetch charts', e);
+      } finally {
+        setIsChartsLoading(false);
+      }
+    };
     
     fetchLogs();
+    fetchCharts();
   }, [token, activeTenantId, user?.role]);
 
   if (isLoading) {
@@ -76,6 +103,106 @@ export function Dashboard() {
            </div>
         </div>
       </div>
+
+      {/* Charts Section */}
+      {isChartsLoading ? (
+        <div className="w-full h-[300px] bg-zinc-50 rounded-xl flex flex-col items-center justify-center border border-zinc-200">
+          <Loader2 className="w-8 h-8 text-amber-400 animate-spin mb-4" />
+          <p className="text-sm font-medium text-zinc-400">Memuat visualisasi data...</p>
+        </div>
+      ) : chartsData ? (
+        <div className="space-y-6">
+          {/* Row 1: Area Chart */}
+          <Card className="border-none shadow-sm overflow-hidden bg-white">
+            <CardHeader className="border-b border-zinc-50 p-6">
+              <CardTitle className="text-lg font-bold text-zinc-900">Tren Aktivitas (7 Hari Terakhir)</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {chartsData.activityTrend && chartsData.activityTrend.length > 0 ? (
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartsData.activityTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorAktivitas" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
+                      <XAxis dataKey="date" tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                      <YAxis tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #f4f4f5', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Area type="monotone" dataKey="aktivitas" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorAktivitas)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Row 2: Two Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Doughnut Chart */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+              <CardHeader className="border-b border-zinc-50 p-6">
+                <CardTitle className="text-lg font-bold text-zinc-900">Komposisi Tim</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {chartsData.roleDistribution && chartsData.roleDistribution.length > 0 ? (
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={chartsData.roleDistribution}
+                          innerRadius={70}
+                          outerRadius={90}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {chartsData.roleDistribution.map((entry: any, index: number) => {
+                            const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#8b5cf6', '#ec4899'];
+                            return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                          })}
+                        </Pie>
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #f4f4f5', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                        <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 600, color: '#71717a' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Bar Chart */}
+            <Card className="border-none shadow-sm overflow-hidden bg-white">
+              <CardHeader className="border-b border-zinc-50 p-6">
+                <CardTitle className="text-lg font-bold text-zinc-900">Distribusi Konten</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {chartsData.contentDistribution && chartsData.contentDistribution.some((d: any) => d.total > 0) ? (
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartsData.contentDistribution} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
+                        <XAxis dataKey="name" tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                        <YAxis tick={{fontSize: 12, fill: '#a1a1aa', fontWeight: 600}} tickLine={false} axisLine={false} />
+                        <Tooltip cursor={{fill: '#f4f4f5'}} contentStyle={{ borderRadius: '12px', border: '1px solid #f4f4f5', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                        <Bar dataKey="total" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={40} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((stat, i) => {
