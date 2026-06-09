@@ -29,9 +29,11 @@ export function Users() {
 
   const getHeaders = useCallback(() => {
     const t = localStorage.getItem('token');
+    const activeTenantId = localStorage.getItem('active_tenant_id');
     return {
       'Content-Type': 'application/json',
-      ...(t ? { Authorization: `Bearer ${t}` } : {})
+      ...(t ? { Authorization: `Bearer ${t}` } : {}),
+      ...(activeTenantId ? { 'x-active-tenant': activeTenantId } : {})
     };
   }, []);
 

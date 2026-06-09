@@ -195,14 +195,6 @@ export function Header({ onMenuClick }: HeaderProps) {
            Buka Frontend
         </button>
 
-        <div 
-          onClick={() => navigate('/dashboard/updates')}
-          className="flex items-center gap-2 cursor-pointer hover:bg-zinc-50 p-2 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300"
-        >
-          <History className="w-5 h-5 text-zinc-500" />
-          <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Histori Update</span>
-        </div>
-
         <button 
           onClick={() => window.open('https://drive.google.com/file/d/1ZaUlAvkTbGGBH8zTmLKxSJhAPoPO7ik7/view?usp=sharing', '_blank')}
           className="flex items-center gap-2 hover:bg-zinc-50 p-2 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300"
@@ -215,12 +207,15 @@ export function Header({ onMenuClick }: HeaderProps) {
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="relative p-2.5 text-zinc-500 hover:text-amber-500 transition-colors rounded-full hover:bg-zinc-50 border border-transparent"
+            className="flex items-center gap-2 hover:bg-zinc-50 p-2 px-3 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300 text-zinc-500 hover:text-amber-500"
           >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-white animate-pulse" />
-            )}
+            <div className="relative">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-white animate-pulse" />
+              )}
+            </div>
+            <span className="hidden xl:block text-xs font-bold text-zinc-600 uppercase tracking-widest">Pusat Notifikasi</span>
           </button>
 
           {/* Notification Dropdown */}
@@ -327,6 +322,14 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
           )}
         </div>
+
+        <button 
+          onClick={() => navigate('/dashboard/updates')}
+          className="flex items-center justify-center w-10 h-10 hover:bg-zinc-50 rounded-xl transition-colors border border-zinc-200 hover:border-zinc-300 text-zinc-500 hover:text-amber-500"
+          title="Histori Update"
+        >
+          <History className="w-5 h-5" />
+        </button>
         
         <div className="flex items-center gap-4 pl-6 border-l border-zinc-200">
           <div 

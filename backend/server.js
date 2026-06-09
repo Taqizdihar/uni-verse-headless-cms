@@ -2268,9 +2268,10 @@ app.get('/api/dashboard/stats', async (req, res) => {
 // --- Users (Tenant Users) ---
 app.get('/api/users', async (req, res) => {
     try {
-        const tid = getTenantId(req);
+        // Use explicit req.user.tenant_id enforced by auth middleware
+        const tid = req.user.tenant_id;
         const [rows] = await db.execute(`
-            SELECT u.id as user_id, u.name, u.email, u.profile_picture_url, tu.role,
+            SELECT u.id as user_id, u.name, u.email, u.profile_picture_url, tu.role AS role,
                    IFNULL(tu.status, 'active') as status
             FROM tenant_users tu
             JOIN users u ON tu.user_id = u.id
