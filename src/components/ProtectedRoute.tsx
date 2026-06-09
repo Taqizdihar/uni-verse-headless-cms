@@ -5,7 +5,7 @@ import { useTenantGuard } from '../hooks/useTenantGuard';
 import { ShieldAlert } from 'lucide-react';
 
 export function ProtectedRoute() {
-  const { isLoading, user, isAuthenticated } = useCMS();
+  const { isLoading, user, isAuthenticated, isSwitchingWorkspace } = useCMS();
   const { isEvicted, handleEvictionAck } = useTenantGuard();
 
   // Super Admin immunity: never show eviction modal
