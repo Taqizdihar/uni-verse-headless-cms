@@ -2270,20 +2270,32 @@ app.get('/api/v1/dashboard/charts', async (req, res) => {
         const tid = getTenantId(req);
         if (!tid) return res.status(400).json({ error: 'Tenant ID required' });
 
-        // 1. Activity Trend (Last 7 Days)
+        const timeRange = req.query.timeRange || '7d';
+        let dateFilter = 'DATE_SUB(CURDATE(), INTERVAL 7 DAY)';
+        if (timeRange === '30d') dateFilter = 'DATE_SUB(CURDATE(), INTERVAL 30 DAY)';
+        else if (timeRange === '90d') dateFilter = 'DATE_SUB(CURDATE(), INTERVAL 90 DAY)';
+        else if (timeRange === 'all') dateFilter = "'1970-01-01'";
+
+        // 1. Activity Trend
         const [activityRows] = await db.execute(`
             SELECT DATE(created_at) as date, COUNT(*) as aktivitas 
             FROM activity_logs 
-            WHERE tenant_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
+            WHERE tenant_id = ? AND created_at >= ${dateFilter}
             GROUP BY DATE(created_at) 
             ORDER BY DATE(created_at) ASC
         `, [tid]);
 
         const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+        
         const activityTrend = activityRows.map(row => {
             const dateObj = new Date(row.date);
+            let dateLabel = daysOfWeek[dateObj.getDay()];
+            if (timeRange !== '7d') {
+                dateLabel = `${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+            }
             return {
-                date: daysOfWeek[dateObj.getDay()],
+                date: dateLabel,
                 aktivitas: row.aktivitas
             };
         });

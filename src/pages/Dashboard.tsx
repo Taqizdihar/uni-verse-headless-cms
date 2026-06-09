@@ -13,6 +13,7 @@ export function Dashboard() {
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [chartsData, setChartsData] = useState<any>(null);
   const [isChartsLoading, setIsChartsLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('7d');
 
   const pendingCommentsCount = comments ? comments.filter(c => c.status === 'Pending').length : 0;
 
@@ -49,8 +50,9 @@ export function Dashboard() {
         setIsChartsLoading(false);
         return;
       }
+      setIsChartsLoading(true);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/dashboard/charts`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/dashboard/charts?timeRange=${timeRange}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'x-active-tenant': String(activeTenantId)
@@ -69,7 +71,7 @@ export function Dashboard() {
     
     fetchLogs();
     fetchCharts();
-  }, [token, activeTenantId, user?.role]);
+  }, [token, activeTenantId, user?.role, timeRange]);
 
   if (isLoading) {
     return (
@@ -114,12 +116,22 @@ export function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Area Chart */}
           <Card className="border-none shadow-sm overflow-hidden bg-white lg:col-span-2 flex flex-col">
-            <CardHeader className="border-b border-zinc-50 p-6">
-              <CardTitle className="text-lg font-bold text-zinc-900">Tren Aktivitas (7 Hari Terakhir)</CardTitle>
+            <CardHeader className="border-b border-zinc-50 p-6 flex flex-row items-center justify-between space-y-0">
+              <CardTitle className="text-lg font-bold text-zinc-900">Tren Aktivitas</CardTitle>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="text-xs font-bold bg-zinc-50 border border-zinc-200 text-zinc-600 rounded-lg px-2 py-1.5 outline-none hover:bg-zinc-100 transition-colors cursor-pointer"
+              >
+                <option value="7d">7 Hari Terakhir</option>
+                <option value="30d">30 Hari Terakhir</option>
+                <option value="90d">90 Hari Terakhir</option>
+                <option value="all">Semua Waktu</option>
+              </select>
             </CardHeader>
             <CardContent className="p-6 flex-1 flex flex-col">
               {chartsData.activityTrend && chartsData.activityTrend.length > 0 ? (
-                <div className="h-[300px] lg:h-full min-h-[300px] w-full flex-1">
+                <div className="h-[200px] lg:h-full min-h-[200px] w-full flex-1">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={chartsData.activityTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
@@ -137,7 +149,7 @@ export function Dashboard() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-zinc-400 font-medium italic min-h-[300px]">Belum ada data yang cukup untuk visualisasi</div>
+                <div className="flex-1 flex items-center justify-center text-zinc-400 font-medium italic min-h-[200px]">Belum ada data yang cukup untuk visualisasi</div>
               )}
             </CardContent>
           </Card>
@@ -151,13 +163,13 @@ export function Dashboard() {
               </CardHeader>
               <CardContent className="p-6">
                 {chartsData.roleDistribution && chartsData.roleDistribution.length > 0 ? (
-                  <div className="h-[250px] w-full">
+                  <div className="h-[180px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={chartsData.roleDistribution}
-                          innerRadius={60}
-                          outerRadius={80}
+                          innerRadius={40}
+                          outerRadius={60}
                           paddingAngle={5}
                           dataKey="value"
                         >
@@ -172,7 +184,7 @@ export function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[250px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[180px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
@@ -184,7 +196,7 @@ export function Dashboard() {
               </CardHeader>
               <CardContent className="p-6">
                 {chartsData.contentDistribution && chartsData.contentDistribution.some((d: any) => d.total > 0) ? (
-                  <div className="h-[250px] w-full">
+                  <div className="h-[180px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartsData.contentDistribution} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
@@ -196,7 +208,7 @@ export function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[250px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
+                  <div className="h-[180px] flex items-center justify-center text-zinc-400 font-medium italic">Belum ada data yang cukup untuk visualisasi</div>
                 )}
               </CardContent>
             </Card>
