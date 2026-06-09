@@ -107,6 +107,8 @@ interface CMSContextType {
   isAvatarUploading: boolean;
   setUser: (u: any) => void;
   setToken: (t: string | null) => void;
+  setActiveTenantId: (id: number | null) => void;
+  setActiveRole: (role: string | null) => void;
   setPages: (p: PageItem[]) => void;
   setPosts: (p: PostItem[]) => void;
   setMedia: (m: MediaItem[]) => void;
@@ -854,6 +856,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
     <CMSContext.Provider value={{ 
       pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers, totalInquiries,
       user, token, isAuthenticated, activeTenantId, activeRole, isSwitchingWorkspace, isAvatarUploading, setUser, setToken, 
+      setActiveTenantId, setActiveRole,
       setPages, setPosts, setMedia,
       fetchAllData, switchWorkspace, uploadAvatar,
       savePage, deletePage, 

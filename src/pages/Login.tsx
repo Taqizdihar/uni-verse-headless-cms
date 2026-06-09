@@ -7,7 +7,7 @@ import { useCMS } from '../context/CMSContext';
 
 export function Login() {
   const navigate = useNavigate();
-  const { setToken, setUser } = useCMS();
+  const { setToken, setUser, setActiveTenantId, setActiveRole } = useCMS();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -66,6 +66,8 @@ export function Login() {
       
       setToken(token);
       setUser(user);
+      setActiveTenantId(parseInt(primaryTenantId, 10));
+      setActiveRole(user.role || 'admin');
       
       console.log(`[FRONTEND] Login success. User ID: ${user.id}`);
 
