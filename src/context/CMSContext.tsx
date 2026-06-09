@@ -155,6 +155,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>({});
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalInquiries, setTotalInquiries] = useState<number>(0);
   const [user, setUser] = useState<any>(() => {
     try {
       const stored = localStorage.getItem('user');
@@ -251,6 +252,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
       if (Array.isArray(usersRes)) setUsers(usersRes);
       if (Array.isArray(pluginsRes)) setPlugins(pluginsRes);
       if (dashboardRes && dashboardRes.totalUsers !== undefined) setTotalUsers(dashboardRes.totalUsers);
+      if (dashboardRes && dashboardRes.totalInquiries !== undefined) setTotalInquiries(dashboardRes.totalInquiries);
       if (Array.isArray(commentsRes)) setComments(commentsRes);
       
     } catch (err) {
@@ -850,7 +852,7 @@ export function CMSProvider({ children }: { children: ReactNode }) {
 
   return (
     <CMSContext.Provider value={{ 
-      pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers,
+      pages, posts, media, comments, layoutBlocks, users, plugins, settings, activities, totalUsers, totalInquiries,
       user, token, isAuthenticated, activeTenantId, activeRole, isSwitchingWorkspace, isAvatarUploading, setUser, setToken, 
       setPages, setPosts, setMedia,
       fetchAllData, switchWorkspace, uploadAvatar,

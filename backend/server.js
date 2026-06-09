@@ -2241,8 +2241,16 @@ app.get('/api/v1/activity-logs', authenticateToken, async (req, res) => {
 // --- Dashboard ---
 app.get('/api/dashboard/stats', async (req, res) => {
     try {
-        const [rows] = await db.execute('SELECT COUNT(*) as total FROM users');
-        res.json({ totalUsers: rows[0].total });
+        const tid = getTenantId(req);
+        const [userRows] = await db.execute('SELECT COUNT(*) as total FROM users');
+        
+        let totalInquiries = 0;
+        if (tid) {
+            const [inqRows] = await db.execute('SELECT COUNT(*) as total FROM contact_inquiries WHERE tenant_id = ?', [tid]);
+            totalInquiries = inqRows[0].total;
+        }
+
+        res.json({ totalUsers: userRows[0].total, totalInquiries });
     } catch (error) {
         console.error('[API ERROR] Get Dashboard Stats:', error);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -1,26 +1,20 @@
-// File: src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Link } from 'react-router-dom';
-import { Users, FileText, CheckCircle, TrendingUp, Loader2, Image as ImageIcon, MessageSquare, TrendingUp as Up, TrendingDown as Down, Mail } from 'lucide-react';
+import { Loader2, History } from 'lucide-react';
 import { useCMS } from '@/context/CMSContext';
 import { formatActivityDate } from '@/utils/dateFormatter';
 
-export function Dashboard() {
-  const { pages, posts, media, comments, totalUsers, totalInquiries, settings, user, token, activeTenantId } = useCMS();
+export function LogAktivitas() {
+  const { user, token, activeTenantId } = useCMS();
   const [isLoading, setIsLoading] = useState(true);
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
 
-  const pendingCommentsCount = comments ? comments.filter(c => c.status === 'Pending').length : 0;
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const fetchLogs = async () => {
-      if (user?.role === 'guest') return;
+      if (user?.role === 'guest') {
+        setIsLoading(false);
+        return;
+      }
       if (!token) return;
       
       try {
@@ -38,6 +32,8 @@ export function Dashboard() {
         }
       } catch (err) {
         console.error('Failed to fetch activity logs', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -48,69 +44,28 @@ export function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] h-full space-y-4">
         <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-        <p className="text-zinc-500 font-medium">Mensinkronisasi data ekosistem...</p>
+        <p className="text-zinc-500 font-medium">Memuat log audit...</p>
       </div>
     );
   }
-
-  const stats = [
-    { title: "Total User", value: totalUsers.toString(), icon: Users },
-    { title: "Halaman Diterbitkan", value: pages?.length.toString() || "0", icon: FileText },
-    { title: "Post Aktif", value: posts?.length.toString() || "0", icon: CheckCircle },
-    { title: "Aset Media", value: media?.length.toString() || "0", icon: ImageIcon },
-    { title: "Komentar Tertunda", value: pendingCommentsCount.toString(), icon: MessageSquare },
-    { title: "Email Masuk", value: totalInquiries?.toString() || "0", icon: Mail }
-  ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">Dashboard</h2>
-          <p className="text-zinc-500 text-sm mt-1">Pantau metrik operasional dan umpan aktivitas tenant.</p>
+          <h2 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
+            <History className="w-6 h-6 text-amber-400" /> Log Aktivitas
+          </h2>
+          <p className="text-zinc-500 text-sm mt-1">Daftar lengkap riwayat interaksi dan aktivitas sistem untuk tenant aktif.</p>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="items-center gap-2 hidden md:flex">
-             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Pembaruan Langsung:</span>
-             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
-           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {stats.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={i} className="bg-white border-zinc-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                  {stat.title}
-                </CardTitle>
-                <div className="p-2 bg-zinc-50 rounded-lg">
-                  <Icon className="w-4 h-4 text-zinc-900" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-zinc-900">{stat.value}</div>
-              </CardContent>
-            </Card>
-          );
-        })}
       </div>
 
       <Card className="border-none shadow-sm overflow-hidden">
         <CardHeader className="border-b border-zinc-50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg font-bold">Umpan Aktivitas Terbaru</CardTitle>
-              <CardDescription className="mt-0.5 text-zinc-500 italic">
-                Sinyal interaksi terbaru di semua subdomain.
-              </CardDescription>
-            </div>
-            <Link to="/log-aktivitas" className="text-xs font-bold text-amber-400 hover:text-zinc-900 transition-colors uppercase tracking-widest underline underline-offset-4">
-              Log Audit
-            </Link>
-          </div>
+          <CardTitle className="text-lg font-bold">Semua Aktivitas</CardTitle>
+          <CardDescription className="mt-0.5 text-zinc-500 italic">
+            Catatan jejak audit lengkap dari aksi para anggota workspace.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -127,11 +82,11 @@ export function Dashboard() {
               <tbody className="divide-y divide-zinc-50">
                 {user?.role === 'guest' ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-zinc-400 italic">
+                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 italic">
                         Akses log aktivitas dibatasi untuk peran Guest.
                     </td>
                   </tr>
-                ) : activityLogs && activityLogs.length > 0 ? activityLogs.slice(0, 10).map((activity) => (
+                ) : activityLogs && activityLogs.length > 0 ? activityLogs.map((activity) => (
                   <tr key={activity.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4 font-bold text-zinc-900">{activity.actor_name}</td>
                     <td className="px-6 py-4 text-zinc-600 font-medium">{
@@ -151,8 +106,8 @@ export function Dashboard() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-zinc-400 italic">
-                        Tidak ada sinyal aktivitas yang terdeteksi.
+                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-400 italic">
+                        Tidak ada log aktivitas yang tercatat di workspace ini.
                     </td>
                   </tr>
                 )}
