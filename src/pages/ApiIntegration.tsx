@@ -261,7 +261,10 @@ export function ApiIntegration() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'X-Active-Tenant': user?.tenant_id?.toString() || ''
+            }
         });
         if (res.ok) {
            const data = await res.json();
@@ -272,7 +275,7 @@ export function ApiIntegration() {
       }
     }
     fetchApiKey();
-  }, [isGuest]);
+  }, [isGuest, user?.tenant_id]);
 
   const handleRegenerateApiKey = async () => {
     setIsKeyConfirmOpen(false);
@@ -281,7 +284,10 @@ export function ApiIntegration() {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key/regenerate`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'X-Active-Tenant': user?.tenant_id?.toString() || ''
+            }
         });
         if (res.ok) {
            const data = await res.json();
