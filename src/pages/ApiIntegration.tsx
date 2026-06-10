@@ -244,7 +244,7 @@ function CopyableUrl({ label, url, helperText, copiedId, onCopy, copyKey }: {
 }
 
 export function ApiIntegration() {
-  const { user, activeRole } = useCMS();
+  const { user, activeRole, activeTenantId } = useCMS();
   const isGuest = activeRole === 'guest' || user?.role === 'guest';
 
   const [apiKey, setApiKey] = useState('');
@@ -263,7 +263,7 @@ export function ApiIntegration() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
             headers: { 
               'Authorization': `Bearer ${token}`,
-              'X-Active-Tenant': user?.tenant_id?.toString() || ''
+              'X-Active-Tenant': activeTenantId?.toString() || ''
             }
         });
         if (res.ok) {
@@ -275,7 +275,7 @@ export function ApiIntegration() {
       }
     }
     fetchApiKey();
-  }, [isGuest, user?.tenant_id]);
+  }, [isGuest, activeTenantId]);
 
   const handleRegenerateApiKey = async () => {
     setIsKeyConfirmOpen(false);
@@ -286,7 +286,7 @@ export function ApiIntegration() {
             method: 'POST',
             headers: { 
               'Authorization': `Bearer ${token}`,
-              'X-Active-Tenant': user?.tenant_id?.toString() || ''
+              'X-Active-Tenant': activeTenantId?.toString() || ''
             }
         });
         if (res.ok) {

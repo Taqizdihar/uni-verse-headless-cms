@@ -101,7 +101,7 @@ const ENDPOINT_OPTIONS: EndpointOption[] = [
 ];
 
 export function ApiSandbox() {
-  const { user, activeRole } = useCMS();
+  const { user, activeRole, activeTenantId } = useCMS();
   const isGuest = activeRole === 'guest' || user?.role === 'guest';
 
   const [apiKey, setApiKey] = useState('');
@@ -122,13 +122,13 @@ export function ApiSandbox() {
   // Fetch existing API key on mount and when user's tenant changes
   useEffect(() => {
     const fetchApiKey = async () => {
-      if (!user?.tenant_id) return;
+      if (!activeTenantId) return;
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
-            'X-Active-Tenant': user.tenant_id.toString()
+            'X-Active-Tenant': activeTenantId.toString()
           },
         });
         if (res.ok) {
@@ -143,7 +143,7 @@ export function ApiSandbox() {
       }
     };
     fetchApiKey();
-  }, [user?.tenant_id]);
+  }, [activeTenantId]);
 
   // Reset param & body when endpoint changes
   useEffect(() => {
