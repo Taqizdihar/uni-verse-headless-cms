@@ -978,7 +978,9 @@ const inquiryLimiter = rateLimit({
     message: { error: 'Terlalu banyak permintaan. Silakan coba lagi dalam 1 menit.' }
 });
 
-app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
+const { apiAuth } = require('./server/routes/auth');
+
+app.post('/api/v1/inquiries', inquiryLimiter, apiAuth, async (req, res) => {
     try {
         const { name, email, message, subject } = req.body;
 
@@ -993,13 +995,7 @@ app.post('/api/v1/inquiries', inquiryLimiter, async (req, res) => {
         }
 
         // 2. Resolve tenant from API Key
-        const apiKey = req.headers['x-api-key'];
-        if (!apiKey) return res.status(401).json({ error: 'x-api-key header diperlukan.' });
-
-        const [keys] = await db.execute('SELECT tenant_id FROM api_keys WHERE api_key = ? LIMIT 1', [apiKey]);
-        if (keys.length === 0) return res.status(401).json({ error: 'API Key tidak valid.' });
-
-        const tenantId = keys[0].tenant_id;
+        const tenantId = req.api_tenant_id;
 
         // 3. Insert into contact_inquiries table
         const [result] = await db.execute(

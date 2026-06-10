@@ -10,7 +10,7 @@
 //   GET  /settings                    → Site identity & branding
 //
 // All routes are protected by the apiAuth middleware which
-// validates the x-api-key header and resolves req.publicTenantId.
+// validates the x-api-key header and resolves req.api_tenant_id.
 // =============================================================
 
 const express = require('express');
@@ -93,7 +93,7 @@ const normalizeContentImages = (content) => {
 // =============================================================
 router.get('/posts', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const [posts] = await db.execute(
             `SELECT posts.*, post_categories.name AS category_name, post_categories.slug AS category_slug
              FROM posts
@@ -130,7 +130,7 @@ router.get('/posts', async (req, res) => {
 // =============================================================
 router.get('/posts/:slug', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const { slug } = req.params;
 
         const [rows] = await db.execute(
@@ -172,7 +172,7 @@ router.get('/posts/:slug', async (req, res) => {
 
 router.post('/posts/:post_id/comments', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const { post_id } = req.params;
         const { author_name, author_email, content } = req.body;
 
@@ -227,7 +227,7 @@ router.post('/posts/:post_id/comments', async (req, res) => {
 
 router.get('/posts/:post_id/comments', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const { post_id } = req.params;
 
         const [comments] = await db.execute(
@@ -250,7 +250,7 @@ router.get('/posts/:post_id/comments', async (req, res) => {
 // =============================================================
 router.get('/pages', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const [pages] = await db.execute(
             "SELECT * FROM pages WHERE tenant_id = ? AND status = 'published'", 
             [tenantId]
@@ -284,7 +284,7 @@ router.get('/pages', async (req, res) => {
 // =============================================================
 router.get('/pages/:slug', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const { slug } = req.params;
 
         const [rows] = await db.execute(
@@ -326,7 +326,7 @@ router.get('/pages/:slug', async (req, res) => {
 
 router.get('/navigation', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const [navItems] = await db.execute(
             `SELECT title, slug
              FROM pages
@@ -348,7 +348,7 @@ router.get('/navigation', async (req, res) => {
 // =============================================================
 router.get('/settings', async (req, res) => {
     try {
-        const tenantId = req.publicTenantId;
+        const tenantId = req.api_tenant_id;
         const [settingsRows] = await db.execute(
             "SELECT site_name as title, tagline, logo_url, global_options FROM settings WHERE tenant_id = ? LIMIT 1",
             [tenantId]
@@ -390,6 +390,23 @@ router.get('/settings', async (req, res) => {
         res.json(settings);
     } catch (error) {
         console.error('[PUBLIC API ERROR] Get settings:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// =============================================================
+// GET /post-categories — Published categories
+// =============================================================
+router.get('/post-categories', async (req, res) => {
+    try {
+        const tenantId = req.api_tenant_id;
+        const [categories] = await db.execute(
+            "SELECT * FROM post_categories WHERE tenant_id = ? ORDER BY name ASC", 
+            [tenantId]
+        );
+        res.json(categories);
+    } catch (error) {
+        console.error('[PUBLIC API ERROR] Get categories:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

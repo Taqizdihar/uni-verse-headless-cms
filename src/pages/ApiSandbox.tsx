@@ -49,7 +49,7 @@ const ENDPOINT_OPTIONS: EndpointOption[] = [
   {
     label: 'Daftar Kategori Post',
     method: 'GET',
-    path: '/api/v1/post-categories',
+    path: '/api/v1/public/post-categories',
   },
   {
     label: 'Daftar Post/Berita',
@@ -119,24 +119,31 @@ export function ApiSandbox() {
 
   const selected = ENDPOINT_OPTIONS[selectedIdx];
 
-  // Fetch existing API key on mount
+  // Fetch existing API key on mount and when user's tenant changes
   useEffect(() => {
     const fetchApiKey = async () => {
+      if (!user?.tenant_id) return;
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings/api-key`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'X-Active-Tenant': user.tenant_id.toString()
+          },
         });
         if (res.ok) {
           const data = await res.json();
           setApiKey(data.api_key || '');
+        } else {
+          setApiKey('');
         }
       } catch {
         // Silently fail
+        setApiKey('');
       }
     };
     fetchApiKey();
-  }, []);
+  }, [user?.tenant_id]);
 
   // Reset param & body when endpoint changes
   useEffect(() => {
@@ -302,6 +309,21 @@ export function ApiSandbox() {
               </div>
             </div>
 
+            {/* Missing API Key Warning */}
+            {!apiKey && (
+              <div className="px-6 pb-2">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest block mb-1">Peringatan</span>
+                    <p className="text-xs text-amber-700 font-medium leading-relaxed">
+                      Silakan buat API Key di menu Integrasi API untuk workspace ini terlebih dahulu.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Section: Endpoint Selector */}
             <div className="p-6 border-b border-zinc-100">
               <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
@@ -416,7 +438,7 @@ export function ApiSandbox() {
               <button
                 type="button"
                 onClick={handleExecute}
-                disabled={isLoading}
+                disabled={isLoading || !apiKey}
                 className="w-full py-4 bg-amber-400 hover:bg-amber-500 text-zinc-950 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2.5 shadow-lg shadow-amber-400/20 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
               >
                 {isLoading ? (

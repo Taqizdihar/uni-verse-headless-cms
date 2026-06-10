@@ -37,7 +37,7 @@ const apiAuth = async (req, res, next) => {
             return res.status(401).json({ error: 'Invalid API Key' });
         }
 
-        req.publicTenantId = keys[0].tenant_id;
+        req.api_tenant_id = keys[0].tenant_id;
         next();
     } catch (error) {
         console.error('[API AUTH ERROR]:', error);
@@ -54,14 +54,11 @@ const apiAuth = async (req, res, next) => {
 
 router.get('/api-key', async (req, res) => {
     try {
-        const tid = req.user.tenant_id;
+        const tid = req.headers['x-active-tenant'] ? parseInt(req.headers['x-active-tenant'], 10) : req.user.tenant_id;
         const [keys] = await db.execute('SELECT api_key FROM api_keys WHERE tenant_id = ? LIMIT 1', [tid]);
         
         if (keys.length === 0) {
-            // Auto-generate if not exists (for older tenants)
-            const newKey = 'uni_' + crypto.randomBytes(24).toString('hex');
-            await db.execute('INSERT INTO api_keys (tenant_id, api_key) VALUES (?, ?)', [tid, newKey]);
-            return res.json({ api_key: newKey });
+            return res.status(404).json({ error: 'No API Key found for this workspace. Please generate one.' });
         }
         res.json({ api_key: keys[0].api_key });
     } catch (error) {
@@ -79,7 +76,7 @@ router.get('/api-key', async (req, res) => {
 
 router.post('/api-key/regenerate', async (req, res) => {
     try {
-        const tid = req.user.tenant_id;
+        const tid = req.headers['x-active-tenant'] ? parseInt(req.headers['x-active-tenant'], 10) : req.user.tenant_id;
         const newKey = 'uni_' + crypto.randomBytes(24).toString('hex');
         
         const [keys] = await db.execute('SELECT id FROM api_keys WHERE tenant_id = ?', [tid]);
