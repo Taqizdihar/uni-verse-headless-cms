@@ -165,6 +165,11 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                 <button type="button" onClick={() => onOpenMediaPicker(block.id, 'background_image')} className="p-2 bg-amber-400 text-zinc-900 rounded-lg hover:bg-amber-500">
                   <ImageIcon className="w-4 h-4" />
                 </button>
+                {block.data.background_image && (
+                  <button type="button" onClick={() => updateBlockData(block.id, 'background_image', null)} className="p-2 bg-red-100 text-red-500 rounded-lg hover:bg-red-200">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
             <div>
