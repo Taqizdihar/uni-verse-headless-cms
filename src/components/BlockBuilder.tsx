@@ -88,7 +88,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
 
     // Initialize default data structures
     if (type === 'hero') {
-      newBlock.data = { headline: '', sub_headline: '', background_image: '', stats: [], labels: [], cta_buttons: [] };
+      newBlock.data = { headline: '', sub_headline: '', background_image: '', stats: [], labels: [], cta_buttons: [], images: [] };
     } else if (type === 'profile-tabs') {
       newBlock.data = { title: '', tabs: [] };
     } else if (type === 'activity-slider') {
@@ -232,6 +232,32 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                   <input type="text" placeholder="Button Text" value={btn.text || ''} onChange={(e) => { const arr = [...(block.data.cta_buttons || [])]; arr[i] = { ...arr[i], text: e.target.value }; updateBlockData(block.id, 'cta_buttons', arr); }} className="w-1/3 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
                   <input type="url" placeholder="Button URL" value={btn.url || ''} onChange={(e) => { const arr = [...(block.data.cta_buttons || [])]; arr[i] = { ...arr[i], url: e.target.value }; updateBlockData(block.id, 'cta_buttons', arr); }} className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
                   <button type="button" onClick={() => { const arr = (block.data.cta_buttons || []).filter((_: any, idx: number) => idx !== i); updateBlockData(block.id, 'cta_buttons', arr); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Images (Max 10)</label>
+                <button 
+                    type="button" 
+                    onClick={() => { 
+                        const arr = block.data.images || []; 
+                        if (arr.length < 10) updateBlockData(block.id, 'images', [...arr, { url: '' }]); 
+                    }} 
+                    disabled={(block.data.images || []).length >= 10}
+                    className="text-xs font-bold text-amber-600 hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    + Add Image
+                </button>
+              </div>
+              {(block.data.images || []).map((img: any, i: number) => (
+                <div key={i} className="flex gap-2 mb-2 items-center">
+                  <div className="w-6 h-6 flex items-center justify-center rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-500 flex-shrink-0">{i + 1}</div>
+                  <input type="text" readOnly placeholder="Image URL..." value={img.url || ''} className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
+                  <button type="button" onClick={() => onOpenMediaPicker(block.id, 'gallery_image', i)} className="p-2 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg text-xs font-bold flex items-center gap-1 flex-shrink-0">
+                    <ImageIcon className="w-4 h-4"/>
+                  </button>
+                  <button type="button" onClick={() => { const arr = (block.data.images || []).filter((_: any, idx: number) => idx !== i); updateBlockData(block.id, 'images', arr); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
             </div>
