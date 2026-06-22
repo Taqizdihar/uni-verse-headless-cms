@@ -88,7 +88,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
 
     // Initialize default data structures
     if (type === 'hero') {
-      newBlock.data = { headline: '', sub_headline: '', background_image: '', stats: [] };
+      newBlock.data = { headline: '', sub_headline: '', background_image: '', stats: [], labels: [], cta_buttons: [] };
     } else if (type === 'profile-tabs') {
       newBlock.data = { title: '', tabs: [] };
     } else if (type === 'activity-slider') {
@@ -196,6 +196,42 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                     const stats = block.data.stats.filter((_: any, idx: number) => idx !== i);
                     updateBlockData(block.id, 'stats', stats);
                   }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Labels</label>
+                <button type="button" onClick={() => { const arr = block.data.labels || []; updateBlockData(block.id, 'labels', [...arr, '']); }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Label</button>
+              </div>
+              {(block.data.labels || []).map((lbl: string, i: number) => (
+                <div key={i} className="flex gap-2 mb-2 items-center">
+                  <input type="text" placeholder="e.g. Education" value={lbl || ''} onChange={(e) => { const arr = [...(block.data.labels || [])]; arr[i] = e.target.value; updateBlockData(block.id, 'labels', arr); }} className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
+                  <button type="button" onClick={() => { const arr = (block.data.labels || []).filter((_: any, idx: number) => idx !== i); updateBlockData(block.id, 'labels', arr); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">CTA Buttons (Max 6)</label>
+                <button 
+                    type="button" 
+                    onClick={() => { 
+                        const arr = block.data.cta_buttons || []; 
+                        if (arr.length < 6) updateBlockData(block.id, 'cta_buttons', [...arr, { text: '', url: '' }]); 
+                    }} 
+                    disabled={(block.data.cta_buttons || []).length >= 6}
+                    className="text-xs font-bold text-amber-600 hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    + Add CTA Button
+                </button>
+              </div>
+              {(block.data.cta_buttons || []).map((btn: any, i: number) => (
+                <div key={i} className="flex gap-2 mb-2 items-center">
+                  <div className="w-6 h-6 flex items-center justify-center rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-500">{i + 1}</div>
+                  <input type="text" placeholder="Button Text" value={btn.text || ''} onChange={(e) => { const arr = [...(block.data.cta_buttons || [])]; arr[i] = { ...arr[i], text: e.target.value }; updateBlockData(block.id, 'cta_buttons', arr); }} className="w-1/3 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
+                  <input type="url" placeholder="Button URL" value={btn.url || ''} onChange={(e) => { const arr = [...(block.data.cta_buttons || [])]; arr[i] = { ...arr[i], url: e.target.value }; updateBlockData(block.id, 'cta_buttons', arr); }} className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
+                  <button type="button" onClick={() => { const arr = (block.data.cta_buttons || []).filter((_: any, idx: number) => idx !== i); updateBlockData(block.id, 'cta_buttons', arr); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                 </div>
               ))}
             </div>

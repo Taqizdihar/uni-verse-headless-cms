@@ -384,7 +384,9 @@ router.get('/settings', async (req, res) => {
             footer_nav_1: globalOptions.footer_config?.footer_nav_1 || [],
             footer_nav_2: globalOptions.footer_config?.footer_nav_2 || [],
             footer_contacts: globalOptions.footer_config?.footer_contacts || [],
-            google_maps_url: globalOptions.footer_config?.google_maps_url || null
+            google_maps_url: globalOptions.footer_config?.google_maps_url || null,
+            address: globalOptions.footer_config?.address || '',
+            alamat: globalOptions.footer_config?.address || ''
         };
 
         res.json(settings);

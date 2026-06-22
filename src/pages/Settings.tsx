@@ -22,7 +22,8 @@ export function Settings() {
       footer_nav_1: [] as { label: string; url: string }[],
       footer_nav_2: [] as { label: string; url: string }[],
       footer_contacts: [] as { label: string; value: string }[],
-      google_maps_url: ''
+      google_maps_url: '',
+      address: ''
     }
   });
 
@@ -51,7 +52,8 @@ export function Settings() {
           footer_nav_1: fc.footer_nav_1 || fc.quick_links || [],
           footer_nav_2: fc.footer_nav_2 || [],
           footer_contacts: fc.footer_contacts || [],
-          google_maps_url: fc.google_maps_url || ''
+          google_maps_url: fc.google_maps_url || '',
+          address: fc.address || ''
         }
       });
       setIsSettingsLoaded(true);
@@ -438,6 +440,22 @@ export function Settings() {
                                     </div>
                                 ))}
                                 {formData.footer_config.footer_contacts.length === 0 && <p className="text-xs text-zinc-400 italic ml-1">Belum ada kontak ditambahkan.</p>}
+                            </div>
+                        </div>
+
+                        {/* Alamat */}
+                        <div className="border-t border-zinc-100 pt-6 mt-6">
+                            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Alamat Lengkap</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
+                                <input 
+                                    type="text" 
+                                    value={formData.footer_config.address || ''} 
+                                    onChange={(e) => handleFooterChange('address', '', e.target.value)}
+                                    disabled={isGuest}
+                                    className={`w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-xl focus:bg-white focus:border-amber-400 outline-none transition-all font-medium text-zinc-600 ${isGuest ? 'cursor-not-allowed opacity-70 !bg-zinc-100' : ''}`} 
+                                    placeholder="Tuliskan alamat lengkap..." 
+                                />
                             </div>
                         </div>
 
