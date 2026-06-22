@@ -107,15 +107,6 @@ export function Settings() {
       });
   };
 
-  const resolveMapsUrl = (input: string) => {
-    if (!input) return '';
-    if (input.includes('<iframe')) {
-        const match = input.match(/src="([^"]+)"/);
-        return match ? match[1] : input;
-    }
-    return input;
-  };
-
   const handleSave = async () => {
     setStatus('saving');
     
@@ -464,18 +455,6 @@ export function Settings() {
                                     placeholder="Tempel URL embed Google Maps atau kode <iframe>..." 
                                 />
                             </div>
-                            {formData.footer_config.google_maps_url && (
-                                <div className="mt-4 rounded-xl overflow-hidden border border-zinc-100 h-48">
-                                    <iframe 
-                                        src={resolveMapsUrl(formData.footer_config.google_maps_url)} 
-                                        className="w-full h-full border-0" 
-                                        allowFullScreen 
-                                        loading="lazy" 
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        title="Pratinjau Peta"
-                                    />
-                                </div>
-                            )}
                         </div>
                     </Card>
 
