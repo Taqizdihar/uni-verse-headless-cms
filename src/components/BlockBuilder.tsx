@@ -96,7 +96,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
     } else if (type === 'dynamic-post-feed') {
       newBlock.data = { category: null, limit: 3, sort_order: 'desc', selection_mode: 'dynamic', selected_post_ids: null };
     } else if (type === 'rich-text') {
-      newBlock.data = { content: '' };
+      newBlock.data = { content: '', images: [] };
     } else if (type === 'contacts') {
       newBlock.data = { title: null, phone_numbers: [], emails: [], addresses: [], map_location_url: null, social_links: [], working_hours: null };
     } else if (type === 'features') {
@@ -480,9 +480,38 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
 
       case 'rich-text':
         return (
-          <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Content</label>
-            <RichTextEditor value={block.data.content || ''} onChange={(val) => updateBlockData(block.id, 'content', val || null)} />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Content</label>
+              <RichTextEditor value={block.data.content || ''} onChange={(val) => updateBlockData(block.id, 'content', val || null)} />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Images</label>
+                <button type="button" onClick={() => {
+                  const images = block.data.images || [];
+                  updateBlockData(block.id, 'images', [...images, { url: null, label: null }]);
+                }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Image</button>
+              </div>
+              {(block.data.images || []).map((img: any, i: number) => (
+                <div key={i} className="mb-4 p-3 border border-zinc-100 rounded-xl bg-zinc-50/50 space-y-3 relative">
+                  <button type="button" onClick={() => {
+                    const images = (block.data.images || []).filter((_: any, idx: number) => idx !== i);
+                    updateBlockData(block.id, 'images', images);
+                  }} className="absolute top-2 right-2 p-1.5 bg-red-100 text-red-500 hover:bg-red-200 rounded-lg z-10"><Trash2 className="w-3 h-3" /></button>
+                  
+                  <div className="flex gap-2 pr-8">
+                    <input type="text" readOnly value={img.url || ''} placeholder="Image URL..." className="flex-1 px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
+                    <button type="button" onClick={() => onOpenMediaPicker(block.id, 'rich_text_image', i)} className="p-2 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg text-xs font-bold flex items-center gap-1"><ImageIcon className="w-3 h-3"/>Choose</button>
+                  </div>
+                  <input type="text" placeholder="Image Label/Title" value={img.label || ''} onChange={(e) => {
+                    const images = [...(block.data.images || [])];
+                    images[i] = { ...images[i], label: e.target.value || null };
+                    updateBlockData(block.id, 'images', images);
+                  }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold" />
+                </div>
+              ))}
+            </div>
           </div>
         );
 

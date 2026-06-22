@@ -458,6 +458,12 @@ export function Pages() {
                             return { ...block, data: { ...block.data, images: newImages } };
                         }
                         
+                        if (field === 'rich_text_image' && typeof index === 'number') {
+                            const newImages = [...(block.data.images || [])];
+                            newImages[index] = { ...newImages[index], url: mediaUrl };
+                            return { ...block, data: { ...block.data, images: newImages } };
+                        }
+                        
                         return { ...block, data: { ...block.data, [field]: mediaUrl } };
                     }));
                 }
