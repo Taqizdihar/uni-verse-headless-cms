@@ -711,7 +711,7 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Feature Items</label>
-                <button type="button" onClick={() => { const items = block.data.items || []; updateBlockData(block.id, 'items', [...items, { icon_url: null, title: null, description: null, link_url: null }]); }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Feature</button>
+                <button type="button" onClick={() => { const items = block.data.items || []; updateBlockData(block.id, 'items', [...items, { icon_url: null, title: null, description: null, link_url: null, labels: [], alamat: null }]); }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Feature</button>
               </div>
               {(block.data.items || []).map((item: any, i: number) => (
                 <div key={i} className="mb-4 p-3 border border-zinc-100 rounded-xl bg-zinc-50/50 space-y-3 relative">
@@ -723,6 +723,35 @@ export function BlockBuilder({ blocks, onChange, onOpenMediaPicker }: BlockBuild
                   <input type="text" placeholder="Feature Title" value={item.title || ''} onChange={(e) => { const items = [...(block.data.items || [])]; items[i] = { ...items[i], title: e.target.value || null }; updateBlockData(block.id, 'items', items); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs font-bold" />
                   <textarea placeholder="Description" rows={2} value={item.description || ''} onChange={(e) => { const items = [...(block.data.items || [])]; items[i] = { ...items[i], description: e.target.value || null }; updateBlockData(block.id, 'items', items); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:border-amber-400" />
                   <input type="url" placeholder="Link URL (optional)" value={item.link_url || ''} onChange={(e) => { const items = [...(block.data.items || [])]; items[i] = { ...items[i], link_url: e.target.value || null }; updateBlockData(block.id, 'items', items); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
+                  <input type="text" placeholder="Alamat (opsional)" value={item.alamat || ''} onChange={(e) => { const items = [...(block.data.items || [])]; items[i] = { ...items[i], alamat: e.target.value || null }; updateBlockData(block.id, 'items', items); }} className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-xs" />
+                  <div className="mt-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Labels</label>
+                      <button type="button" onClick={() => { 
+                        const items = [...(block.data.items || [])]; 
+                        const labels = items[i].labels || []; 
+                        items[i] = { ...items[i], labels: [...labels, ''] }; 
+                        updateBlockData(block.id, 'items', items); 
+                      }} className="text-xs font-bold text-amber-600 hover:text-amber-700">+ Add Label</button>
+                    </div>
+                    {(item.labels || []).map((lbl: string, lblIdx: number) => (
+                      <div key={lblIdx} className="flex gap-2 mb-2 items-center">
+                        <input type="text" placeholder="Label teks" value={lbl || ''} onChange={(e) => { 
+                          const items = [...(block.data.items || [])]; 
+                          const labels = [...(items[i].labels || [])]; 
+                          labels[lblIdx] = e.target.value; 
+                          items[i] = { ...items[i], labels }; 
+                          updateBlockData(block.id, 'items', items); 
+                        }} className="flex-1 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-xs" />
+                        <button type="button" onClick={() => { 
+                          const items = [...(block.data.items || [])]; 
+                          const labels = (items[i].labels || []).filter((_: any, idx: number) => idx !== lblIdx); 
+                          items[i] = { ...items[i], labels }; 
+                          updateBlockData(block.id, 'items', items); 
+                        }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
