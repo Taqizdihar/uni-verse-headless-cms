@@ -100,7 +100,7 @@ const PUBLIC_ENDPOINTS = [
   { 
     name: 'Daftar Kategori Post', 
     method: 'GET', 
-    path: '/api/v1/post-categories', 
+    path: '/api/v1/public/post-categories', 
     desc: 'Mengambil daftar seluruh kategori postingan yang telah dibuat secara kustom oleh admin (misal: Baju, Makanan, Event).',
     info: 'Sangat berguna untuk membuat tombol filter kategori di halaman Blog atau Katalog Produk Anda.',
     response: `{
@@ -429,8 +429,10 @@ export function ApiIntegration() {
       <div className="space-y-4">
         {PUBLIC_ENDPOINTS.map((ep: any, idx: number) => {
           const fullUrl = `${RENDER_BASE_URL}${ep.path}`;
+          const kroomboxFullUrl = `${KROOMBOX_BASE_URL}${ep.path}`;
           const isCopiedSnippet = copiedEndpoint === `snippet_${idx}`;
-          const isCopiedUrl = copiedEndpoint === `url_${idx}`;
+          const isCopiedUrlRender = copiedEndpoint === `url_render_${idx}`;
+          const isCopiedUrlKroombox = copiedEndpoint === `url_kroombox_${idx}`;
           const isPost = ep.method === 'POST';
           
           let snippet = '';
@@ -474,18 +476,34 @@ export function ApiIntegration() {
                 <div className="p-6 pb-4">
                   <p className="text-zinc-500 text-sm font-medium mb-4">{ep.desc}</p>
                   
-                  <div className="mb-4">
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Endpoint URL</label>
-                    <div className="bg-zinc-50 rounded-xl px-4 py-3 flex items-center justify-between gap-3 border border-zinc-200">
-                      <code className="text-zinc-700 font-mono text-xs font-medium break-all">{fullUrl}</code>
-                      <button
-                          type="button"
-                          onClick={() => copyToClipboard(fullUrl, `url_${idx}`)}
-                          className={`flex-shrink-0 p-2 rounded-lg transition-all ${isCopiedUrl ? 'bg-green-500/10 text-green-600' : 'bg-zinc-200/50 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-200'}`}
-                          title="Salin URL"
-                      >
-                          {isCopiedUrl ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
+                  <div className="mb-4 space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Endpoint URL (Render)</label>
+                      <div className="bg-zinc-50 rounded-xl px-4 py-3 flex items-center justify-between gap-3 border border-zinc-200">
+                        <code className="text-zinc-700 font-mono text-xs font-medium break-all">{fullUrl}</code>
+                        <button
+                            type="button"
+                            onClick={() => copyToClipboard(fullUrl, `url_render_${idx}`)}
+                            className={`flex-shrink-0 p-2 rounded-lg transition-all ${isCopiedUrlRender ? 'bg-green-500/10 text-green-600' : 'bg-zinc-200/50 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-200'}`}
+                            title="Salin URL Render"
+                        >
+                            {isCopiedUrlRender ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Endpoint URL (Kroombox)</label>
+                      <div className="bg-zinc-50 rounded-xl px-4 py-3 flex items-center justify-between gap-3 border border-zinc-200">
+                        <code className="text-zinc-700 font-mono text-xs font-medium break-all">{kroomboxFullUrl}</code>
+                        <button
+                            type="button"
+                            onClick={() => copyToClipboard(kroomboxFullUrl, `url_kroombox_${idx}`)}
+                            className={`flex-shrink-0 p-2 rounded-lg transition-all ${isCopiedUrlKroombox ? 'bg-green-500/10 text-green-600' : 'bg-zinc-200/50 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-200'}`}
+                            title="Salin URL Kroombox"
+                        >
+                            {isCopiedUrlKroombox ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
