@@ -18,6 +18,7 @@ const router = express.Router();
 const db = require('../lib/db');
 const apiAuth = require('../../middleware/apiAuth');
 const { deepSanitizeContent } = require('../../utils/sanitizeHtml');
+const { normalizePostText } = require('../../utils/postText');
 
 // Apply API-key authentication to all data routes
 router.use(apiAuth);
@@ -112,10 +113,7 @@ router.get('/posts', async (req, res) => {
                 // Sanitize legacy &nbsp; entities from database records
                 post.content = deepSanitizeContent(post.content);
             }
-            if (post.excerpt) {
-                post.excerpt = typeof post.excerpt === 'string' ? post.excerpt.replace(/&nbsp;/g, ' ').replace(/&#160;/g, ' ').replace(/\u00A0/g, ' ') : post.excerpt;
-            }
-            return post;
+            return normalizePostText(post);
         });
 
         res.json(normalizedPosts);
@@ -156,7 +154,7 @@ router.get('/posts/:slug', async (req, res) => {
             post.content = deepSanitizeContent(post.content);
         }
 
-        res.json(post);
+        res.json(normalizePostText(post));
     } catch (error) {
         console.error('[PUBLIC API ERROR] Get single post:', error);
         res.status(500).json({ error: 'Internal Server Error' });

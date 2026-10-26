@@ -55,11 +55,20 @@ components:
         content:
           description: Dynamic Block Builder JSON content (parsed).
           oneOf:
+            - type: array
+              items:
+                type: object
             - type: object
             - type: string
         excerpt:
           type: string
           example: "Ringkasan singkat artikel..."
+        summary:
+          type: string
+          description: Alias of excerpt for landing-page summaries, available in both post list and detail responses.
+        description:
+          type: string
+          description: Post description from the template fields in content, preserving rich-text HTML. Empty when no description is provided; content remains unchanged for block renderers.
         category:
           type: string
           example: "Berita"

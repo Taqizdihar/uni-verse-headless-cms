@@ -251,9 +251,9 @@ export function Posts() {
         const contentData = Array.isArray(parsed) ? (parsed[0] || {}) : parsed;
         setCustomBlocks([]);
         setFormData({
-          excerpt: post.excerpt || '',
           featured_image: contentData.featured_image || '',
-          ...contentData
+          ...contentData,
+          excerpt: post.excerpt ?? contentData.excerpt ?? ''
         });
       }
       
