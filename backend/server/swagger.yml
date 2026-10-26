@@ -53,11 +53,18 @@ components:
           type: string
           example: "selamat-datang-di-kampus"
         content:
-          description: Dynamic Block Builder JSON content (parsed).
+          description: Template posts expose an array with excerpt and body_content in content[0], including legacy object/HTML content. Custom posts retain their original dynamic blocks.
           oneOf:
             - type: array
               items:
                 type: object
+                properties:
+                  excerpt:
+                    type: string
+                    description: Post summary, matching the top-level excerpt.
+                  body_content:
+                    type: string
+                    description: Post description, preserving rich-text HTML; read by landing pages such as GIAT.
             - type: object
             - type: string
         excerpt:
@@ -68,7 +75,7 @@ components:
           description: Alias of excerpt for landing-page summaries, available in both post list and detail responses.
         description:
           type: string
-          description: Post description from the template fields in content, preserving rich-text HTML. Empty when no description is provided; content remains unchanged for block renderers.
+          description: Post description from the template fields in content, preserving rich-text HTML. Also available as content[0].body_content for template posts. Empty when no description is provided.
         category:
           type: string
           example: "Berita"

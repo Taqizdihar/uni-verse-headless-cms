@@ -120,44 +120,52 @@ const PUBLIC_ENDPOINTS = [
     name: 'Daftar Post/Berita', 
     method: 'GET', 
     path: '/api/v1/public/posts', 
-    desc: 'Mengambil daftar seluruh postingan/artikel, atau mengambil detail satu postingan spesifik berdasarkan slug-nya.',
-    info: 'Data ini sudah mencakup nama kategori (category_name) dan format template yang digunakan (template_type).',
-    response: `{
-  "success": true,
-  "data": [
-    {
-      "id": 10,
-      "title": "Seminar Teknologi 2026",
-      "slug": "seminar-teknologi-2026",
-      "category": "Event",
-      "excerpt": "Bergabunglah dengan kami dalam seminar...",
-      "featured_image": "https://..."
-    }
-  ]
-}`
-  },
-  { 
-    name: 'Detail Post/Berita', 
-    method: 'GET', 
-    path: '/api/v1/public/posts/:slug', 
-    desc: 'Mengambil daftar seluruh postingan/artikel, atau mengambil detail satu postingan spesifik berdasarkan slug-nya.',
-    info: 'Data ini sudah mencakup nama kategori (category_name) dan format template yang digunakan (template_type).',
-    response: `{
-  "success": true,
-  "data": {
+    desc: 'Mengambil daftar seluruh postingan yang telah dipublikasikan. Respons berupa array langsung, tanpa pembungkus data.',
+    info: 'Ringkasan tersedia di excerpt (alias summary) dan content[0].excerpt. Deskripsi tersedia di description dan content[0].body_content, sesuai pembacaan landing page GIAT. HTML dari editor tetap dipertahankan. Postingan Custom tetap menggunakan array blok aslinya.',
+    response: `[
+  {
+    "id": 10,
     "title": "Seminar Teknologi 2026",
     "slug": "seminar-teknologi-2026",
-    "category": "Event",
+    "template_type": "Event",
+    "category_name": "Kegiatan",
+    "excerpt": "Bergabunglah dengan kami dalam seminar teknologi.",
+    "summary": "Bergabunglah dengan kami dalam seminar teknologi.",
+    "description": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
     "content": [
       {
-        "type": "post_event",
-        "data": {
-          "location": "Auditorium Utama",
-          "start_date": "2026-05-10T09:00:00Z"
-        }
+        "excerpt": "Bergabunglah dengan kami dalam seminar teknologi.",
+        "event_description": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
+        "body_content": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
+        "featured_image": "https://example.com/seminar.jpg"
       }
     ]
   }
+]`
+  },
+  {
+    name: 'Detail Post/Berita',
+    method: 'GET',
+    path: '/api/v1/public/posts/:slug',
+    desc: 'Mengambil satu postingan yang telah dipublikasikan berdasarkan slug. Respons berupa objek langsung, tanpa pembungkus data.',
+    info: 'Field ringkasan dan deskripsi sama dengan endpoint daftar: excerpt / content[0].excerpt dan description / content[0].body_content. Ganti :slug dengan slug postingan.',
+    response: `{
+  "id": 10,
+  "title": "Seminar Teknologi 2026",
+  "slug": "seminar-teknologi-2026",
+  "template_type": "Event",
+  "category_name": "Kegiatan",
+  "excerpt": "Bergabunglah dengan kami dalam seminar teknologi.",
+  "summary": "Bergabunglah dengan kami dalam seminar teknologi.",
+  "description": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
+  "content": [
+    {
+      "excerpt": "Bergabunglah dengan kami dalam seminar teknologi.",
+      "event_description": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
+      "body_content": "<p>Seminar membahas perkembangan teknologi bersama para praktisi.</p>",
+      "featured_image": "https://example.com/seminar.jpg"
+    }
+  ]
 }`
   },
   {
