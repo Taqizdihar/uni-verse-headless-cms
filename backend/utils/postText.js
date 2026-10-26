@@ -1,5 +1,14 @@
 const { sanitizeNbsp } = require('./sanitizeHtml');
 
+// GIAT's detail page only renders body_content. Include an announcement's
+// summary there as text, preserving line breaks when switching to HTML output.
+function announcementBody(excerpt, message) {
+    if (!excerpt || excerpt === message) return message;
+    const paragraph = text => `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r\n?|\n/g, '<br>')}</p>`;
+    const body = message.trimStart().startsWith('<') ? message : (message ? paragraph(message) : '');
+    return [paragraph(excerpt), body].filter(Boolean).join('\n');
+}
+
 // Posts from the form store template fields in content[0]; older posts
 // may store an object, a post_*.data wrapper, or plain HTML instead.
 // GIAT reads content[0].excerpt and content[0].body_content, so template posts
@@ -33,6 +42,9 @@ function normalizePostText(post) {
     const custom = template === 'custom' || dynamicBlocks;
     const description = custom ? firstText(post.description) : firstText(
         data[templateFields[template]],
+        // Keep the original message when normalizing a legacy announcement
+        // again: body_content may already include the rendered summary.
+        template === 'pengumuman' ? post.description : undefined,
         data.description,
         data.body,
         data.main_content,
@@ -51,7 +63,9 @@ function normalizePostText(post) {
             ...data,
             ...(wrappedPost ? fields : {}),
             excerpt: normalizedExcerpt,
-            body_content: normalizedDescription
+            body_content: template === 'pengumuman'
+                ? announcementBody(normalizedExcerpt, normalizedDescription)
+                : normalizedDescription
         };
         normalizedContent = Array.isArray(content) ? [item, ...content.slice(1)] : [item];
     }

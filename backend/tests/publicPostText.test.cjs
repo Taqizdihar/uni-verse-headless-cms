@@ -16,7 +16,8 @@ const fixtures = [
     { id: 6, tenant_id: 7, slug: 'custom', template_type: 'Custom', excerpt: 'Ringkasan custom', content: JSON.stringify([{ type: 'hero', description: 'Bukan deskripsi postingan', data: { title: 'Hero' } }]) },
     { id: 7, tenant_id: 7, slug: 'wrapped-event', content: JSON.stringify([{ type: 'post_event', data: { excerpt: 'Ringkasan blok acara', event_description: '<p>Deskripsi blok acara</p>', location: 'Auditorium' } }]) },
     { id: 8, tenant_id: 7, slug: 'json-object', template_type: 'Artikel', content: JSON.stringify({ excerpt: 'Ringkasan objek', body_content: '<p>Deskripsi objek</p>', tags: ['Berita'] }) },
-    { id: 9, tenant_id: 7, slug: 'description-field', template_type: 'Artikel', excerpt: 'Ringkasan deskripsi', content: [{ description: '<p>Deskripsi lama</p>' }] }
+    { id: 9, tenant_id: 7, slug: 'description-field', template_type: 'Artikel', excerpt: 'Ringkasan deskripsi', content: [{ description: '<p>Deskripsi lama</p>' }] },
+    { id: 10, tenant_id: 7, slug: 'pengambilan-toga', template_type: 'Pengumuman', excerpt: 'Toga wisuda dapat diambil mulai 9 November 2026.', content: JSON.stringify([{ excerpt: 'Ringkasan lama', alert_message: 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', urgency_level: 'High', expiry_date: '2026-11-25' }]) }
 ];
 const dbPath = require.resolve('../server/lib/db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {
@@ -45,8 +46,8 @@ test('public list and detail expose matching summaries and descriptions from sav
     assert.equal(response.status, 200);
     const posts = await response.json();
     assert.equal(posts.length, fixtures.length);
-    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>'];
-    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi'];
+    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>', 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.'];
+    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi', 'Toga wisuda dapat diambil mulai 9 November 2026.'];
     for (const [index, post] of posts.entries()) {
         await t.test(post.slug, async () => {
             assert.equal(post.excerpt, summaries[index]);
@@ -59,7 +60,14 @@ test('public list and detail expose matching summaries and descriptions from sav
                 const giatExcerpt = post.excerpt || contentItem?.excerpt || '';
                 const giatContent = contentItem?.body_content || '';
                 assert.equal(giatExcerpt, summaries[index]);
-                assert.equal(giatContent, descriptions[index]);
+                if (post.template_type === 'Pengumuman') {
+                    assert.equal(giatContent, '<p>Toga wisuda dapat diambil mulai 9 November 2026.</p>\n<p>Halo Wisudawan/Wisudawati!<br><br>Toga sudah dapat diambil di Koperasi GIAT.</p>');
+                    assert.equal(contentItem.alert_message, descriptions[index]);
+                    assert.equal(contentItem.urgency_level, 'High');
+                    assert.equal(contentItem.expiry_date, '2026-11-25');
+                } else {
+                    assert.equal(giatContent, descriptions[index]);
+                }
                 assert.equal(contentItem.excerpt, summaries[index]);
             }
             const detail = await get(`/${post.slug}`);
@@ -105,6 +113,33 @@ test('repeated normalization preserves template fields and additional content it
     assert.deepEqual(normalized.content[0].speakers, ['Nama']);
     assert.deepEqual(normalized.content[1], { metadata: true });
     assert.deepEqual(post, original);
+});
+
+test('announcement summaries are escaped, displayed before the message and not duplicated on normalization', () => {
+    const post = { template_type: 'Pengumuman', excerpt: 'Toga <img src=x onerror=alert(1)> & jadwal\nBaris kedua', content: [{ alert_message: 'Halo <Wisudawan> & Wisudawati!\r\n\r\nPukul 08.00–16.00 WIB' }] };
+    const original = structuredClone(post);
+    const normalized = normalizePostText(post);
+    assert.equal(normalized.content[0].body_content, '<p>Toga &lt;img src=x onerror=alert(1)&gt; &amp; jadwal<br>Baris kedua</p>\n<p>Halo &lt;Wisudawan&gt; &amp; Wisudawati!<br><br>Pukul 08.00–16.00 WIB</p>');
+    assert.equal(normalized.excerpt, post.excerpt);
+    assert.equal(normalized.description, post.content[0].alert_message);
+    assert.equal(normalized.content[0].alert_message, post.content[0].alert_message);
+    assert.deepEqual(normalizePostText(normalized), normalized);
+    assert.deepEqual(post, original);
+});
+
+test('announcement HTML stays formatted and legacy messages also get the summary', () => {
+    const post = { category: 'Pengumuman', excerpt: 'Ringkasan', content: [{ body_content: '<p>Pesan <strong>penting</strong></p>' }] };
+    const normalized = normalizePostText(post);
+    assert.equal(normalized.content[0].body_content, '<p>Ringkasan</p>\n<p>Pesan <strong>penting</strong></p>');
+    assert.equal(normalized.description, '<p>Pesan <strong>penting</strong></p>');
+    assert.deepEqual(normalizePostText(normalized), normalized);
+});
+
+test('announcement body stays unchanged when summary is empty or identical to the message', () => {
+    for (const excerpt of ['', 'Pesan pengumuman']) {
+        const normalized = normalizePostText({ template_type: 'Pengumuman', excerpt, content: [{ alert_message: 'Pesan pengumuman' }] });
+        assert.equal(normalized.content[0].body_content, 'Pesan pengumuman');
+    }
 });
 
 test('CMS integration examples document the real post response shape consumed by GIAT', () => {

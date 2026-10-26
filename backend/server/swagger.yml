@@ -64,7 +64,7 @@ components:
                     description: Post summary, matching the top-level excerpt.
                   body_content:
                     type: string
-                    description: Post description, preserving rich-text HTML; read by landing pages such as GIAT.
+                    description: Post description, preserving rich-text HTML; read by landing pages such as GIAT. For Pengumuman, includes the summary before the original message so detail pages that only render body_content display both.
             - type: object
             - type: string
         excerpt:
@@ -75,7 +75,7 @@ components:
           description: Alias of excerpt for landing-page summaries, available in both post list and detail responses.
         description:
           type: string
-          description: Post description from the template fields in content, preserving rich-text HTML. Also available as content[0].body_content for template posts. Empty when no description is provided.
+          description: Post description from the template fields in content, preserving rich-text HTML. Empty when no description is provided. For Pengumuman this remains the original message; content[0].body_content additionally includes the summary.
         category:
           type: string
           example: "Berita"
