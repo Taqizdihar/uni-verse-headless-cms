@@ -18,7 +18,8 @@ const fixtures = [
     { id: 8, tenant_id: 7, slug: 'json-object', template_type: 'Artikel', content: JSON.stringify({ excerpt: 'Ringkasan objek', body_content: '<p>Deskripsi objek</p>', tags: ['Berita'] }) },
     { id: 9, tenant_id: 7, slug: 'description-field', template_type: 'Artikel', excerpt: 'Ringkasan deskripsi', content: [{ description: '<p>Deskripsi lama</p>' }] },
     { id: 10, tenant_id: 7, slug: 'pengambilan-toga', template_type: 'Pengumuman', excerpt: 'Toga wisuda dapat diambil mulai 9 November 2026.', content: JSON.stringify([{ excerpt: 'Ringkasan lama', alert_message: 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', urgency_level: 'High', expiry_date: '2026-11-25' }]) },
-    { id: 11, tenant_id: 7, slug: 'pengumuman-rich-text', template_type: 'Pengumuman', excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', content: JSON.stringify([{ excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', excerpt_html: '<p>Pengambilan toga <strong>mulai Senin</strong>.</p><p><a href="https://example.com/jadwal">Lihat jadwal</a>.</p>', alert_message: 'Bawa kartu mahasiswa.' }]) }
+    { id: 11, tenant_id: 7, slug: 'pengumuman-rich-text', template_type: 'Pengumuman', excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', content: JSON.stringify([{ excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', excerpt_html: '<p>Pengambilan toga <strong>mulai Senin</strong>.</p><p><a href="https://example.com/jadwal">Lihat jadwal</a>.</p>', alert_message: 'Bawa kartu mahasiswa.' }]) },
+    { id: 12, tenant_id: 7, slug: 'pengumuman-pesan-rich-text', template_type: 'Pengumuman', excerpt: 'Ringkasan penting.', content: JSON.stringify([{ excerpt: 'Ringkasan penting.', excerpt_html: '<p>Ringkasan <strong>penting</strong>.</p>', alert_message: '<p>Segera <strong>daftar</strong> melalui <a href="https://example.com/daftar">tautan</a>.</p>', alert_message_format: 'html' }]) }
 ];
 const dbPath = require.resolve('../server/lib/db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {
@@ -47,8 +48,8 @@ test('public list and detail expose matching summaries and descriptions from sav
     assert.equal(response.status, 200);
     const posts = await response.json();
     assert.equal(posts.length, fixtures.length);
-    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>', 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', 'Bawa kartu mahasiswa.'];
-    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi', 'Toga wisuda dapat diambil mulai 9 November 2026.', 'Pengambilan toga mulai Senin. Lihat jadwal.'];
+    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>', 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', 'Bawa kartu mahasiswa.', '<p>Segera <strong>daftar</strong> melalui <a href="https://example.com/daftar">tautan</a>.</p>'];
+    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi', 'Toga wisuda dapat diambil mulai 9 November 2026.', 'Pengambilan toga mulai Senin. Lihat jadwal.', 'Ringkasan penting.'];
     for (const [index, post] of posts.entries()) {
         await t.test(post.slug, async () => {
             assert.equal(post.excerpt, summaries[index]);
@@ -66,6 +67,9 @@ test('public list and detail expose matching summaries and descriptions from sav
                         assert.equal(contentItem.excerpt_html, JSON.parse(fixtures[index].content)[0].excerpt_html);
                         assert.equal(post.excerpt_html, contentItem.excerpt_html);
                         assert.equal(giatContent, '<p>Pengambilan toga <strong>mulai Senin</strong>.</p><p><a href="https://example.com/jadwal">Lihat jadwal</a>.</p>\n<p>Bawa kartu mahasiswa.</p>');
+                    } else if (post.slug === 'pengumuman-pesan-rich-text') {
+                        assert.equal(contentItem.alert_message_format, 'html');
+                        assert.equal(giatContent, '<p>Ringkasan <strong>penting</strong>.</p>\n<p>Segera <strong>daftar</strong> melalui <a href="https://example.com/daftar">tautan</a>.</p>');
                     } else {
                         assert.equal(giatContent, '<p>Toga wisuda dapat diambil mulai 9 November 2026.</p>\n<p>Halo Wisudawan/Wisudawati!<br><br>Toga sudah dapat diambil di Koperasi GIAT.</p>');
                     }
@@ -162,6 +166,20 @@ test('announcement Rich Text keeps supported formatting and removes unsafe marku
     assert.doesNotMatch(rich, /javascript:|<script|<img|onerror|ql-ui/);
     assert.equal(normalized.content[0].body_content, `${rich}\n<p>Silakan hadir.</p>`);
     assert.equal(normalized.excerpt, 'Jadwal baru FEB tautan');
+    assert.deepEqual(normalizePostText(normalized), normalized);
+});
+
+test('Rich Text announcement messages are sanitized in API fields and remain stable on repeated normalization', () => {
+    const post = { template_type: 'Pengumuman', excerpt: '', content: [{
+        alert_message_format: 'html',
+        alert_message: '<p>Daftar <strong>sekarang</strong> di <a href="javascript:alert(1)">sini</a>.</p><script>alert(1)</script><ol><li data-list="bullet">Bawa kartu</li></ol>'
+    }] };
+    const normalized = normalizePostText(post);
+    assert.match(normalized.description, /<strong>sekarang<\/strong>/);
+    assert.match(normalized.description, /list-style-type:\s*disc/);
+    assert.doesNotMatch(normalized.description, /javascript:|<script/);
+    assert.equal(normalized.content[0].alert_message, normalized.description);
+    assert.equal(normalized.content[0].body_content, normalized.description);
     assert.deepEqual(normalizePostText(normalized), normalized);
 });
 

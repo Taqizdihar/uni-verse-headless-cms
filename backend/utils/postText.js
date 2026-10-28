@@ -1,7 +1,7 @@
 const { sanitizeNbsp } = require('./sanitizeHtml');
 const sanitizeHtml = require('sanitize-html');
 
-function safeExcerptHtml(html) {
+function safeRichTextHtml(html) {
     return sanitizeNbsp(sanitizeHtml(html, {
         allowedTags: ['p', 'br', 'h1', 'h2', 'strong', 'b', 'em', 'i', 'u', 'ol', 'ul', 'li', 'a'],
         allowedAttributes: { a: ['href'], li: ['style'] },
@@ -74,9 +74,12 @@ function normalizePostText(post) {
     );
 
     const normalizedExcerpt = sanitizeNbsp(excerpt);
-    const normalizedDescription = sanitizeNbsp(description);
+    const richAnnouncementMessage = template === 'pengumuman' && data.alert_message_format === 'html';
+    const normalizedDescription = richAnnouncementMessage
+        ? safeRichTextHtml(description)
+        : sanitizeNbsp(description);
     const normalizedRichExcerpt = template === 'pengumuman' && typeof data.excerpt_html === 'string'
-        ? safeExcerptHtml(data.excerpt_html)
+        ? safeRichTextHtml(data.excerpt_html)
         : '';
     let normalizedContent = content;
     if (!custom) {
@@ -86,6 +89,9 @@ function normalizePostText(post) {
             excerpt: normalizedExcerpt,
             ...(template === 'pengumuman' && typeof data.excerpt_html === 'string' && {
                 excerpt_html: normalizedRichExcerpt
+            }),
+            ...(richAnnouncementMessage && typeof data.alert_message === 'string' && {
+                alert_message: normalizedDescription
             }),
             body_content: template === 'pengumuman'
                 ? announcementBody(normalizedExcerpt, normalizedDescription, normalizedRichExcerpt)

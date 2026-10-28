@@ -872,11 +872,14 @@ export function Posts() {
 
             <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 ml-1">Pesan Pengumuman</label>
-                <textarea 
-                    value={formData.alert_message || ''} 
-                    onChange={e => handleInputChange('alert_message', e.target.value)} 
+                <RichTextEditor
+                    value={formData.alert_message || ''}
+                    onChange={html => setFormData((prev: any) => ({
+                        ...prev,
+                        alert_message: html,
+                        alert_message_format: 'html'
+                    }))}
                     placeholder="Tuliskan isi pengumuman penting di sini..."
-                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[120px] resize-none transition-all"
                 />
             </div>
 
