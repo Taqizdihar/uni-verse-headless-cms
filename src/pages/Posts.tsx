@@ -19,6 +19,15 @@ const TEMPLATE_TYPES = [
   { id: 'Custom', label: 'Custom', icon: Puzzle, color: 'text-teal-500', bg: 'bg-teal-50', badge: 'bg-teal-100 text-teal-700 border-teal-200', description: 'Gunakan Dynamic Blocks untuk tata letak bebas.' },
 ];
 
+// GIAT shows the top-level excerpt as text in cards and body_content as HTML
+// on the detail page. Save both representations for announcements.
+const plainExcerptFromHtml = (html: string) => {
+  const document = new DOMParser().parseFromString(html, 'text/html');
+  document.body.querySelectorAll('br').forEach(breakElement => breakElement.replaceWith('\n'));
+  document.body.querySelectorAll('p, h1, h2, li').forEach(block => block.append('\n'));
+  return (document.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+};
+
 export function Posts() {
   const { posts, savePost, deletePost, togglePostStatus, media, fetchAllData, user } = useCMS();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -253,7 +262,10 @@ export function Posts() {
         setFormData({
           featured_image: contentData.featured_image || '',
           ...contentData,
-          excerpt: post.excerpt ?? contentData.excerpt ?? ''
+          excerpt: post.excerpt ?? contentData.excerpt ?? '',
+          ...((post.template_type || post.category) === 'Pengumuman' && {
+            excerpt_html: contentData.excerpt_html || ''
+          })
         });
       }
       
@@ -286,6 +298,7 @@ export function Posts() {
           setFormData({
               excerpt: formData.excerpt || '',
               featured_image: formData.featured_image || '',
+              ...(selectedCat === 'Pengumuman' && { excerpt_html: '' }),
           });
       }
     }
@@ -298,6 +311,7 @@ export function Posts() {
       setFormData({
         excerpt: formData.excerpt || '',
         featured_image: formData.featured_image || '',
+        ...(confirmCategoryChange.nextCategory === 'Pengumuman' && { excerpt_html: '' }),
       });
       setConfirmCategoryChange({ isOpen: false, nextCategory: null });
       setIsCategoryModalOpen(false);
@@ -1284,12 +1298,24 @@ export function Posts() {
 
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 ml-1">Ringkasan Pendek (Excerpt)</label>
-                  <textarea 
-                    value={formData.excerpt || ''} 
-                    onChange={e => handleInputChange('excerpt', e.target.value)} 
-                    placeholder="Berikan ringkasan singkat untuk tampilan list..." 
-                    className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
-                  />
+                  {category === 'Pengumuman' ? (
+                    <RichTextEditor
+                      value={formData.excerpt_html || formData.excerpt || ''}
+                      onChange={html => setFormData((prev: any) => ({
+                        ...prev,
+                        excerpt_html: html,
+                        excerpt: plainExcerptFromHtml(html)
+                      }))}
+                      placeholder="Berikan ringkasan singkat untuk tampilan list..."
+                    />
+                  ) : (
+                    <textarea
+                      value={formData.excerpt || ''}
+                      onChange={e => handleInputChange('excerpt', e.target.value)}
+                      placeholder="Berikan ringkasan singkat untuk tampilan list..."
+                      className="w-full px-5 py-4 bg-zinc-50 border border-zinc-100 rounded-xl outline-none focus:border-amber-400 font-medium text-zinc-700 min-h-[80px] resize-none transition-all"
+                    />
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-zinc-100">

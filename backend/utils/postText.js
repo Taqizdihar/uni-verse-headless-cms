@@ -1,12 +1,30 @@
 const { sanitizeNbsp } = require('./sanitizeHtml');
+const sanitizeHtml = require('sanitize-html');
+
+function safeExcerptHtml(html) {
+    return sanitizeNbsp(sanitizeHtml(html, {
+        allowedTags: ['p', 'br', 'h1', 'h2', 'strong', 'b', 'em', 'i', 'u', 'ol', 'ul', 'li', 'a'],
+        allowedAttributes: { a: ['href'], li: ['style'] },
+        allowedStyles: { li: { 'list-style-type': [/^(disc|decimal)$/] } },
+        allowedSchemes: ['http', 'https', 'mailto'],
+        transformTags: {
+            li: (_tagName, attribs) => {
+                const listStyle = attribs['data-list'] === 'bullet' ? 'disc'
+                    : attribs['data-list'] === 'ordered' ? 'decimal'
+                        : (attribs.style || '').match(/list-style-type:\s*(disc|decimal)(?:\s*;|\s*$)/i)?.[1];
+                return { tagName: 'li', attribs: listStyle ? { style: `list-style-type: ${listStyle}` } : {} };
+            }
+        }
+    }));
+}
 
 // GIAT's detail page only renders body_content. Include an announcement's
-// summary there as text, preserving line breaks when switching to HTML output.
-function announcementBody(excerpt, message) {
+// summary there as HTML, preserving legacy plain text and its line breaks.
+function announcementBody(excerpt, message, excerptHtml = '') {
     if (!excerpt || excerpt === message) return message;
     const paragraph = text => `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r\n?|\n/g, '<br>')}</p>`;
     const body = message.trimStart().startsWith('<') ? message : (message ? paragraph(message) : '');
-    return [paragraph(excerpt), body].filter(Boolean).join('\n');
+    return [excerptHtml || paragraph(excerpt), body].filter(Boolean).join('\n');
 }
 
 // Posts from the form store template fields in content[0]; older posts
@@ -57,14 +75,20 @@ function normalizePostText(post) {
 
     const normalizedExcerpt = sanitizeNbsp(excerpt);
     const normalizedDescription = sanitizeNbsp(description);
+    const normalizedRichExcerpt = template === 'pengumuman' && typeof data.excerpt_html === 'string'
+        ? safeExcerptHtml(data.excerpt_html)
+        : '';
     let normalizedContent = content;
     if (!custom) {
         const item = {
             ...data,
             ...(wrappedPost ? fields : {}),
             excerpt: normalizedExcerpt,
+            ...(template === 'pengumuman' && typeof data.excerpt_html === 'string' && {
+                excerpt_html: normalizedRichExcerpt
+            }),
             body_content: template === 'pengumuman'
-                ? announcementBody(normalizedExcerpt, normalizedDescription)
+                ? announcementBody(normalizedExcerpt, normalizedDescription, normalizedRichExcerpt)
                 : normalizedDescription
         };
         normalizedContent = Array.isArray(content) ? [item, ...content.slice(1)] : [item];
@@ -74,6 +98,7 @@ function normalizePostText(post) {
         ...post,
         content: normalizedContent,
         excerpt: normalizedExcerpt,
+        ...(template === 'pengumuman' && { excerpt_html: normalizedRichExcerpt }),
         summary: normalizedExcerpt,
         description: normalizedDescription
     };

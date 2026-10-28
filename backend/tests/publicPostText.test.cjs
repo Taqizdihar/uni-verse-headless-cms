@@ -17,7 +17,8 @@ const fixtures = [
     { id: 7, tenant_id: 7, slug: 'wrapped-event', content: JSON.stringify([{ type: 'post_event', data: { excerpt: 'Ringkasan blok acara', event_description: '<p>Deskripsi blok acara</p>', location: 'Auditorium' } }]) },
     { id: 8, tenant_id: 7, slug: 'json-object', template_type: 'Artikel', content: JSON.stringify({ excerpt: 'Ringkasan objek', body_content: '<p>Deskripsi objek</p>', tags: ['Berita'] }) },
     { id: 9, tenant_id: 7, slug: 'description-field', template_type: 'Artikel', excerpt: 'Ringkasan deskripsi', content: [{ description: '<p>Deskripsi lama</p>' }] },
-    { id: 10, tenant_id: 7, slug: 'pengambilan-toga', template_type: 'Pengumuman', excerpt: 'Toga wisuda dapat diambil mulai 9 November 2026.', content: JSON.stringify([{ excerpt: 'Ringkasan lama', alert_message: 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', urgency_level: 'High', expiry_date: '2026-11-25' }]) }
+    { id: 10, tenant_id: 7, slug: 'pengambilan-toga', template_type: 'Pengumuman', excerpt: 'Toga wisuda dapat diambil mulai 9 November 2026.', content: JSON.stringify([{ excerpt: 'Ringkasan lama', alert_message: 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', urgency_level: 'High', expiry_date: '2026-11-25' }]) },
+    { id: 11, tenant_id: 7, slug: 'pengumuman-rich-text', template_type: 'Pengumuman', excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', content: JSON.stringify([{ excerpt: 'Pengambilan toga mulai Senin. Lihat jadwal.', excerpt_html: '<p>Pengambilan toga <strong>mulai Senin</strong>.</p><p><a href="https://example.com/jadwal">Lihat jadwal</a>.</p>', alert_message: 'Bawa kartu mahasiswa.' }]) }
 ];
 const dbPath = require.resolve('../server/lib/db');
 require.cache[dbPath] = { id: dbPath, filename: dbPath, loaded: true, exports: {
@@ -46,8 +47,8 @@ test('public list and detail expose matching summaries and descriptions from sav
     assert.equal(response.status, 200);
     const posts = await response.json();
     assert.equal(posts.length, fixtures.length);
-    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>', 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.'];
-    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi', 'Toga wisuda dapat diambil mulai 9 November 2026.'];
+    const descriptions = ['<p>Isi artikel</p>', '<p>Deskripsi acara</p>', 'Deskripsi template', '<p>Deskripsi legacy</p>', '<p>Deskripsi HTML</p>', '', '<p>Deskripsi blok acara</p>', '<p>Deskripsi objek</p>', '<p>Deskripsi lama</p>', 'Halo Wisudawan/Wisudawati!\n\nToga sudah dapat diambil di Koperasi GIAT.', 'Bawa kartu mahasiswa.'];
+    const summaries = ['Ringkasan baru', 'Ringkasan acara', '', 'Ringkasan legacy', 'Ringkasan HTML', 'Ringkasan custom', 'Ringkasan blok acara', 'Ringkasan objek', 'Ringkasan deskripsi', 'Toga wisuda dapat diambil mulai 9 November 2026.', 'Pengambilan toga mulai Senin. Lihat jadwal.'];
     for (const [index, post] of posts.entries()) {
         await t.test(post.slug, async () => {
             assert.equal(post.excerpt, summaries[index]);
@@ -61,10 +62,18 @@ test('public list and detail expose matching summaries and descriptions from sav
                 const giatContent = contentItem?.body_content || '';
                 assert.equal(giatExcerpt, summaries[index]);
                 if (post.template_type === 'Pengumuman') {
-                    assert.equal(giatContent, '<p>Toga wisuda dapat diambil mulai 9 November 2026.</p>\n<p>Halo Wisudawan/Wisudawati!<br><br>Toga sudah dapat diambil di Koperasi GIAT.</p>');
+                    if (post.slug === 'pengumuman-rich-text') {
+                        assert.equal(contentItem.excerpt_html, JSON.parse(fixtures[index].content)[0].excerpt_html);
+                        assert.equal(post.excerpt_html, contentItem.excerpt_html);
+                        assert.equal(giatContent, '<p>Pengambilan toga <strong>mulai Senin</strong>.</p><p><a href="https://example.com/jadwal">Lihat jadwal</a>.</p>\n<p>Bawa kartu mahasiswa.</p>');
+                    } else {
+                        assert.equal(giatContent, '<p>Toga wisuda dapat diambil mulai 9 November 2026.</p>\n<p>Halo Wisudawan/Wisudawati!<br><br>Toga sudah dapat diambil di Koperasi GIAT.</p>');
+                    }
                     assert.equal(contentItem.alert_message, descriptions[index]);
-                    assert.equal(contentItem.urgency_level, 'High');
-                    assert.equal(contentItem.expiry_date, '2026-11-25');
+                    if (post.slug === 'pengambilan-toga') {
+                        assert.equal(contentItem.urgency_level, 'High');
+                        assert.equal(contentItem.expiry_date, '2026-11-25');
+                    }
                 } else {
                     assert.equal(giatContent, descriptions[index]);
                 }
@@ -140,6 +149,20 @@ test('announcement body stays unchanged when summary is empty or identical to th
         const normalized = normalizePostText({ template_type: 'Pengumuman', excerpt, content: [{ alert_message: 'Pesan pengumuman' }] });
         assert.equal(normalized.content[0].body_content, 'Pesan pengumuman');
     }
+});
+
+test('announcement Rich Text keeps supported formatting and removes unsafe markup before GIAT renders it', () => {
+    const html = '<h2>Jadwal <em>baru</em></h2><ol><li data-list="bullet"><span class="ql-ui"></span>FEB</li></ol><p><a href="javascript:alert(1)">tautan</a><script>alert(1)</script><img src=x onerror=alert(1)></p>';
+    const post = { template_type: 'Pengumuman', excerpt: 'Jadwal baru FEB tautan', content: [{ excerpt_html: html, alert_message: 'Silakan hadir.' }] };
+    const normalized = normalizePostText(post);
+    const rich = normalized.content[0].excerpt_html;
+    assert.equal(normalized.excerpt_html, rich);
+    assert.match(rich, /<h2>Jadwal <em>baru<\/em><\/h2>/);
+    assert.match(rich, /list-style-type:\s*disc/);
+    assert.doesNotMatch(rich, /javascript:|<script|<img|onerror|ql-ui/);
+    assert.equal(normalized.content[0].body_content, `${rich}\n<p>Silakan hadir.</p>`);
+    assert.equal(normalized.excerpt, 'Jadwal baru FEB tautan');
+    assert.deepEqual(normalizePostText(normalized), normalized);
 });
 
 test('CMS integration examples document the real post response shape consumed by GIAT', () => {

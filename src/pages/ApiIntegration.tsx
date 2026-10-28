@@ -121,7 +121,7 @@ const PUBLIC_ENDPOINTS = [
     method: 'GET', 
     path: '/api/v1/public/posts', 
     desc: 'Mengambil daftar seluruh postingan yang telah dipublikasikan. Respons berupa array langsung, tanpa pembungkus data.',
-    info: 'Ringkasan tersedia di excerpt (alias summary) dan content[0].excerpt. Deskripsi tersedia di description dan content[0].body_content, sesuai pembacaan landing page GIAT. Khusus Pengumuman, body_content memuat ringkasan di awal lalu pesan pengumuman agar keduanya terlihat di halaman detail; description dan alert_message tetap berisi pesan asli. HTML dari editor tetap dipertahankan. Postingan Custom tetap menggunakan array blok aslinya.',
+    info: 'Ringkasan tersedia di excerpt (alias summary) dan content[0].excerpt. Deskripsi tersedia di description dan content[0].body_content, sesuai pembacaan landing page GIAT. Khusus Pengumuman, excerpt tetap teks biasa untuk kartu daftar, sedangkan excerpt_html dan content[0].excerpt_html menyimpan Rich Text. body_content memuat Rich Text ringkasan di awal lalu pesan pengumuman agar keduanya terlihat di halaman detail; description dan alert_message tetap berisi pesan asli. Postingan Custom tetap menggunakan array blok aslinya.',
     response: `[
   {
     "id": 10,
@@ -148,7 +148,7 @@ const PUBLIC_ENDPOINTS = [
     method: 'GET',
     path: '/api/v1/public/posts/:slug',
     desc: 'Mengambil satu postingan yang telah dipublikasikan berdasarkan slug. Respons berupa objek langsung, tanpa pembungkus data.',
-    info: 'Field ringkasan dan deskripsi sama dengan endpoint daftar: excerpt / content[0].excerpt dan description / content[0].body_content. Ganti :slug dengan slug postingan.',
+    info: 'Field ringkasan dan deskripsi sama dengan endpoint daftar: excerpt / content[0].excerpt dan description / content[0].body_content. Untuk Pengumuman, HTML ringkasan juga tersedia di excerpt_html dan content[0].excerpt_html serta muncul di awal body_content. Ganti :slug dengan slug postingan.',
     response: `{
   "id": 10,
   "title": "Seminar Teknologi 2026",
